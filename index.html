@@ -59,3 +59,801 @@
     .vbtn:hover{background:var(--s2);color:var(--dim);}
     .vbtn.active{background:rgba(232,71,42,.08);color:var(--accent);}
     .sb-rule{border:none;border-top:1px dashed rgba(107,114,128,.2);margin:7px 13px;}
+
+    /* ── MAIN COLUMN ── */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+    /* TITLE BAR */
+    .vtitle{padding:10px 18px 9px;background:var(--s1);border-bottom:1px solid var(--s3);display:flex;align-items:baseline;gap:12px;flex-shrink:0;}
+    .vtitle h1{font-family:'Rajdhani',sans-serif;font-size:21px;font-weight:700;letter-spacing:.07em;color:var(--white);line-height:1;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:3px;}
+    .chip.year{color:var(--amber);border:1px solid rgba(242,169,0,.4);}
+    .chip.hp{color:var(--accent);border:1px solid rgba(232,71,42,.4);}
+    .chip.model{color:var(--green);border:1px solid rgba(34,197,94,.3);}
+
+    /* UPPER SPLIT: viewer + right spec panel */
+    .upper{display:flex;flex:1;overflow:hidden;min-height:0;}
+    .viewer-panel{flex:1;position:relative;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .viewer-panel iframe{width:100%;height:100%;border:none;display:block;}
+
+    /* SPEC CARD (no model) */
+    .spec-card{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 28px;overflow-y:auto;gap:0;}
+    .sc-hero{text-align:center;margin-bottom:20px;}
+    .sc-icon{font-size:44px;display:block;margin-bottom:10px;}
+    .sc-hero h2{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:var(--white);letter-spacing:.08em;}
+    .sc-hero p{color:var(--muted);font-size:11px;margin-top:5px;font-family:'JetBrains Mono',monospace;}
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:560px;margin-bottom:18px;}
+    .stat-block{background:var(--s2);border:1px solid var(--s3);border-radius:5px;padding:12px 10px;text-align:center;}
+    .stat-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--accent);line-height:1;}
+    .stat-num.amber{color:var(--amber);}
+    .stat-num.chrome{color:var(--chrome);}
+    .stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.10em;margin-top:4px;}
+    .detail-table{width:100%;max-width:560px;border-collapse:collapse;margin-bottom:16px;}
+    .detail-table tr{border-bottom:1px solid var(--s3);}
+    .detail-table td{padding:7px 0;font-size:11px;}
+    .detail-table td:first-child{color:var(--muted);width:40%;}
+    .detail-table td:last-child{font-family:'JetBrains Mono',monospace;color:var(--chrome);text-align:right;}
+    .special-note{width:100%;max-width:560px;background:rgba(242,169,0,.07);border:1px solid rgba(242,169,0,.22);border-radius:5px;padding:10px 12px;font-size:10px;color:var(--amber);line-height:1.5;}
+    .perf-bars{width:100%;max-width:560px;margin-top:14px;}
+    .pbar-row{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+    .pbar-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);width:48px;text-align:right;flex-shrink:0;}
+    .pbar-track{flex:1;height:4px;background:var(--s3);border-radius:2px;overflow:hidden;}
+    .pbar-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .5s ease;}
+    .pbar-fill.amber{background:var(--amber);}
+    .pbar-val{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);width:64px;flex-shrink:0;}
+
+    /* RIGHT SPEC SIDEBAR */
+    .rsidebar{width:188px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--s3);overflow-y:auto;}
+    .rs-sec{padding:11px 0 6px;}
+    .rs-lbl{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;padding:0 12px 5px;}
+    .rs-rule{border:none;border-top:1px dashed rgba(107,114,128,.2);margin:0 12px 6px;}
+    .rs-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 12px;}
+    .rs-k{font-size:10px;color:var(--muted);}
+    .rs-v{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--chrome);text-align:right;max-width:105px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .rs-v.accent{color:var(--accent);}
+    .rs-v.amber{color:var(--amber);}
+
+    /* ── PARTS CONFIGURATOR PANEL ── */
+    .parts-panel{
+      flex-shrink:0;
+      background:var(--s1);
+      border-top:1px solid var(--s3);
+      display:flex;
+      flex-direction:column;
+      height:260px;
+    }
+
+    /* Parts panel header + category tabs */
+    .pp-header{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--s3);padding:0 14px;flex-shrink:0;}
+    .pp-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:.12em;color:var(--white);padding:9px 14px 9px 0;border-right:1px solid var(--s3);margin-right:10px;white-space:nowrap;}
+    .cat-tab{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:.07em;color:var(--muted);padding:9px 11px 8px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap;}
+    .cat-tab:hover{color:var(--dim);}
+    .cat-tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+
+    /* Parts grid */
+    .pp-body{flex:1;overflow-x:auto;overflow-y:hidden;padding:10px 14px;}
+    .parts-grid{display:flex;gap:10px;height:100%;}
+
+    /* Part card */
+    .part-card{
+      flex-shrink:0;
+      width:220px;
+      background:var(--s2);
+      border:1px solid var(--s3);
+      border-radius:6px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      transition:border-color .15s;
+      cursor:pointer;
+    }
+    .part-card:hover{border-color:var(--s4);}
+    .part-card.selected{border-color:var(--amber);}
+
+    .pc-top{padding:9px 10px 7px;border-bottom:1px solid var(--s3);}
+    .pc-name{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:12px;letter-spacing:.05em;color:var(--white);line-height:1.2;margin-bottom:3px;}
+    .pc-brand{font-size:10px;color:var(--muted);}
+
+    /* Stock vs aftermarket split */
+    .pc-compare{display:flex;flex:1;overflow:hidden;}
+    .pc-col{flex:1;padding:8px 9px;display:flex;flex-direction:column;gap:4px;}
+    .pc-col:first-child{border-right:1px solid var(--s3);}
+    .pc-col-lbl{font-size:9px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+    .pc-col-lbl.am{color:var(--amber);}
+    .pc-stat-row{display:flex;justify-content:space-between;font-size:10px;}
+    .pc-stat-key{color:var(--muted);}
+    .pc-stat-val{font-family:'JetBrains Mono',monospace;color:var(--chrome);}
+    .pc-stat-val.better{color:var(--green);}
+    .pc-delta{display:flex;align-items:center;gap:4px;margin-top:4px;}
+    .pc-delta-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3);padding:1px 5px;border-radius:2px;}
+    .pc-delta-badge.hp{background:rgba(232,71,42,.12);color:var(--accent);border-color:rgba(232,71,42,.3);}
+    .pc-delta-badge.amber{background:rgba(242,169,0,.12);color:var(--amber);border-color:rgba(242,169,0,.3);}
+
+    .pc-footer{padding:7px 9px;border-top:1px solid var(--s3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .pc-price{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);}
+    .buy-btn{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;background:var(--accent);color:var(--white);border:none;border-radius:3px;padding:4px 10px;cursor:pointer;transition:background .15s;text-decoration:none;display:inline-block;}
+    .buy-btn:hover{background:#d13d22;}
+
+    /* Perf delta bar in parts panel */
+    .pp-delta-bar{margin-top:6px;}
+    .pp-dbar-track{width:100%;height:3px;background:var(--s3);border-radius:2px;overflow:hidden;margin-top:2px;}
+    .pp-dbar-fill{height:100%;border-radius:2px;background:var(--accent);}
+
+    /* ── ATTRIBUTION FOOTER ── */
+    .attr-footer{background:var(--s1);border-top:1px solid var(--s3);padding:5px 16px;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:960px){.rsidebar{display:none;}}
+    @media(max-width:720px){
+      .lsidebar{width:160px;}
+      .stat-grid{grid-template-columns:repeat(2,1fr);}
+      .parts-panel{height:240px;}
+    }
+  </style>
+  <meta name="description" content="BlowerBuildz — The only interactive 3D parts configurator built for supercharged Mopar platforms. Hellcat, Demon, Trackhawk, and more." />
+</head>
+<body>
+
+<header>
+  <div class="wordmark"><div class="dot"></div>BLOWERBUILDZ</div>
+  <div class="hdr-badge">SUPERCHARGED MOPAR · CONFIGURATOR</div>
+  <div class="hdr-right" id="hdrTag">CHALLENGER · 2015</div>
+</header>
+
+<div class="root">
+
+  <!-- Family nav -->
+  <nav class="fnav" id="familyNav">
+    <button class="fnav-tab active" data-family="challenger">CHALLENGER</button>
+    <button class="fnav-tab" data-family="charger">CHARGER</button>
+    <button class="fnav-tab" data-family="demon">DEMON</button>
+    <button class="fnav-tab" data-family="trackhawk">TRACKHAWK</button>
+    <button class="fnav-tab" data-family="300srt">300 SRT</button>
+  </nav>
+
+  <div class="content">
+
+    <!-- Left sidebar -->
+    <aside class="lsidebar" id="lsidebar"></aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Title bar -->
+      <div class="vtitle">
+        <h1 id="titleName">SRT HELLCAT</h1>
+        <span class="chip year" id="titleYear">2015</span>
+        <span class="chip hp"   id="titleHp">717HP</span>
+        <span class="chip model hidden" id="titleModel">3D MODEL</span>
+      </div>
+
+      <!-- Upper split: 3D / spec  +  right sidebar -->
+      <div class="upper">
+        <div class="viewer-panel" id="viewerPanel"></div>
+        <aside class="rsidebar" id="rsidebar"></aside>
+      </div>
+
+      <!-- Parts configurator -->
+      <div class="parts-panel">
+        <div class="pp-header">
+          <div class="pp-title">PARTS &amp; MODS</div>
+          <button class="cat-tab active" data-cat="engine">ENGINE</button>
+          <button class="cat-tab" data-cat="supercharger">S/C</button>
+          <button class="cat-tab" data-cat="suspension">SUSPENSION</button>
+          <button class="cat-tab" data-cat="brakes">BRAKES</button>
+          <button class="cat-tab" data-cat="exhaust">EXHAUST</button>
+          <button class="cat-tab" data-cat="wheels">WHEELS</button>
+          <button class="cat-tab" data-cat="exterior">EXTERIOR</button>
+        </div>
+        <div class="pp-body">
+          <div class="parts-grid" id="partsGrid"></div>
+        </div>
+      </div>
+
+      <div class="attr-footer">
+        <span id="attrText">Use the year selector to browse the full BlowerBuildz lineup</span>
+        <span id="attrLic"></span>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   VEHICLE DATA
+   ===================================================== */
+const HP_MAX = 1100, TQ_MAX = 1000, SPD_MAX = 215;
+
+const FAMILIES = {
+  challenger: {
+    label:'Challenger SRT Hellcat',
+    years:[
+      { year:2015, variants:[
+        { id:'ch-2015', label:'SRT Hellcat', sketchfabId:'e9349f847d5f4b95a01a6ce578e19899',
+          credit:'ChoochooLi', license:'CC Attribution',
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd manual / 8-spd auto', weight:'4,449 lb', msrp:'~$59,995', prod:'2015' }
+        }
+      ]},
+      { year:2016, variants:[
+        { id:'ch-2016', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd manual / 8-spd auto', weight:'4,449 lb', msrp:'~$61,395', prod:'2016' }
+        }
+      ]},
+      { year:2017, variants:[
+        { id:'ch-2017', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd manual / 8-spd auto', weight:'4,449 lb', msrp:'~$62,195', prod:'2017' }
+        }
+      ]},
+      { year:2018, variants:[
+        { id:'ch-2018', label:'SRT Hellcat', sketchfabId:'e31b4430d9934f61b212f55f194c9ef7',
+          credit:'Emmanual Robinson Jr.', license:'CC Attribution — credit required',
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd manual / 8-spd auto', weight:'4,449 lb', msrp:'~$63,295', prod:'2018' }
+        }
+      ]},
+      { year:2019, variants:[
+        { id:'ch-2019', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd / 8-spd auto', weight:'4,455 lb', msrp:'~$59,690', prod:'2019' }
+        },
+        { id:'ch-2019-re', label:'Hellcat Redeye', specCard:true,
+          specs:{ hp:'797', tq:'707 lb·ft', z60:'3.4s', vmax:'203 mph', engine:'6.2L Hemi V8 (Redeye)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,435 lb', msrp:'~$69,945', prod:'2019' }
+        }
+      ]},
+      { year:2020, variants:[
+        { id:'ch-2020', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd / 8-spd auto', weight:'4,449 lb', msrp:'~$59,995', prod:'2020' }
+        },
+        { id:'ch-2020-re', label:'Hellcat Redeye', specCard:true,
+          specs:{ hp:'797', tq:'707 lb·ft', z60:'3.4s', vmax:'203 mph', engine:'6.2L Hemi V8 (Redeye)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,435 lb', msrp:'~$69,945', prod:'2020' }
+        },
+        { id:'ch-2020-wb', label:'Redeye Widebody', sketchfabId:'410a034c7d9e4f58b9aac33dd9ada12d',
+          credit:'samydepapelo3', license:'CC Attribution',
+          specs:{ hp:'797', tq:'707 lb·ft', z60:'3.4s', vmax:'203 mph', engine:'6.2L Hemi V8 (Redeye)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,451 lb', msrp:'~$73,945', prod:'2020', body:'Widebody +3.5" per side' }
+        }
+      ]},
+      { year:2021, variants:[
+        { id:'ch-2021', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd / 8-spd auto', weight:'4,449 lb', msrp:'~$59,995', prod:'2021' }
+        },
+        { id:'ch-2021-re', label:'Hellcat Redeye', sketchfabId:'86ae58e2e2e443cb8243df52f407729a',
+          credit:'RPMRender', license:'Sketchfab Free Standard',
+          specs:{ hp:'797', tq:'707 lb·ft', z60:'3.4s', vmax:'203 mph', engine:'6.2L Hemi V8 (Redeye)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,451 lb', msrp:'~$69,945', prod:'2021', body:'Widebody' }
+        },
+        { id:'ch-2021-ss', label:'Super Stock', specCard:true,
+          specs:{ hp:'807', tq:'707 lb·ft', z60:'3.25s', vmax:'168 mph (drag)', engine:'6.2L Hemi V8 (Redeye+)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,451 lb', msrp:'~$79,495', prod:'2021', special:'Drag-tuned suspension · Pirelli P Zero drag tires · 168 mph limiter for strip safety' }
+        }
+      ]},
+      { year:2022, variants:[
+        { id:'ch-2022', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd / 8-spd auto', weight:'4,449 lb', msrp:'~$62,245', prod:'2022' }
+        },
+        { id:'ch-2022-re', label:'Hellcat Redeye', specCard:true,
+          specs:{ hp:'797', tq:'707 lb·ft', z60:'3.4s', vmax:'203 mph', engine:'6.2L Hemi V8 (Redeye)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,451 lb', msrp:'~$72,245', prod:'2022' }
+        },
+        { id:'ch-2022-jb', label:'Jailbreak', sketchfabId:'6b48e002dcd441d2b38cc34c5df14fac',
+          credit:'RPMRender (HPE1000 build)', license:'Sketchfab Free Standard',
+          specs:{ hp:'717 (limiter removed)', tq:'650 lb·ft', z60:'3.6s', vmax:'Unlim.', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,451 lb', msrp:'~$79,595', prod:'2022', special:'Jailbreak removes factory power + top-speed limiters — fully tunable from factory' }
+        }
+      ]},
+      { year:2023, variants:[
+        { id:'ch-2023', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'199 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'6-spd / 8-spd auto', weight:'4,449 lb', msrp:'~$63,995', prod:'2023 — final model year' }
+        },
+        { id:'ch-2023-jb', label:'Jailbreak', specCard:true,
+          specs:{ hp:'717 (tunable)', tq:'650 lb·ft', z60:'3.6s', vmax:'Unlim.', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,449 lb', msrp:'~$80,595', prod:'2023', special:'Jailbreak: no power limiter' }
+        },
+        { id:'ch-2023-lc', label:'Last Call Editions', specCard:true,
+          specs:{ hp:'717–807', tq:'650–707 lb·ft', z60:'3.25–3.6s', vmax:'199–203 mph', engine:'6.2L Hemi V8', sc:'2.4L / 2.7L IHI', trans:'6-spd manual / 8-spd auto', weight:'4,449–4,451 lb', msrp:'Varies', prod:'2023', special:"Last Call editions: Swinger · Shakedown · Devil's Redeye · Special Edition 1 · Going Going Gone · Phantom" }
+        }
+      ]}
+    ]
+  },
+
+  charger: {
+    label:'Charger SRT Hellcat',
+    years:[
+      { year:2015, variants:[{ id:'cgr-2015', label:'SRT Hellcat', specCard:true,
+        specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$67,995', prod:'2015', body:'4-door sedan' }}]},
+      { year:2016, variants:[{ id:'cgr-2016', label:'SRT Hellcat', specCard:true,
+        specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$69,295', prod:'2016', body:'4-door sedan' }}]},
+      { year:2017, variants:[{ id:'cgr-2017', label:'SRT Hellcat', specCard:true,
+        specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$69,995', prod:'2017', body:'4-door sedan' }}]},
+      { year:2018, variants:[
+        { id:'cgr-2018', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$70,995', prod:'2018', body:'4-door sedan' }},
+        { id:'cgr-2018-wb', label:'Widebody', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.6s', vmax:'203 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$75,995', prod:'2018', body:'Widebody +3.5" per side' }}
+      ]},
+      { year:2019, variants:[
+        { id:'cgr-2019', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$67,995', prod:'2019', body:'4-door sedan' }},
+        { id:'cgr-2019-wb', label:'Widebody', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.6s', vmax:'203 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$75,995', prod:'2019', body:'Widebody' }}
+      ]},
+      { year:2020, variants:[
+        { id:'cgr-2020', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$68,495', prod:'2020', body:'4-door sedan' }},
+        { id:'cgr-2020-wb', label:'Widebody', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.6s', vmax:'203 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$76,495', prod:'2020', body:'Widebody' }}
+      ]},
+      { year:2021, variants:[
+        { id:'cgr-2021', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.7s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,575 lb', msrp:'~$69,495', prod:'2021', body:'4-door sedan' }},
+        { id:'cgr-2021-wb', label:'Widebody', specCard:true,
+          specs:{ hp:'707', tq:'650 lb·ft', z60:'3.6s', vmax:'203 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$77,495', prod:'2021', body:'Widebody' }}
+      ]},
+      { year:2022, variants:[
+        { id:'cgr-2022', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'204 mph', engine:'6.2L Hemi V8 (upgraded)', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$73,495', prod:'2022', body:'4-door sedan' }},
+        { id:'cgr-2022-wb', label:'Widebody', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.5s', vmax:'203 mph', engine:'6.2L Hemi V8 (upgraded)', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$79,995', prod:'2022', body:'Widebody' }},
+        { id:'cgr-2022-jb', label:'Jailbreak', specCard:true,
+          specs:{ hp:'717 (tunable)', tq:'650 lb·ft', z60:'3.6s', vmax:'Unlim.', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$84,995', prod:'2022', special:'Jailbreak: removes factory limiter' }}
+      ]},
+      { year:2023, variants:[
+        { id:'cgr-2023', label:'SRT Hellcat', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.6s', vmax:'204 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$74,995', prod:'2023 — final MY', body:'4-door sedan' }},
+        { id:'cgr-2023-wb', label:'Widebody', specCard:true,
+          specs:{ hp:'717', tq:'650 lb·ft', z60:'3.5s', vmax:'203 mph', engine:'6.2L Hemi V8', sc:'2.4L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$81,995', prod:'2023', body:'Widebody' }},
+        { id:'cgr-2023-kd', label:'King Daytona', specCard:true,
+          specs:{ hp:'807', tq:'707 lb·ft', z60:'3.3s', vmax:'203 mph', engine:'6.2L Hemi V8 (Redeye+)', sc:'2.7L IHI', trans:'8-spd auto', weight:'4,591 lb', msrp:'~$96,595', prod:'2023', special:"Final Charger Hellcat ever built — King Daytona Last Call edition" }}
+      ]}
+    ]
+  },
+
+  demon: {
+    label:'Challenger SRT Demon',
+    years:[
+      { year:2018, variants:[
+        { id:'dem-2018', label:'SRT Demon', specCard:true,
+          specs:{ hp:'840 (808 on 91-oct)', tq:'770 lb·ft', z60:'2.3s', vmax:'168 mph (drag limited)', engine:'6.2L Hemi Demon', sc:'2.7L IHI (enhanced)', trans:'8-spd auto', weight:'4,254 lb', msrp:'~$84,995', prod:'2018 — 3,300 units', qmile:'9.65s @ 140 mph', special:'First production car to lift front wheels from a standing start · Sets world production-car 0–60 record (2.3s on 100-oct)' }}
+      ]},
+      { year:2023, variants:[
+        { id:'dem-2023', label:'SRT Demon 170', specCard:true,
+          specs:{ hp:'1,025 on E85 / 900 on 91-oct', tq:'945 lb·ft', z60:'1.66s', vmax:'203 mph', engine:'6.2L Hemi Demon 170', sc:'3.0L Whipple-derived', trans:'8HP90 paddle-shift', weight:'4,340 lb', msrp:'~$96,666', prod:'2023 — 3,300 units', qmile:'8.91s @ 151.17 mph', special:'Fastest 0–60 ever recorded for a production car at launch (1.66s) · Fastest quarter-mile of any production car at launch' }}
+      ]}
+    ]
+  },
+
+  trackhawk: {
+    label:'Jeep Grand Cherokee Trackhawk',
+    years:[
+      { year:2018, variants:[{ id:'twk-2018', label:'Trackhawk', specCard:true,
+        specs:{ hp:'707', tq:'645 lb·ft', z60:'3.5s', vmax:'180 mph', engine:'6.2L Supercharged Hemi V8', sc:'2.4L IHI', trans:'8-spd auto · Quadra-Trac II AWD', weight:'5,363 lb', msrp:'~$86,895', prod:'2018', body:'Grand Cherokee SUV' }}]},
+      { year:2019, variants:[{ id:'twk-2019', label:'Trackhawk', specCard:true,
+        specs:{ hp:'707', tq:'645 lb·ft', z60:'3.5s', vmax:'180 mph', engine:'6.2L Supercharged Hemi V8', sc:'2.4L IHI', trans:'8-spd auto · Quadra-Trac II AWD', weight:'5,363 lb', msrp:'~$89,995', prod:'2019', body:'Grand Cherokee SUV' }}]},
+      { year:2020, variants:[{ id:'twk-2020', label:'Trackhawk', specCard:true,
+        specs:{ hp:'707', tq:'645 lb·ft', z60:'3.5s', vmax:'180 mph', engine:'6.2L Supercharged Hemi V8', sc:'2.4L IHI', trans:'8-spd auto · Quadra-Trac II AWD', weight:'5,363 lb', msrp:'~$88,995', prod:'2020', body:'Grand Cherokee SUV' }}]},
+      { year:2021, variants:[{ id:'twk-2021', label:'Trackhawk', specCard:true,
+        specs:{ hp:'707', tq:'645 lb·ft', z60:'3.5s', vmax:'180 mph', engine:'6.2L Supercharged Hemi V8', sc:'2.4L IHI', trans:'8-spd auto · Quadra-Trac II AWD', weight:'5,363 lb', msrp:'~$89,895', prod:'2021', body:'Grand Cherokee SUV' }}]},
+      { year:2022, variants:[{ id:'twk-2022', label:'Trackhawk', specCard:true,
+        specs:{ hp:'707', tq:'645 lb·ft', z60:'3.5s', vmax:'180 mph', engine:'6.2L Supercharged Hemi V8', sc:'2.4L IHI', trans:'8-spd auto · Quadra-Trac II AWD', weight:'5,363 lb', msrp:'~$91,895', prod:'2022 — final MY', body:'Grand Cherokee SUV' }}]}
+    ]
+  },
+
+  '300srt': {
+    label:'Chrysler 300 SRT',
+    years:[
+      { year:2012, variants:[{ id:'300-2012', label:'SRT8 392', specCard:true,
+        specs:{ hp:'470', tq:'470 lb·ft', z60:'4.4s', vmax:'175 mph', engine:'6.4L 392 Hemi V8 (N/A)', sc:'None', trans:'5-spd auto', weight:'4,256 lb', msrp:'~$49,495', prod:'2012–2014', special:'Note: The 300 SRT8/SRT uses the 6.4L 392 Hemi, not the supercharged 6.2L Hellcat motor. A Hellcat-powered 300C concept was shown but never entered production.' }}]},
+      { year:2015, variants:[{ id:'300-2015', label:'SRT 392', specCard:true,
+        specs:{ hp:'470', tq:'470 lb·ft', z60:'4.4s', vmax:'175 mph', engine:'6.4L 392 Hemi V8 (N/A)', sc:'None', trans:'8-spd auto', weight:'4,256 lb', msrp:'~$51,995', prod:'2015', special:'No confirmed Hellcat (6.2L supercharged) production variant for the 300. Included here for completeness — SRT trim used the 392 Hemi.' }}]}
+    ]
+  }
+};
+
+/* =====================================================
+   PARTS DATA (per category)
+   ===================================================== */
+const PARTS = {
+  engine:[
+    {
+      name:'Cold Air Intake', brand:'Mopar/S&B',
+      stock:{ flow:'580 cfm', mat:'Paper filter', notes:'OEM airbox' },
+      am:{ flow:'640 cfm', mat:'Oiled cotton', notes:'S&B Cold Air', delta:'+12 hp est.', gain:'hp' },
+      price:'$249', link:'https://www.amazon.com/s?k=hellcat+cold+air+intake&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Throttle Body 92mm', brand:'Lethal Performance',
+      stock:{ bore:'87mm', mat:'Cast aluminum', notes:'OEM TB' },
+      am:{ bore:'92mm', mat:'Billet 6061', notes:'Lethal 92mm', delta:'+20 hp est.', gain:'hp' },
+      price:'$499', link:'https://www.summitracing.com/search/keyword/hellcat+throttle+body'
+    },
+    {
+      name:'E85 Flex Fuel Kit', brand:'Fore Innovations',
+      stock:{ fuel:'93-oct gasoline', hp:'717 hp', notes:'Factory tune' },
+      am:{ fuel:'E85 flex', hp:'800+ hp', notes:'Fore FFI kit', delta:'+83+ hp', gain:'hp' },
+      price:'$1,199', link:'https://www.amazon.com/s?k=hellcat+flex+fuel+kit&tag=hellcatbuilds-20'
+    },
+    {
+      name:'High-Flow Catback Headers', brand:'Kooks',
+      stock:{ dia:'1-7/8"', mat:'OEM steel', notes:'Factory headers' },
+      am:{ dia:'2"', mat:'304 SS', notes:'Kooks long-tube', delta:'+35 hp est.', gain:'hp' },
+      price:'$1,599', link:'https://www.jegs.com/i/Kooks/524/11402400/10002/-1'
+    }
+  ],
+  supercharger:[
+    {
+      name:'2.65L Pulley Upgrade', brand:'SPS / ID Performance',
+      stock:{ pulley:'2.75L / stock snout', boost:'11.6 psi', notes:'Factory setup' },
+      am:{ pulley:'2.65L smaller snout', boost:'~13.5 psi', notes:'ID 2.65 pulley', delta:'+47 hp est.', gain:'hp' },
+      price:'$349', link:'https://www.amazon.com/s?k=hellcat+supercharger+pulley&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Intercooler Upgrade', brand:'Mishimoto',
+      stock:{ cap:'1.5L reservoir', IAT:'~130°F heat soak', notes:'OEM chiller' },
+      am:{ cap:'2.8L reservoir', IAT:'~95°F heat soak', notes:'Mishimoto chiller', delta:'-35°F IAT / +25 hp', gain:'amber' },
+      price:'$799', link:'https://www.mishimoto.com/dodge-challenger-hellcat-intercooler.html'
+    },
+    {
+      name:'Whipple 3.0L Supercharger', brand:'Whipple',
+      stock:{ disp:'2.4L (std) / 2.7L (Redeye)', hp:'717–797 hp', notes:'Factory IHI' },
+      am:{ disp:'3.0L twin-screw', hp:'900–1000+ hp', notes:'Whipple Stage 2', delta:'+180–300 hp', gain:'hp' },
+      price:'$4,995', link:'https://www.amazon.com/s?k=whipple+hellcat+supercharger&tag=hellcatbuilds-20'
+    }
+  ],
+  suspension:[
+    {
+      name:'Coilover Kit', brand:'Bilstein',
+      stock:{ type:'Passive monotube', drop:'0"', notes:'OEM SRT shocks' },
+      am:{ type:'Adj. monotube', drop:'0–2"', notes:'Bilstein B16', delta:'Adjustable · better cornering', gain:'amber' },
+      price:'$1,299', link:'https://www.amazon.com/s?k=hellcat+coilover+bilstein&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Front Sway Bar', brand:'Whiteline',
+      stock:{ dia:'32mm', adj:'Non-adjustable', notes:'OEM bar' },
+      am:{ dia:'33mm', adj:'3-position', notes:'Whiteline adj.', delta:'Better cornering / -understeer', gain:'amber' },
+      price:'$389', link:'https://www.summitracing.com/search/keyword/whiteline+hellcat+sway+bar'
+    },
+    {
+      name:'Strut Tower Brace', brand:'BBK Performance',
+      stock:{ type:'No brace', flex:'OEM chassis flex', notes:'Factory' },
+      am:{ type:'Billet aluminum X-brace', flex:'Reduced chassis flex', notes:'BBK brace', delta:'Crisper steering feel', gain:'amber' },
+      price:'$249', link:'https://www.jegs.com/c/BBK-Performance-Parts/10027/10002/-1'
+    }
+  ],
+  brakes:[
+    {
+      name:'Brembo 6-Piston Upgrade', brand:'Brembo',
+      stock:{ caliper:'4-piston Brembo', rotor:'14.2" slotted', notes:'OEM SRT' },
+      am:{ caliper:'6-piston Brembo', rotor:'15.0" slotted', notes:'Brembo GT kit', delta:'Shorter stops / no fade', gain:'amber' },
+      price:'$3,499', link:'https://www.amazon.com/s?k=brembo+hellcat+brake+kit&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Hawk HP Plus Pads', brand:'Hawk Performance',
+      stock:{ compound:'OEM semi-metallic', fade:'Moderate heat fade', notes:'Factory pads' },
+      am:{ compound:'HP Plus ferro-carbon', fade:'High-temp stable', notes:'Hawk HP+', delta:'Less fade · better bite', gain:'amber' },
+      price:'$119', link:'https://www.amazon.com/s?k=hawk+hp+plus+hellcat+brake+pads&tag=hellcatbuilds-20'
+    }
+  ],
+  exhaust:[
+    {
+      name:'Borla ATAK Catback', brand:'Borla',
+      stock:{ db:'~97 dB', mat:'OEM steel', tone:'Muffled V8', notes:'Factory exhaust' },
+      am:{ db:'~104 dB', mat:'T-304 SS', tone:'Aggressive Hellcat howl', notes:'Borla ATAK', delta:'Deeper tone · +8 hp est.', gain:'hp' },
+      price:'$1,299', link:'https://www.amazon.com/s?k=borla+atak+challenger+hellcat&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Corsa Sport Catback', brand:'Corsa Performance',
+      stock:{ db:'~97 dB', mat:'OEM steel', tone:'Muffled', notes:'Factory' },
+      am:{ db:'~101 dB', mat:'304 SS', tone:'Sport tone — drone-free', notes:'Corsa Sport', delta:'Refined V8 sound · drone-free', gain:'amber' },
+      price:'$1,099', link:'https://www.amazon.com/s?k=corsa+sport+hellcat+catback&tag=hellcatbuilds-20'
+    }
+  ],
+  wheels:[
+    {
+      name:'20" Forgeline CF1 Forged', brand:'Forgeline',
+      stock:{ dia:'20"', weight:'~28 lb/wheel', mat:'Cast aluminum', notes:'OEM SRT wheels' },
+      am:{ dia:'20"', weight:'~19 lb/wheel', mat:'Monoblock forged', notes:'Forgeline CF1', delta:'-9 lb/corner = -36 lb unsprung', gain:'amber' },
+      price:'$599/ea', link:'https://www.forgeline.com/products/one-piece/cf1/'
+    },
+    {
+      name:'Michelin Pilot Sport 4S', brand:'Michelin',
+      stock:{ size:'275/40ZR20', compound:'OEM touring', notes:'Factory rubber' },
+      am:{ size:'275/40ZR20', compound:'Ultra-high performance', notes:'PS4S', delta:'Better cornering grip / shorter stops', gain:'amber' },
+      price:'$299/ea', link:'https://www.amazon.com/s?k=michelin+pilot+sport+4s+275+40+20&tag=hellcatbuilds-20'
+    }
+  ],
+  exterior:[
+    {
+      name:'Widebody Fender Flares', brand:'Mopar OEM',
+      stock:{ width:'Factory track', notes:'Standard body' },
+      am:{ width:'+3.5" per side', notes:'Mopar OEM widebody kit', delta:'Adds 7" total track width', gain:'amber' },
+      price:'$3,499', link:'https://www.amazon.com/s?k=challenger+widebody+fender+flare&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Carbon Fiber Hood', brand:'Duraflex',
+      stock:{ mat:'Steel OEM', weight:'~28 lb', notes:'Factory hood' },
+      am:{ mat:'Carbon fiber', weight:'~14 lb', notes:'Duraflex CF', delta:'-14 lb from front nose', gain:'amber' },
+      price:'$799', link:'https://www.amazon.com/s?k=challenger+carbon+fiber+hood+hellcat&tag=hellcatbuilds-20'
+    },
+    {
+      name:'Rear Spoiler — SRT Style', brand:'Mopar OEM',
+      stock:{ type:'No spoiler / flush deck', notes:'Std coupe' },
+      am:{ type:'High-mount rear wing', notes:'Mopar SRT spoiler', delta:'Increased downforce at speed', gain:'amber' },
+      price:'$349', link:'https://www.amazon.com/s?k=challenger+hellcat+rear+spoiler&tag=hellcatbuilds-20'
+    }
+  ]
+};
+
+/* =====================================================
+   STATE
+   ===================================================== */
+let fam      = 'challenger';
+let yr       = 2015;
+let varId    = null;
+let partCat  = 'engine';
+let selPart  = null;
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+const getFD  = f => FAMILIES[f];
+const getYD  = (f,y) => getFD(f).years.find(d => d.year===y);
+const getVar = (f,y,id) => { const yd=getYD(f,y); if(!yd) return null; return id ? yd.variants.find(v=>v.id===id)||yd.variants[0] : yd.variants[0]; };
+const numHp  = s => { if(!s) return 0; const m=(s+'').match(/(\d+)/); return m?parseInt(m[1]):0; };
+const numTq  = s => { if(!s) return 0; const m=(s+'').replace(',','').match(/(\d+)/); return m?parseInt(m[1]):0; };
+const numSpd = s => { if(!s) return 0; const m=(s+'').replace(',','').match(/(\d+)/); return m?parseInt(m[1]):0; };
+const hasModel = (f,y) => { const yd=getYD(f,y); return yd&&yd.variants.some(v=>v.sketchfabId); };
+
+/* =====================================================
+   RENDER SIDEBAR
+   ===================================================== */
+function renderSidebar() {
+  const fd = getFD(fam);
+  const yd = getYD(fam, yr);
+  let h = `<div class="sb-label">Model Year</div>`;
+  fd.years.forEach(d => {
+    const active = d.year===yr;
+    const has3d  = hasModel(fam, d.year);
+    h += `<button class="year-btn${active?' active':''}" onclick="selectYear(${d.year})">
+            <span>${d.year}</span>
+            <span class="ybadge ${has3d?'has3d':'nomodel'}">${has3d?'3D':'SPEC'}</span>
+          </button>`;
+    if (active && d.variants.length > 1) {
+      d.variants.forEach(v => {
+        const va = varId && varId===v.id;
+        h += `<button class="vbtn${va?' active':''}" onclick="selectVariant('${v.id}')">${v.label}</button>`;
+      });
+    }
+  });
+  document.getElementById('lsidebar').innerHTML = h;
+}
+
+/* =====================================================
+   RENDER VIEWER (3D embed or spec card)
+   ===================================================== */
+function renderViewer(v) {
+  const s  = v.specs;
+  const hp = numHp(s.hp), tq = numTq(s.tq), spd = numSpd(s.vmax);
+  const hpPct  = Math.min(100, Math.round(hp/HP_MAX*100));
+  const tqPct  = Math.min(100, Math.round(tq/TQ_MAX*100));
+  const spdPct = Math.min(100, Math.round(spd/SPD_MAX*100));
+
+  if (v.sketchfabId) {
+    const url = `https://sketchfab.com/models/${v.sketchfabId}/embed?ui_theme=dark&ui_controls=1&ui_infos=0&ui_watermark=0&camera=0`;
+    document.getElementById('viewerPanel').innerHTML =
+      `<iframe src="${url}" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"
+         allow="autoplay; fullscreen; xr-spatial-tracking" title="${v.label} 3D"></iframe>`;
+    return;
+  }
+
+  let extras = '';
+  if (s.body)    extras += `<tr><td>Body style</td><td>${s.body}</td></tr>`;
+  if (s.qmile)   extras += `<tr><td>Quarter mile</td><td>${s.qmile}</td></tr>`;
+
+  document.getElementById('viewerPanel').innerHTML = `
+    <div class="spec-card">
+      <div class="sc-hero">
+        <span class="sc-icon">🏎</span>
+        <h2>${v.label.toUpperCase()}</h2>
+        <p>${s.engine} &nbsp;·&nbsp; ${s.prod||yr}</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-block"><div class="stat-num">${s.hp}</div><div class="stat-lbl">Horsepower</div></div>
+        <div class="stat-block"><div class="stat-num amber">${s.tq}</div><div class="stat-lbl">Torque</div></div>
+        <div class="stat-block"><div class="stat-num chrome">${s.z60}</div><div class="stat-lbl">0–60 mph</div></div>
+        <div class="stat-block"><div class="stat-num chrome">${s.vmax}</div><div class="stat-lbl">Top Speed</div></div>
+      </div>
+      <table class="detail-table">
+        <tr><td>Engine</td><td>${s.engine}</td></tr>
+        <tr><td>Supercharger</td><td>${s.sc}</td></tr>
+        <tr><td>Transmission</td><td>${s.trans}</td></tr>
+        <tr><td>Curb weight</td><td>${s.weight}</td></tr>
+        <tr><td>Launch MSRP</td><td>${s.msrp}</td></tr>
+        ${extras}
+      </table>
+      ${s.special ? `<div class="special-note">${s.special}</div>` : ''}
+      <div class="perf-bars">
+        <div class="pbar-row">
+          <span class="pbar-lbl">POWER</span>
+          <div class="pbar-track"><div class="pbar-fill" style="width:${hpPct}%"></div></div>
+          <span class="pbar-val">${s.hp} hp</span>
+        </div>
+        <div class="pbar-row">
+          <span class="pbar-lbl">TORQUE</span>
+          <div class="pbar-track"><div class="pbar-fill amber" style="width:${tqPct}%"></div></div>
+          <span class="pbar-val">${s.tq}</span>
+        </div>
+        <div class="pbar-row">
+          <span class="pbar-lbl">V-MAX</span>
+          <div class="pbar-track"><div class="pbar-fill" style="width:${spdPct}%"></div></div>
+          <span class="pbar-val">${s.vmax}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* =====================================================
+   RENDER RIGHT SPEC SIDEBAR
+   ===================================================== */
+function renderRightSidebar(v) {
+  const s = v.specs;
+  const rows = [
+    ['HP',       s.hp,    'accent'],
+    ['Torque',   s.tq,    'amber'],
+    ['0–60',     s.z60,   ''],
+    ['Top Speed',s.vmax,  ''],
+    ['Engine',   s.engine,''],
+    ['S/C',      s.sc,    ''],
+    ['Trans',    s.trans, ''],
+    ['Weight',   s.weight,''],
+    ['MSRP',     s.msrp,  ''],
+  ];
+  if (s.body) rows.push(['Body', s.body, '']);
+  if (s.qmile) rows.push(['¼ mile', s.qmile, '']);
+
+  let h = `<div class="rs-sec"><div class="rs-lbl">Specifications</div><hr class="rs-rule">`;
+  rows.forEach(([k,val,cls]) => {
+    h += `<div class="rs-row"><span class="rs-k">${k}</span><span class="rs-v ${cls}" title="${val}">${val}</span></div>`;
+  });
+  h += `</div>`;
+  if (v.sketchfabId) {
+    h += `<div class="rs-sec"><hr class="rs-rule"><div class="rs-lbl">3D Model</div>
+           <div class="rs-row"><span class="rs-k">Creator</span><span class="rs-v" title="${v.credit}">${v.credit}</span></div>
+           <div class="rs-row"><span class="rs-k">License</span><span class="rs-v" title="${v.license}">${v.license}</span></div>
+          </div>`;
+  }
+  document.getElementById('rsidebar').innerHTML = h;
+}
+
+/* =====================================================
+   RENDER PARTS PANEL
+   ===================================================== */
+function renderParts() {
+  const parts = PARTS[partCat] || [];
+  let h = '';
+  parts.forEach((p, i) => {
+    const isSel = selPart===i;
+    const gainCls = p.am.gain==='hp' ? 'hp' : p.am.gain==='amber' ? 'amber' : '';
+    h += `<div class="part-card${isSel?' selected':''}" onclick="togglePart(${i})">
+      <div class="pc-top">
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-brand">${p.brand}</div>
+      </div>
+      <div class="pc-compare">
+        <div class="pc-col">
+          <div class="pc-col-lbl">STOCK</div>
+          ${Object.entries(p.stock).filter(([k])=>k!=='notes').map(([k,v])=>`
+            <div class="pc-stat-row"><span class="pc-stat-key">${k}</span><span class="pc-stat-val">${v}</span></div>`).join('')}
+          <div class="pc-stat-row" style="margin-top:2px"><span class="pc-stat-key" style="font-size:9px;color:var(--muted)">${p.stock.notes}</span></div>
+        </div>
+        <div class="pc-col">
+          <div class="pc-col-lbl am">AFTERMARKET</div>
+          ${Object.entries(p.am).filter(([k])=>k!=='notes'&&k!=='delta'&&k!=='gain').map(([k,v])=>`
+            <div class="pc-stat-row"><span class="pc-stat-key">${k}</span><span class="pc-stat-val better">${v}</span></div>`).join('')}
+          <div class="pc-stat-row" style="margin-top:2px"><span class="pc-stat-key" style="font-size:9px;color:var(--muted)">${p.am.notes}</span></div>
+          <div class="pc-delta">
+            <span class="pc-delta-badge ${gainCls}">${p.am.delta}</span>
+          </div>
+        </div>
+      </div>
+      <div class="pc-footer">
+        <span class="pc-price">${p.price}</span>
+        <a class="buy-btn" href="${p.link}" target="_blank" rel="noopener">Buy Now ↗</a>
+      </div>
+    </div>`;
+  });
+  document.getElementById('partsGrid').innerHTML = h;
+}
+
+/* =====================================================
+   FULL RENDER
+   ===================================================== */
+function renderAll() {
+  const fd = getFD(fam);
+  const v  = getVar(fam, yr, varId);
+  if (!v) return;
+  const s  = v.specs;
+
+  // Header tag
+  document.getElementById('hdrTag').textContent = `${fd.label.toUpperCase()} · ${yr}`;
+
+  // Title bar
+  document.getElementById('titleName').textContent = v.label.toUpperCase();
+  document.getElementById('titleYear').textContent = yr;
+  document.getElementById('titleHp').textContent   = numHp(s.hp) + 'HP';
+
+  const modelChip = document.getElementById('titleModel');
+  if (v.sketchfabId) { modelChip.classList.remove('hidden'); }
+  else               { modelChip.classList.add('hidden'); }
+
+  renderViewer(v);
+  renderRightSidebar(v);
+  renderSidebar();
+  renderParts();
+
+  // Attribution footer
+  document.getElementById('attrText').textContent = v.sketchfabId
+    ? `3D model: ${v.credit} — ${v.license}`
+    : 'Spec card — no 3D model available for this variant · Green badge = 3D model available';
+  document.getElementById('attrLic').textContent = v.sketchfabId
+    ? 'sketchfab.com'
+    : '';
+}
+
+/* =====================================================
+   EVENT HANDLERS
+   ===================================================== */
+function selectFamily(f) {
+  fam   = f;
+  yr    = getFD(f).years[0].year;
+  varId = null;
+  selPart = null;
+  document.querySelectorAll('.fnav-tab').forEach(b => b.classList.toggle('active', b.dataset.family===f));
+  renderAll();
+}
+
+function selectYear(y) {
+  yr    = y;
+  varId = null;
+  selPart = null;
+  renderAll();
+}
+
+function selectVariant(id) {
+  varId = id;
+  selPart = null;
+  renderAll();
+}
+
+function selectPartCat(cat) {
+  partCat = cat;
+  selPart = null;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.toggle('active', b.dataset.cat===cat));
+  renderParts();
+}
+
+function togglePart(i) {
+  selPart = selPart===i ? null : i;
+  renderParts();
+}
+
+/* Family nav */
+document.getElementById('familyNav').addEventListener('click', e => {
+  const t = e.target.closest('.fnav-tab');
+  if (t && t.dataset.family) selectFamily(t.dataset.family);
+});
+
+/* Parts category tabs */
+document.querySelector('.pp-header').addEventListener('click', e => {
+  const t = e.target.closest('.cat-tab');
+  if (t && t.dataset.cat) selectPartCat(t.dataset.cat);
+});
+
+/* =====================================================
+   INIT
+   ===================================================== */
+renderAll();
+</script>
+
+<footer style="background:#0A0A0A;border-top:1px solid #2A2A2A;padding:10px 16px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:#6B7280;letter-spacing:0.04em;">
+  BlowerBuildz is an independent enthusiast platform. Not affiliated with Stellantis or Dodge. &nbsp;|&nbsp; "Build it. Know it. Own it."
+</footer>
+</body>
+</html>
