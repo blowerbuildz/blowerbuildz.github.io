@@ -1,0 +1,22 @@
+name: Deploy BlowerBuildz Configurator
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch full configurator HTML
+        run: |
+          curl -s "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_9f49e9a965e84bde8d78fa13d145d53d.txt" -o index.html
+          echo "Downloaded: $(wc -c < index.html) bytes"
+      - name: Commit and push
+        run: |
+          git config user.email "blowerbuildz@gmail.com"
+          git config user.name "BlowerBuildz Bot"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Deploy full BlowerBuildz configurator v5 (49KB)"
+          git push
