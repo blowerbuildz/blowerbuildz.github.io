@@ -270,73 +270,129 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
   </div>
 </div>
 
-<!-- DRAG RACE MODAL -->
-<div id="dragModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:16px">
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:24px;max-width:580px;width:90%;max-height:80vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-family:var(--fh);font-size:1.4rem;font-weight:700;color:var(--amber)">DRAG RACE SIMULATOR</div>
-      <button onclick="closeDrag()" style="background:none;border:1px solid var(--border);color:var(--dim);width:28px;height:28px;border-radius:3px;cursor:pointer;font-size:.9rem">✕</button>
+<!-- DRAG RACE MODAL — immersive rebuild -->
+<style>
+#dragModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;flex-direction:column;align-items:stretch;justify-content:flex-start}
+#dragModal.open{display:flex}
+#dragConfig{flex-shrink:0;background:rgba(10,10,12,.98);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.dclabel{font-family:var(--fm);font-size:.56rem;letter-spacing:.15em;color:var(--dim2);text-transform:uppercase;margin-bottom:2px}
+.dcsel{background:var(--bg3);border:1px solid var(--border);color:var(--white);padding:4px 7px;border-radius:3px;font-family:var(--fm);font-size:.66rem;min-width:120px}
+#dragMyBuildLabel{font-family:var(--fh);font-size:.8rem;color:var(--amber);white-space:nowrap;flex-shrink:0;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.dcspacer{flex:1}
+#btnCloseDrag{background:none;border:1px solid var(--border);color:var(--dim);width:28px;height:28px;border-radius:3px;cursor:pointer;font-size:.9rem;flex-shrink:0}
+#camBar{flex-shrink:0;background:rgba(10,10,12,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:4px}
+.camBtn{font-family:var(--fm);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);padding:7px 10px;cursor:pointer;transition:all .15s}
+.camBtn.active{color:var(--amber);border-bottom-color:var(--amber)}
+.camBtn:hover:not(.active){color:var(--white)}
+#raceStage{flex:1;position:relative;overflow:hidden;background:#0a0a0c;min-height:0}
+#raceCanvas{display:block;width:100%;height:100%}
+#raceHUD{position:absolute;inset:0;pointer-events:none;display:none}
+#demonBanner{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:var(--fh);font-size:.78rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#ff2200;text-shadow:0 0 16px rgba(255,34,0,.9);opacity:0;transition:opacity .4s;white-space:nowrap}
+#raceOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#raceMsg{font-family:var(--fh);font-size:4.5rem;font-weight:700;color:var(--amber);text-shadow:0 0 40px rgba(242,169,0,.9);opacity:0;transition:opacity .1s;text-align:center;line-height:1.1}
+#flashOverlay{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#launchBtn{flex-shrink:0;width:100%;padding:14px;background:var(--red);color:#fff;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;box-shadow:0 -4px 20px rgba(232,71,42,.3)}
+#launchBtn:hover{background:var(--red2)}
+#launchBtn:disabled{opacity:.4;cursor:default}
+#resultPanel{position:absolute;inset:0;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+#resultInner{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px;max-width:400px;width:100%}
+#resultTitle{font-family:var(--fh);font-size:1.9rem;font-weight:700;text-align:center;margin-bottom:12px}
+.resultGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.resultCard{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:9px}
+.rcLabel{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;color:var(--dim2);text-transform:uppercase;margin-bottom:3px}
+.rcET{font-family:var(--fh);font-size:1.35rem;font-weight:700;color:var(--amber)}
+.rcTrap{font-family:var(--fm);font-size:.66rem;color:var(--dim);margin-top:2px}
+.rcSpec2{font-family:var(--fm);font-size:.58rem;color:var(--dim2);margin-top:3px}
+.rcMeta{font-family:var(--fm);font-size:.62rem;color:var(--dim2);text-align:center;margin-bottom:12px}
+#btnRerun{width:100%;padding:10px;background:var(--red);color:#fff;font-family:var(--fh);font-size:.88rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;margin-bottom:7px}
+#btnRerun:hover{background:var(--red2)}
+#dragLBStrip{flex-shrink:0;background:rgba(10,10,12,.97);border-top:1px solid var(--border);padding:6px 12px;display:none}
+.lbTitle{font-family:var(--fm);font-size:.56rem;letter-spacing:.18em;color:var(--dim2);text-transform:uppercase;margin-bottom:4px}
+.lbRow{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.65rem}
+</style>
+
+<div id="dragModal">
+  <div id="dragConfig">
+    <div>
+      <div class="dclabel">My Build</div>
+      <div id="dragMyBuildLabel">—</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;border-radius:4px">
-        <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:6px">MY BUILD</div>
-        <div id="myBuildSpec" style="font-family:var(--fh);font-size:.9rem;color:var(--white)">—</div>
-        <div style="margin-top:8px">
-          <label style="font-family:var(--fm);font-size:.62rem;color:var(--dim2);letter-spacing:.1em;display:block;margin-bottom:4px">TIRES</label>
-          <select id="dragTires" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem">
-            <option value="0">Street Tires (+0.0s)</option>
-            <option value="0.3">Sticky 200TW (-0.3s)</option>
-            <option value="0.7">Drag Radials (-0.7s)</option>
-          </select>
-          <label style="font-family:var(--fm);font-size:.62rem;color:var(--dim2);letter-spacing:.1em;display:block;margin-bottom:4px;margin-top:6px">LAUNCH TUNE</label>
-          <select id="dragLaunch" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem">
-            <option value="0">Stock Launch (+0.0s)</option>
-            <option value="0.2">Launch Control (-0.2s)</option>
-            <option value="0.5">Demon Mode (-0.5s)</option>
-          </select>
+    <div>
+      <div class="dclabel">Tires</div>
+      <select id="dragTires" class="dcsel">
+        <option value="0">Street (+0.0s)</option>
+        <option value="0.3">Sticky 200TW (-0.3s)</option>
+        <option value="0.7">Drag Radials (-0.7s)</option>
+      </select>
+    </div>
+    <div>
+      <div class="dclabel">Launch Tune</div>
+      <select id="dragLaunch" class="dcsel">
+        <option value="0">Stock (+0.0s)</option>
+        <option value="0.2">Launch Control (-0.2s)</option>
+        <option value="0.5">Demon Mode (-0.5s)</option>
+      </select>
+    </div>
+    <div>
+      <div class="dclabel">Opponent</div>
+      <select id="oppSelect" class="dcsel" onchange="updateOppSpec()">
+        <option value="camaro_zl1">Camaro ZL1 1LE (650hp)</option>
+        <option value="mustang_gt500">Mustang GT500 (760hp)</option>
+        <option value="corvette_z06">Corvette Z06 C8 (670hp)</option>
+        <option value="bmw_m5cs">BMW M5 CS (627hp)</option>
+        <option value="lambo_huracan">Huracan EVO (631hp)</option>
+        <option value="dodge_demon_170">Demon 170 E85 (1025hp)</option>
+      </select>
+    </div>
+    <div id="oppSpec" style="font-family:var(--fm);font-size:.62rem;color:var(--dim);align-self:flex-end;min-width:120px"></div>
+    <div class="dcspacer"></div>
+    <button id="btnCloseDrag" onclick="closeDrag()">✕</button>
+  </div>
+  <div id="camBar">
+    <button class="camBtn active" id="camBtn_cockpit" onclick="setCam('cockpit')">🎮 COCKPIT</button>
+    <button class="camBtn" id="camBtn_chase" onclick="setCam('chase')">🚗 CHASE CAM</button>
+    <button class="camBtn" id="camBtn_wide" onclick="setCam('wide')">🔭 WIDE</button>
+    <div style="flex:1"></div>
+    <span id="oppSpecCam" style="font-family:var(--fm);font-size:.6rem;color:var(--dim2)"></span>
+  </div>
+  <div id="raceStage">
+    <canvas id="raceCanvas"></canvas>
+    <div id="raceHUD">
+      <canvas id="hudRPM" width="88" height="88" style="position:absolute;bottom:16px;left:16px"></canvas>
+      <canvas id="hudSpeedo" width="88" height="88" style="position:absolute;bottom:16px;right:16px"></canvas>
+      <div id="demonBanner">DEMON MODE ACTIVE</div>
+    </div>
+    <div id="raceOverlay"><div id="raceMsg"></div></div>
+    <div id="flashOverlay"></div>
+    <div id="resultPanel">
+      <div id="resultInner">
+        <div id="resultTitle"></div>
+        <div class="resultGrid">
+          <div class="resultCard" id="rcMe">
+            <div class="rcLabel">My Build</div>
+            <div class="rcET" id="rcMyET"></div>
+            <div class="rcTrap" id="rcMyTrap"></div>
+            <div class="rcSpec2" id="rcMySpec"></div>
+          </div>
+          <div class="resultCard" id="rcOpp">
+            <div class="rcLabel" id="rcOppLabel"></div>
+            <div class="rcET" id="rcOppET" style="color:var(--white)"></div>
+            <div class="rcTrap" id="rcOppTrap"></div>
+            <div class="rcSpec2" id="rcOppSpec"></div>
+          </div>
         </div>
+        <div class="rcMeta" id="rcMeta"></div>
+        <button id="btnRerun" onclick="rerunRace()">RUN AGAIN</button>
+        <button onclick="closeDrag()" style="width:100%;padding:8px;background:none;border:1px solid var(--border);color:var(--dim);font-family:var(--fm);font-size:.68rem;border-radius:3px;cursor:pointer">CLOSE</button>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;border-radius:4px">
-        <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:6px">OPPONENT</div>
-        <select id="oppSelect" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem;margin-bottom:6px">
-          <option value="camaro_zl1">Camaro ZL1 1LE (650hp)</option>
-          <option value="mustang_gt500">Mustang Shelby GT500 (760hp)</option>
-          <option value="corvette_z06">Corvette Z06 C8 (670hp)</option>
-          <option value="bmw_m5cs">BMW M5 CS (627hp)</option>
-          <option value="lambo_huracan">Lamborghini Huracan EVO (631hp)</option>
-          <option value="dodge_demon_170">Demon 170 E85 (1025hp)</option>
-        </select>
-        <div id="oppSpec" style="font-family:var(--fm);font-size:.72rem;color:var(--dim)"></div>
-      </div>
-    </div>
-    <button onclick="runRace()" style="width:100%;padding:13px;background:var(--red);color:#fff;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;margin-bottom:12px">LAUNCH</button>
-    <!-- TRACK ANIMATION -->
-    <div id="trackBox" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:14px;display:none">
-      <!-- Track road surface -->
-      <div style="position:relative;height:80px;background:linear-gradient(180deg,#111 0%,#1a1a1a 50%,#111 100%);border-radius:4px;overflow:hidden;margin-bottom:12px">
-        <!-- Road markings -->
-        <div style="position:absolute;top:39px;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.15) 0px,rgba(255,255,255,.15) 20px,transparent 20px,transparent 40px)"></div>
-        <!-- Start line -->
-        <div style="position:absolute;left:12%;top:0;bottom:0;width:3px;background:rgba(242,169,0,.5)"></div>
-        <!-- Finish line -->
-        <div id="finishLine" style="position:absolute;right:12%;top:0;bottom:0;width:4px;background:repeating-linear-gradient(180deg,#fff 0px,#fff 8px,#000 8px,#000 16px);opacity:.7"></div>
-        <!-- My car lane -->
-        <div id="myCar" style="position:absolute;top:12px;left:12%;font-size:1.4rem;transition:left 0s;filter:drop-shadow(0 0 8px rgba(232,71,42,.8))">🔴</div>
-        <!-- Opponent car lane -->
-        <div id="oppCar" style="position:absolute;top:42px;left:12%;font-size:1.4rem;transition:left 0s;filter:drop-shadow(0 0 6px rgba(255,255,255,.4))">⬜</div>
-        <!-- Speed blur effect -->
-        <div id="speedBlur" style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(232,71,42,.05) 100%);opacity:0;pointer-events:none"></div>
-      </div>
-      <!-- Results -->
-      <div id="raceResult" style="font-family:var(--fh);font-size:1.1rem;color:var(--white);text-align:center"></div>
-    </div>
-    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-      <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:8px">COMMUNITY LEADERBOARD</div>
-      <div id="leaderboard"></div>
     </div>
   </div>
+  <button id="launchBtn" onclick="runRace()">⚡ LAUNCH</button>
+  <div id="dragLBStrip">
+    <div class="lbTitle">Community Leaderboard</div>
+    <div id="leaderboard"></div>
+  </div>
 </div>
-
 <div id="toast"></div>
 
 <script>
@@ -1590,6 +1646,14 @@ function buildLeftPanel(){
     }
     lp.appendChild(div);
   });
+  // Show spec card overlay if no 3D model for selected year
+  const _fam2 = FAMILIES[currentFamily];
+  const _yr2 = _fam2.years[currentYearIdx] || _fam2.years[0];
+  if(!_yr2.has3d){ setTimeout(showSpecCard, 100); }
+  else {
+    const _exsc = document.getElementById('spec-card');
+    if(_exsc) _exsc.remove();
+  }
 }
 
 function selectFamily(fk){
@@ -1619,13 +1683,6 @@ function updateVehicleInfo(){
   updateMyBuildSpec();
 }
 
-function updateMyBuildSpec(){
-  const fam=FAMILIES[currentFamily];
-  const yr=fam.years[currentYearIdx]||fam.years[0];
-  const hp=isDemonMode?(yr.hp==='840'?840:yr.hp):yr.hp;
-  const spec=document.getElementById('myBuildSpec');
-  if(spec) spec.textContent=`${yr.y} ${fam.name} · ${hp}hp · ${yr.w||fam.weight}lbs`;
-}
 
 // RIGHT PANEL TABS
 const PART_CATS=[
@@ -1794,6 +1851,8 @@ function toggleWidebody(){
   isWidebody=!isWidebody;
   updateFitmentWarning();
   buildRpBody();
+  // Rebuild hotspot overlay when xray state changes
+  setTimeout(buildHotspotOverlay, 50);
 }
 
 function toggleXray(){
@@ -1825,171 +1884,542 @@ function toggleDemon(){
   showToast(isDemonMode?`🔥 DEMON MODE ACTIVE — ${yr.hp}hp unlocked`:`Demon Mode off — 808hp street mode`);
 }
 
-function openDrag(){
-  document.getElementById('dragModal').style.display='flex';
-  updateMyBuildSpec();
-  updateOppSpec();
-  populateLeaderboard();
+
+// ─── AUDIO ────────────────────────────────────────────────────────────────
+let _ac=null;
+function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+function resumeAC(){try{getAC().resume();}catch(e){}}
+
+function playBeep(freq,dur,vol,type,delay){
+  try{
+    const ac=getAC();const o=ac.createOscillator(),g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.type=type||'sine';o.frequency.setValueAtTime(freq,ac.currentTime+(delay||0));
+    g.gain.setValueAtTime(0,ac.currentTime+(delay||0));
+    g.gain.linearRampToValueAtTime(vol||0.3,ac.currentTime+(delay||0)+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+(delay||0)+(dur||0.1));
+    o.start(ac.currentTime+(delay||0));o.stop(ac.currentTime+(delay||0)+(dur||0.1)+0.03);
+  }catch(e){}
 }
-function closeDrag(){document.getElementById('dragModal').style.display='none';}
+
+function playCountBeep(n){playBeep(n===0?1320:880,0.06,0.4,'square');}
+
+function playEngineRev(hp,dragRadials,demonMode,durMs,onDone){
+  try{
+    const ac=getAC();
+    const baseF=60+(hp/1025)*80,topF=baseF*(demonMode?4.8:3.8);
+    const vol=demonMode?0.5:0.38;const dur=durMs/1000;
+    const o=ac.createOscillator(),o2=ac.createOscillator();
+    const g=ac.createGain(),g2=ac.createGain();
+    const dist=ac.createWaveShaper();
+    const curve=new Float32Array(256);
+    for(let i=0;i<256;i++){const x=(i*2/256)-1;curve[i]=Math.tanh(x*2.5);}
+    dist.curve=curve;
+    o.type='sawtooth';o2.type='square';
+    o.connect(dist);dist.connect(g);o2.connect(g2);g2.connect(g);g.connect(ac.destination);
+    const t=ac.currentTime;
+    o.frequency.setValueAtTime(baseF,t);o.frequency.linearRampToValueAtTime(topF,t+dur*0.72);o.frequency.linearRampToValueAtTime(topF*0.88,t+dur);
+    o2.frequency.setValueAtTime(baseF*2,t);o2.frequency.linearRampToValueAtTime(topF*1.4,t+dur*0.72);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.1);g.gain.setValueAtTime(vol,t+dur-0.12);g.gain.linearRampToValueAtTime(0,t+dur+0.06);
+    g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(vol*0.15,t+0.15);g2.gain.linearRampToValueAtTime(0,t+dur+0.06);
+    o.start(t);o2.start(t);o.stop(t+dur+0.1);o2.stop(t+dur+0.1);
+    if(!dragRadials){for(let i=0;i<3;i++)playBeep(100+Math.random()*60,0.05,0.2,'sawtooth',0.02+i*0.04);}
+    if(onDone)setTimeout(onDone,durMs+120);
+  }catch(e){if(onDone)setTimeout(onDone,durMs+120);}
+}
+
+function playTireScreech(durMs){
+  try{
+    const ac=getAC();const sr=ac.sampleRate;
+    const buf=ac.createBuffer(1,sr*Math.ceil(durMs/1000+0.2),sr);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.6;
+    const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
+    f.type='bandpass';f.frequency.value=3800;f.Q.value=1.5;
+    s.buffer=buf;s.connect(f);f.connect(g);g.connect(ac.destination);
+    const t=ac.currentTime;const dur=durMs/1000;
+    g.gain.setValueAtTime(0.38,t);g.gain.linearRampToValueAtTime(0.001,t+dur);
+    s.start(t);s.stop(t+dur+0.05);
+  }catch(e){}
+}
+
+function playGoSound(demonMode){
+  try{
+    const ac=getAC();const f=demonMode?50:68;
+    for(let i=0;i<3;i++){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g);g.connect(ac.destination);
+      o.type='sawtooth';o.frequency.setValueAtTime(f*(i+1),ac.currentTime);
+      o.frequency.exponentialRampToValueAtTime(f*(i+1)*0.68,ac.currentTime+0.32);
+      g.gain.setValueAtTime(0.25-i*0.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.38);
+      o.start();o.stop(ac.currentTime+0.4);
+    }
+  }catch(e){}
+}
+
+// ─── CAMERA STATE ─────────────────────────────────────────────────────────
+let currentCam='cockpit';
+
+function setCam(mode){
+  currentCam=mode;
+  document.querySelectorAll('.camBtn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('camBtn_'+mode);
+  if(btn)btn.classList.add('active');
+  if(!raceRunning)drawIdleTrack();
+}
+
+// ─── MODAL OPEN / CLOSE ───────────────────────────────────────────────────
+function openDrag(){
+  const m=document.getElementById('dragModal');m.style.display='flex';
+  updateMyBuildSpec();updateOppSpec();populateLeaderboard();
+  document.getElementById('dragLBStrip').style.display='block';
+  requestAnimationFrame(()=>{resizeRC();drawIdleTrack();});
+}
+function closeDrag(){
+  cancelRaceAnim();
+  document.getElementById('dragModal').style.display='none';
+  document.getElementById('resultPanel').style.display='none';
+  document.getElementById('raceHUD').style.display='none';
+  const lb=document.getElementById('launchBtn');if(lb){lb.disabled=false;lb.textContent='⚡ LAUNCH';}
+}
 
 function updateOppSpec(){
-  const sel=document.getElementById('oppSelect');
-  if(!sel) return;
+  const sel=document.getElementById('oppSelect');if(!sel)return;
   const opp=OPPONENTS[sel.value];
-  if(opp) document.getElementById('oppSpec').textContent=`${opp.hp}hp · ${opp.weight}lbs · ${opp.zero60}s 0-60`;
+  if(opp){
+    const e=document.getElementById('oppSpec');if(e)e.textContent=`${opp.hp}hp · ${opp.weight.toLocaleString()}lbs · ${opp.qtm}s ET`;
+    const e2=document.getElementById('oppSpecCam');if(e2)e2.textContent=`vs ${opp.name} · ${opp.qtm}s`;
+  }
 }
-if(document.getElementById('oppSelect')){
-  document.getElementById('oppSelect').addEventListener('change',updateOppSpec);
+if(document.getElementById('oppSelect'))document.getElementById('oppSelect').addEventListener('change',updateOppSpec);
+
+// ─── CANVAS + RESIZE ──────────────────────────────────────────────────────
+let _raceAnimId=null;
+function cancelRaceAnim(){if(_raceAnimId){cancelAnimationFrame(_raceAnimId);_raceAnimId=null;}}
+
+function resizeRC(){
+  const stage=document.getElementById('raceStage');
+  const c=document.getElementById('raceCanvas');
+  if(!stage||!c)return;
+  c.width=stage.clientWidth||window.innerWidth;
+  c.height=stage.clientHeight||Math.round(window.innerHeight*0.52);
+}
+window.addEventListener('resize',()=>{
+  if(document.getElementById('dragModal')&&document.getElementById('dragModal').style.display==='flex'){resizeRC();}
+});
+
+// ─── DRAWING HELPERS ──────────────────────────────────────────────────────
+
+function drawCockpit(ctx,W,H,prog,spd,oppProg,demon){
+  ctx.clearRect(0,0,W,H);
+  // Sky
+  const sg=ctx.createLinearGradient(0,0,0,H*0.37);
+  sg.addColorStop(0,'#06060e');sg.addColorStop(1,'#111124');
+  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H*0.37);
+  // Horizon glow
+  const hg=ctx.createRadialGradient(W/2,H*0.37,0,W/2,H*0.37,W*0.44);
+  hg.addColorStop(0,'rgba(232,71,42,0.18)');hg.addColorStop(1,'transparent');
+  ctx.fillStyle=hg;ctx.fillRect(0,0,W,H*0.5);
+  // Road perspective
+  const VY=H*0.37,rL=W*0.04,rR=W*0.96,hL=W*0.42,hR=W*0.58;
+  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.lineTo(hR,VY);ctx.lineTo(rR,H);ctx.closePath();
+  const rg=ctx.createLinearGradient(W/2,VY,W/2,H);
+  rg.addColorStop(0,'#141414');rg.addColorStop(1,'#1e1e1e');
+  ctx.fillStyle=rg;ctx.fill();
+  // Curbs
+  ctx.strokeStyle='rgba(232,71,42,0.45)';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(rR,H);ctx.lineTo(hR,VY);ctx.stroke();
+  // Scrolling lane dashes
+  const scroll=(prog*1800)%80;
+  for(let t=0.02;t<0.99;t+=0.04){
+    const mt=((t*40)+scroll/80)%1;if(mt>0.44)continue;
+    const cx1=(rL+(hL-rL)*t+rR+(hR-rR)*t)/2;
+    const cx2=(rL+(hL-rL)*(t+0.02)+rR+(hR-rR)*(t+0.02))/2;
+    const y1=H+(VY-H)*t,y2=H+(VY-H)*(t+0.02);
+    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=Math.max(0.5,(1-t)*3.8);
+    ctx.beginPath();ctx.moveTo(cx1,y1);ctx.lineTo(cx2,y2);ctx.stroke();
+  }
+  // Finish line
+  if(prog>0.65){
+    const ft=Math.min(1,(prog-0.65)/0.2);
+    const fy=H+(VY-H)*ft*0.84;
+    const fxL=rL+(hL-rL)*ft*0.84,fxR=rR+(hR-rR)*ft*0.84;
+    const fw=Math.max(1,(1-ft*0.78)*18);
+    const segs=8;
+    for(let s=0;s<segs;s++){
+      const sx1=fxL+(fxR-fxL)*(s/segs),sx2=fxL+(fxR-fxL)*((s+1)/segs);
+      ctx.fillStyle=s%2===0?'#fff':'#000';ctx.fillRect(sx1,fy-fw/2,sx2-sx1,fw);
+    }
+  }
+  // Opponent
+  const rd=oppProg-prog;
+  const dep=Math.max(0.05,Math.min(0.93,0.5+rd*1.2));
+  const oy=H+(VY-H)*dep;
+  const ox=(rL+(hL-rL)*dep+rR+(hR-rR)*dep)/2+(W*0.05);
+  const ow=W*(1-dep)*0.28*0.55,oh=ow*0.38;
+  if(ow>4)drawCar(ctx,ox,oy,ow,oh,'#9ab',false,false);
+  // Windshield + wheel
+  drawWindshield(ctx,W,H,demon,prog);
+  drawWheel(ctx,W,H,demon);
+  // Speed flash near line
+  if(prog>0.9&&prog<1){
+    ctx.fillStyle='rgba(255,255,255,'+(0.08*(prog-0.9)/0.1)+')';
+    ctx.fillRect(0,0,W,H);
+  }
 }
 
-// Physics-accurate ET calculator
-// Uses a power-to-weight trap speed model + traction coefficient correction
-// Based on empirical Hellcat drag data (11.5s stock, 8.9s Demon 170)
+function drawChase(ctx,W,H,prog,spd,oppProg,demon){
+  ctx.clearRect(0,0,W,H);
+  const sg=ctx.createLinearGradient(0,0,0,H*0.4);
+  sg.addColorStop(0,'#08080f');sg.addColorStop(1,'#141420');
+  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H*0.4);
+  const hg=ctx.createRadialGradient(W/2,H*0.4,0,W/2,H*0.4,W*0.5);
+  hg.addColorStop(0,'rgba(232,71,42,0.1)');hg.addColorStop(1,'transparent');
+  ctx.fillStyle=hg;ctx.fillRect(0,0,W,H*0.52);
+  const VY=H*0.38,rL=W*0.05,rR=W*0.95,hL=W*0.39,hR=W*0.61;
+  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.lineTo(hR,VY);ctx.lineTo(rR,H);ctx.closePath();
+  const rg=ctx.createLinearGradient(0,VY,0,H);rg.addColorStop(0,'#151515');rg.addColorStop(1,'#1e1e1e');
+  ctx.fillStyle=rg;ctx.fill();
+  ctx.strokeStyle='rgba(232,71,42,0.38)';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(rR,H);ctx.lineTo(hR,VY);ctx.stroke();
+  const scroll=(prog*2200)%80;
+  for(let t=0.02;t<0.99;t+=0.044){
+    const mt=((t*38)+scroll/80)%1;if(mt>0.42)continue;
+    const cx1=(rL+(hL-rL)*t+rR+(hR-rR)*t)/2;
+    const cx2=(rL+(hL-rL)*(t+0.025)+rR+(hR-rR)*(t+0.025))/2;
+    const y1=H+(VY-H)*t,y2=H+(VY-H)*(t+0.025);
+    ctx.strokeStyle='rgba(255,255,255,0.48)';ctx.lineWidth=Math.max(0.4,(1-t)*3.2);
+    ctx.beginPath();ctx.moveTo(cx1,y1);ctx.lineTo(cx2,y2);ctx.stroke();
+  }
+  if(prog>0.68){
+    const ft=Math.min(1,(prog-0.68)/0.22);
+    const fy=H+(VY-H)*ft*0.8;
+    const fxL=rL+(hL-rL)*ft*0.8,fxR=rR+(hR-rR)*ft*0.8;
+    const fw=Math.max(1,(1-ft*0.72)*15);const segs=8;
+    for(let s=0;s<segs;s++){const sx1=fxL+(fxR-fxL)*(s/segs),sx2=fxL+(fxR-fxL)*((s+1)/segs);ctx.fillStyle=s%2===0?'#fff':'#000';ctx.fillRect(sx1,fy-fw/2,sx2-sx1,fw);}
+  }
+  // Opponent ahead
+  const rd=oppProg-prog;
+  const dep=Math.max(0.08,Math.min(0.92,0.42+rd*1.4));
+  const oy=H+(VY-H)*dep;
+  const ox=(rL+(hL-rL)*dep+rR+(hR-rR)*dep)/2+(W*0.04);
+  const ow=W*(1-dep)*0.28*0.55,oh=ow*0.38;
+  if(ow>4)drawCar(ctx,ox,oy,ow,oh,'#8ab',false,false);
+  // Player car bottom-center
+  const pw=W*0.26,ph=pw*0.38;
+  drawCar(ctx,W/2,H*0.72,pw,ph,demon?'#cc1100':'#E8472A',true,demon);
+  // Speed blur behind player
+  if(spd>45){
+    const ba=Math.min(0.3,(spd-45)/110);ctx.save();ctx.globalAlpha=ba;
+    for(let i=0;i<5;i++){
+      const bx=W/2+(Math.random()-0.5)*pw*0.8;const by=H*0.72+ph*0.1+Math.random()*ph*0.25;
+      const bl=pw*0.28*(0.6+Math.random()*0.4);
+      const bg=ctx.createLinearGradient(bx,by,bx+bl,by);
+      bg.addColorStop(0,'rgba(232,71,42,0.5)');bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg;ctx.fillRect(bx,by,bl,1.5);
+    }
+    ctx.restore();
+  }
+}
+
+function drawWide(ctx,W,H,prog,spd,oppProg,demon){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0c0c14';ctx.fillRect(0,0,W,H*0.36);
+  const hg=ctx.createLinearGradient(0,H*0.3,0,H*0.42);
+  hg.addColorStop(0,'transparent');hg.addColorStop(1,'rgba(232,71,42,0.08)');
+  ctx.fillStyle=hg;ctx.fillRect(0,H*0.3,W,H*0.12);
+  ctx.save();ctx.transform(1,0,-0.05,1,W*0.025,0);
+  const ry=H*0.38,rh=H*0.45;
+  ctx.fillStyle='#181818';ctx.fillRect(0,ry,W,rh);
+  ctx.fillStyle='rgba(232,71,42,0.45)';ctx.fillRect(0,ry,W,3);ctx.fillRect(0,ry+rh-3,W,3);
+  const scx=(prog*2800)%120;
+  for(let x=-scx;x<W+120;x+=120){ctx.fillStyle='rgba(255,255,255,0.32)';ctx.fillRect(x,ry+rh/2-1,58,2);}
+  if(prog>0.72){
+    const fx=W*0.82+(prog-0.72)*W*1.8;
+    if(fx<W+20){const sh=13;for(let r=0;r<Math.floor(rh/sh);r++)for(let c=0;c<3;c++){ctx.fillStyle=(r+c)%2===0?'#fff':'#000';ctx.fillRect(fx+c*sh,ry+r*sh,sh,sh);}}
+  }
+  const ox=W*(0.15+oppProg*0.7),px=W*(0.15+prog*0.7);
+  drawCarWide(ctx,ox,ry+rh*0.24,W*0.1,W*0.1*0.38,'#8ab');
+  drawCarWide(ctx,px,ry+rh*0.64,W*0.13,W*0.13*0.38,demon?'#cc1100':'#E8472A');
+  ctx.restore();
+  ctx.save();
+  ctx.fillStyle='rgba(10,10,12,0.6)';ctx.fillRect(8,H*0.4,92,24);
+  ctx.fillStyle='rgba(242,169,0,0.88)';ctx.font=`bold 11px "JetBrains Mono",monospace`;
+  ctx.fillText(`${Math.round(spd)} MPH`,14,H*0.4+16);
+  ctx.restore();
+}
+
+function drawWindshield(ctx,W,H,demon,prog){
+  ctx.save();
+  // Left A-pillar
+  const lg=ctx.createLinearGradient(0,0,W*0.15,0);
+  lg.addColorStop(0,demon?'rgba(70,0,0,0.98)':'rgba(8,8,10,0.98)');lg.addColorStop(1,'transparent');
+  ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*0.17,0);ctx.lineTo(W*0.09,H*0.37);ctx.lineTo(0,H*0.39);ctx.closePath();ctx.fill();
+  // Right A-pillar
+  const rg2=ctx.createLinearGradient(W,0,W*0.85,0);
+  rg2.addColorStop(0,demon?'rgba(70,0,0,0.98)':'rgba(8,8,10,0.98)');rg2.addColorStop(1,'transparent');
+  ctx.fillStyle=rg2;ctx.beginPath();ctx.moveTo(W,0);ctx.lineTo(W*0.83,0);ctx.lineTo(W*0.91,H*0.37);ctx.lineTo(W,H*0.39);ctx.closePath();ctx.fill();
+  if(demon&&prog>0){ctx.fillStyle='rgba(160,0,0,0.07)';ctx.fillRect(0,0,W,H*0.37);}
+  // Dash
+  const dg=ctx.createLinearGradient(0,H*0.68,0,H);
+  dg.addColorStop(0,demon?'rgba(28,0,0,0.97)':'rgba(14,14,16,0.97)');dg.addColorStop(1,demon?'rgba(18,0,0,1)':'rgba(10,10,12,1)');
+  ctx.fillStyle=dg;
+  ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W,H);ctx.lineTo(W,H*0.7);ctx.bezierCurveTo(W*0.78,H*0.63,W*0.22,H*0.63,0,H*0.7);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=demon?'rgba(180,20,0,0.35)':'rgba(255,255,255,0.05)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H*0.7);ctx.bezierCurveTo(W*0.22,H*0.63,W*0.78,H*0.63,W,H*0.7);ctx.stroke();
+  ctx.restore();
+}
+
+function drawWheel(ctx,W,H,demon){
+  const cx=W/2,cy=H*0.865,r=Math.min(W,H)*0.105;
+  ctx.save();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.16)';ctx.lineWidth=r*0.15;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle=demon?'#2a0000':'#181818';ctx.lineWidth=r*0.12;ctx.stroke();
+  for(let i=0;i<3;i++){
+    const a=Math.PI/2+(i/3)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r*0.86,cy+Math.sin(a)*r*0.86);
+    ctx.strokeStyle='rgba(255,255,255,0.09)';ctx.lineWidth=r*0.07;ctx.stroke();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,r*0.2,0,Math.PI*2);ctx.fillStyle=demon?'#800000':'#1e1e1e';ctx.fill();
+  if(demon){ctx.beginPath();ctx.arc(cx,cy,r*0.12,0,Math.PI*2);ctx.fillStyle='#cc0000';ctx.fill();}
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*1.14,Math.PI*1.86);
+  ctx.strokeStyle=demon?'rgba(200,20,0,0.4)':'rgba(255,255,255,0.1)';ctx.lineWidth=r*0.1;ctx.stroke();
+  ctx.restore();
+}
+
+function drawCar(ctx,x,y,w,h,col,isPlayer,demon){
+  ctx.save();ctx.translate(x,y);
+  ctx.fillStyle=col;ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(-w/2,-h*0.35,w,h*0.7,h*0.08);
+  else{ctx.rect(-w/2,-h*0.35,w,h*0.7);}
+  ctx.fill();
+  ctx.fillStyle=isPlayer?(demon?'#5a0000':'#1e1e1e'):'#2e2e2e';
+  if(ctx.roundRect)ctx.roundRect(-w*0.3,-h*0.8,w*0.6,h*0.48,h*0.07);
+  else ctx.rect(-w*0.3,-h*0.8,w*0.6,h*0.48);
+  ctx.fill();
+  ctx.fillStyle='rgba(100,180,255,0.12)';
+  if(ctx.roundRect)ctx.roundRect(-w*0.22,-h*0.76,w*0.44,h*0.38,h*0.04);
+  else ctx.rect(-w*0.22,-h*0.76,w*0.44,h*0.38);
+  ctx.fill();
+  const ww=h*0.36,wr=ww/2;
+  [[-w*0.31,h*0.22],[w*0.31,h*0.22],[-w*0.31,-h*0.08],[w*0.31,-h*0.08]].forEach(([wx,wy])=>{
+    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(wx,wy,wr,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=wr*0.28;ctx.stroke();
+  });
+  ctx.fillStyle=isPlayer?'rgba(255,100,50,0.9)':'rgba(220,220,255,0.75)';
+  [[-w*0.43,-h*0.1],[w*0.43,-h*0.1]].forEach(([lx,ly])=>{
+    ctx.beginPath();ctx.ellipse(lx,ly,w*0.04,h*0.08,0,0,Math.PI*2);ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawCarWide(ctx,x,y,w,h,col){
+  ctx.save();ctx.translate(x,y);
+  ctx.fillStyle=col;
+  if(ctx.roundRect)ctx.roundRect(-w/2,-h*0.4,w,h*0.75,h*0.09);else ctx.rect(-w/2,-h*0.4,w,h*0.75);
+  ctx.fill();
+  ctx.fillStyle='#222';
+  if(ctx.roundRect)ctx.roundRect(-w*0.2,-h*0.85,w*0.5,h*0.5,h*0.06);else ctx.rect(-w*0.2,-h*0.85,w*0.5,h*0.5);
+  ctx.fill();
+  const ww=h*0.4;
+  [[-w*0.32,h*0.28],[w*0.3,h*0.28]].forEach(([wx,wy])=>{
+    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(wx,wy,ww/2,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=ww*0.26;ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function drawIdleTrack(){
+  const c=document.getElementById('raceCanvas');if(!c)return;
+  const ctx=c.getContext('2d');const W=c.width,H=c.height;if(!W||!H)return;
+  drawCockpit(ctx,W,H,0,0,0,false);
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(W/2-130,H/2-28,260,56);
+  ctx.strokeStyle='rgba(242,169,0,0.45)';ctx.lineWidth=1;ctx.strokeRect(W/2-130,H/2-28,260,56);
+  ctx.fillStyle='rgba(242,169,0,0.88)';ctx.font=`bold 17px "Rajdhani",sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⚡ PRESS LAUNCH TO RACE',W/2,H/2);
+  ctx.restore();
+}
+
+function drawGauge(canvasId,val,maxVal,label,color){
+  const c=document.getElementById(canvasId);if(!c)return;
+  const ctx=c.getContext('2d');const W=c.width,H=c.height,cx=W/2,cy=H/2,r=W*0.41;
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*0.8,Math.PI*2.2);
+  ctx.strokeStyle='rgba(255,255,255,0.09)';ctx.lineWidth=r*0.22;ctx.stroke();
+  const f=Math.min(1,val/maxVal);
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*0.8,Math.PI*0.8+Math.PI*1.4*f);
+  ctx.strokeStyle=color;ctx.lineWidth=r*0.19;ctx.shadowBlur=8;ctx.shadowColor=color;ctx.stroke();ctx.shadowBlur=0;
+  ctx.fillStyle='#fff';ctx.font=`bold ${Math.round(W*0.19)}px "JetBrains Mono",monospace`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.round(val),cx,cy-1);
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font=`${Math.round(W*0.11)}px "JetBrains Mono",monospace`;
+  ctx.fillText(label,cx,cy+W*0.17);
+}
+
+// ─── RACE STATE ───────────────────────────────────────────────────────────
+let raceRunning=false;
+let _lastRP=null;
+
+// ─── PHYSICS (unchanged from v6) ─────────────────────────────────────────
 function calcET(hp, weight, tractionCoeff, launchBonus) {
-  // Step 1: Theoretical trap speed from kinetic energy at the 1/4 mile finish
-  // Power delivered = hp * efficiency; at 1/4 mile in ~10-12s the car is running ~peak power
-  const efficiency = 0.85; // drivetrain + aero loss
-  const hpW = hp * 745.7 * efficiency; // watts
-  const massKg = weight * 0.453592;
-  // Trap KE = (1/2)*m*v^2 = hpW * t; solve numerically for consistent t+v
-  // Use empirical formula: trap_mph ≈ 234 * cbrt(hp / weight)
   let trapMph = 234 * Math.pow(hp / weight, 1/3);
-  // Traction correction: poor traction = less effective hp at launch
   trapMph *= (0.85 + tractionCoeff * 0.15);
-  
-  // Step 2: ET from trap speed using distance-time relationship
-  // 1/4 mile = 1320 ft; avg speed = trapMph * 0.59 (acceleration curve factor)
   const avgMph = trapMph * 0.59;
   const etRaw = (1320 / (avgMph * 5280 / 3600));
-  
-  // Step 3: Launch quality correction
   const et = etRaw - launchBonus;
-  
-  // Clamp to realistic range
   return Math.max(8.5, Math.min(16.5, et));
 }
 
-// Calculate trap speed separately for display
 function calcTrap(hp, weight, tractionCoeff) {
   const trapMph = 234 * Math.pow(hp / weight, 1/3);
   return Math.round(trapMph * (0.85 + tractionCoeff * 0.15));
 }
 
-let raceAnimFrame = null;
-let raceRunning = false;
 
 function runRace(){
-  if(raceRunning) return;
-  
-  const fam = FAMILIES[currentFamily];
-  const yr = fam.years[currentYearIdx] || fam.years[0];
-  const hp = isDemonMode ? yr.hp : (yr.hp || 707);
-  const wt = yr.w || fam.weight;
-  
-  // Traction coefficients by tire selection
-  const tireSel = document.getElementById('dragTires')?.value || '0';
-  let tractionCoeff, tireName;
-  if(tireSel === '0.7') { tractionCoeff = 0.98; tireName = 'Drag Radials'; }
-  else if(tireSel === '0.3') { tractionCoeff = 0.88; tireName = 'Sticky 200TW'; }
-  else { tractionCoeff = 0.72; tireName = 'Street Tires'; }
-  
-  // Launch bonus in seconds
-  const launchBonus = parseFloat(document.getElementById('dragLaunch')?.value || 0);
-  
-  const oppKey = document.getElementById('oppSelect')?.value || 'camaro_zl1';
-  const opp = OPPONENTS[oppKey];
-  
-  // My ET uses configured traction + launch bonus
-  const myET = calcET(hp, wt, tractionCoeff, launchBonus);
-  const myTrap = calcTrap(hp, wt, tractionCoeff);
-  
-  // Opponent uses their real-world known ET (not formula) for authenticity
-  const oppET = opp.qtm;
-  const oppTrap = opp.trap;
-  
-  const win = myET <= oppET;
-  const box = document.getElementById('trackBox');
-  box.style.display = 'block';
-  document.getElementById('raceResult').innerHTML = '';
-  
-  // Reset car positions
-  const myCar = document.getElementById('myCar');
-  const oppCar = document.getElementById('oppCar');
-  myCar.style.transition = 'left 0s';
-  oppCar.style.transition = 'left 0s';
-  myCar.style.left = '12%';
-  oppCar.style.left = '12%';
-  
-  // Speed blur
-  const blur = document.getElementById('speedBlur');
-  
-  raceRunning = true;
-  
-  // Countdown then launch
-  let count = 3;
-  document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--amber)">${count}</div>`;
-  
-  const countInterval = setInterval(() => {
+  if(raceRunning)return;
+  resumeAC();
+  const fam=FAMILIES[currentFamily];
+  const yr=fam.years[currentYearIdx]||fam.years[0];
+  const hp=isDemonMode?yr.hp:(yr.hp||707);
+  const wt=yr.w||fam.weight;
+  const tireSel=document.getElementById('dragTires')?.value||'0';
+  let tc,tn,dr=false;
+  if(tireSel==='0.7'){tc=0.98;tn='Drag Radials';dr=true;}
+  else if(tireSel==='0.3'){tc=0.88;tn='Sticky 200TW';}
+  else{tc=0.72;tn='Street Tires';}
+  const lb=parseFloat(document.getElementById('dragLaunch')?.value||0);
+  const oppKey=document.getElementById('oppSelect')?.value||'camaro_zl1';
+  const opp=OPPONENTS[oppKey];
+  const myET=calcET(hp,wt,tc,lb);
+  const myTrap=calcTrap(hp,wt,tc);
+  const oppET=opp.qtm,oppTrap=opp.trap;
+  const win=myET<=oppET;
+  _lastRP={hp,wt,tn,dr,myET,myTrap,oppET,oppTrap,opp,win,oppKey};
+
+  document.getElementById('resultPanel').style.display='none';
+  document.getElementById('raceHUD').style.display='block';
+  const lbtn=document.getElementById('launchBtn');
+  if(lbtn){lbtn.disabled=true;lbtn.textContent='RACING...';}
+
+  const db=document.getElementById('demonBanner');
+  if(db)db.style.opacity=isDemonMode?'1':'0';
+
+  raceRunning=true;
+  resizeRC();
+  const c=document.getElementById('raceCanvas'),ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+
+  const msgEl=document.getElementById('raceMsg');
+  function showCount(n){
+    msgEl.textContent=n===0?'GO!':String(n);
+    msgEl.style.color=n===0?'rgba(232,71,42,0.95)':'rgba(242,169,0,0.95)';
+    msgEl.style.fontSize=n===0?'5.5rem':'5rem';
+    msgEl.style.opacity='1';
+    playCountBeep(n);
+    setTimeout(()=>{msgEl.style.opacity='0';},480);
+  }
+
+  drawFrameByMode(ctx,W,H,0,0,0,isDemonMode,win);
+  showCount(3);
+  let count=3;
+
+  const timer=setInterval(()=>{
     count--;
-    if(count > 0) {
-      document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--amber)">${count}</div>`;
+    if(count>0){
+      showCount(count);
+      drawFrameByMode(ctx,W,H,0,0,0,isDemonMode,win);
     } else {
-      clearInterval(countInterval);
-      document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:var(--red);text-shadow:0 0 20px rgba(232,71,42,.8)">GO!</div>`;
-      
-      // Calculate finish positions proportionally
-      // The winner goes to 84%, loser goes slightly less
-      const myFinish = win ? '85%' : (84 - (oppET - myET) * 5) + '%';
-      const oppFinish = win ? (85 - (myET - oppET) * 5) + '%' : '85%';
-      
-      // Animate: use ET ratio to set speed (lower ET = faster animation)
-      const raceScale = 2.2; // base duration multiplier
-      const myDuration = (myET / 11.5) * raceScale;
-      const oppDuration = (oppET / 11.5) * raceScale;
-      
-      setTimeout(() => {
-        if(blur) { blur.style.transition = 'opacity .3s'; blur.style.opacity = '1'; }
-        myCar.style.transition = `left ${myDuration.toFixed(2)}s cubic-bezier(0.2,0,0.8,1)`;
-        oppCar.style.transition = `left ${oppDuration.toFixed(2)}s cubic-bezier(0.2,0,0.8,1)`;
-        myCar.style.left = myFinish;
-        oppCar.style.left = oppFinish;
-        
-        // Show results after the winner crosses the line
-        const resultDelay = Math.min(myDuration, oppDuration) * 1000 + 400;
-        setTimeout(() => {
-          if(blur) blur.style.opacity = '0';
-          raceRunning = false;
-          const margin = Math.abs(myET - oppET);
-          const marginLabel = margin < 0.1 ? 'BY A BUMPER' : margin < 0.3 ? 'CLOSE' : margin < 0.8 ? 'SOLID WIN' : 'DOMINANT';
-          document.getElementById('raceResult').innerHTML = `
-<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:${win?'#4ade80':'#f87171'};margin-bottom:8px;text-shadow:${win?'0 0 20px rgba(74,222,128,.5)':'0 0 20px rgba(248,113,113,.5)'}">${win ? '🏆 WIN' : '❌ LOSS'} ${win && margin >= 0.1 ? '— ' + marginLabel : ''}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--fm);font-size:.72rem">
-  <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${win?'rgba(74,222,128,.35)':'var(--border)'}">
-    <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">MY BUILD</div>
-    <div style="font-family:var(--fh);color:var(--amber);font-size:1.3rem;font-weight:700">${myET.toFixed(2)}s</div>
-    <div style="color:var(--dim);margin-top:2px">@ ${myTrap} mph trap</div>
-    <div style="color:var(--dim2);font-size:.62rem;margin-top:4px">${hp}hp · ${wt.toLocaleString()}lbs · ${tireName}</div>
-  </div>
-  <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${!win?'rgba(74,222,128,.35)':'var(--border)'}">
-    <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">${opp.name.split(' ').slice(0,3).join(' ')}</div>
-    <div style="font-family:var(--fh);color:var(--white);font-size:1.3rem;font-weight:700">${oppET.toFixed(2)}s</div>
-    <div style="color:var(--dim);margin-top:2px">@ ${oppTrap} mph trap</div>
-    <div style="color:var(--dim2);font-size:.62rem;margin-top:4px">${opp.hp}hp · real-world ET</div>
-  </div>
-</div>
-<div style="margin-top:8px;font-family:var(--fm);font-size:.65rem;color:var(--dim2);text-align:center">Quarter mile · 1320 ft · ${Math.abs(myET-oppET).toFixed(2)}s gap</div>`;
-        }, resultDelay);
-      }, 150);
+      clearInterval(timer);
+      showCount(0);
+      playGoSound(isDemonMode);
+      doFlash();
+
+      const totalDur=(Math.min(myET,oppET)/11.5)*2.1*1000;
+      const startT=performance.now();
+      playEngineRev(hp,dr,isDemonMode,totalDur*1.1+200);
+      let flashedFinish=false;
+
+      function frame(now){
+        const elapsed=now-startT;
+        const t=Math.min(1,elapsed/totalDur);
+        // ease: slow start, fast middle, slight taper
+        const te=t<0.15?t*t*(1/0.0225)*0.5:t<0.85?0.5+((t-0.15)/0.7)*0.44:0.94+((t-0.85)/0.15)*0.06;
+        const myP=Math.min(1,te*(myET/Math.max(myET,oppET)));
+        const oppP=Math.min(1,te*(oppET/Math.max(myET,oppET)));
+        const curSpd=myTrap*Math.pow(t,0.44);
+        drawFrameByMode(ctx,W,H,myP,curSpd,oppP,isDemonMode,win);
+        drawGauge('hudSpeedo',curSpd,180,'MPH','rgba(232,71,42,0.9)');
+        drawGauge('hudRPM',Math.min(8500,1800+curSpd*54),8500,'RPM','rgba(242,169,0,0.9)');
+        if(t>0.9&&!flashedFinish){flashedFinish=true;doFlash();playTireScreech(320);playBeep(220,0.16,0.45,'sawtooth');}
+        if(t<1){_raceAnimId=requestAnimationFrame(frame);}
+        else {
+          raceRunning=false;
+          if(db)db.style.opacity='0';
+          if(lbtn){lbtn.disabled=false;lbtn.textContent='⚡ LAUNCH';}
+          drawFrameByMode(ctx,W,H,1,myTrap,win?0.94:1.0,isDemonMode,win);
+          drawGauge('hudSpeedo',myTrap,180,'MPH','rgba(232,71,42,0.9)');
+          drawGauge('hudRPM',1800,8500,'RPM','rgba(242,169,0,0.9)');
+          setTimeout(()=>showResult(_lastRP),600);
+        }
+      }
+      _raceAnimId=requestAnimationFrame(frame);
     }
-  }, 800);
+  },800);
+}
+
+function drawFrameByMode(ctx,W,H,myP,spd,oppP,demon){
+  if(currentCam==='cockpit')drawCockpit(ctx,W,H,myP,spd,oppP,demon);
+  else if(currentCam==='chase')drawChase(ctx,W,H,myP,spd,oppP,demon);
+  else drawWide(ctx,W,H,myP,spd,oppP,demon);
+}
+
+function doFlash(){
+  const f=document.getElementById('flashOverlay');if(!f)return;
+  f.style.transition='none';f.style.opacity='0.5';
+  setTimeout(()=>{f.style.transition='opacity 0.3s';f.style.opacity='0';},55);
+  setTimeout(()=>{f.style.transition='';},380);
+}
+
+function showResult(p){
+  const win=p.win,m=Math.abs(p.myET-p.oppET);
+  const ml=m<0.1?'BY A BUMPER':m<0.3?'CLOSE RACE':m<0.8?'SOLID WIN':'DOMINANT';
+  document.getElementById('resultTitle').textContent=win?'🏆 WIN':'❌ LOSS';
+  document.getElementById('resultTitle').style.color=win?'#4ade80':'#f87171';
+  document.getElementById('rcMe').style.borderColor=win?'rgba(74,222,128,0.4)':'rgba(255,255,255,0.08)';
+  document.getElementById('rcOpp').style.borderColor=!win?'rgba(74,222,128,0.4)':'rgba(255,255,255,0.08)';
+  document.getElementById('rcMyET').textContent=p.myET.toFixed(2)+'s';
+  document.getElementById('rcMyTrap').textContent='@ '+p.myTrap+' mph trap';
+  document.getElementById('rcMySpec').textContent=p.hp+'hp · '+p.wt.toLocaleString()+'lbs · '+p.tn;
+  document.getElementById('rcOppLabel').textContent=p.opp.name.split(' ').slice(0,3).join(' ');
+  document.getElementById('rcOppET').textContent=p.oppET.toFixed(2)+'s';
+  document.getElementById('rcOppTrap').textContent='@ '+p.oppTrap+' mph trap';
+  document.getElementById('rcOppSpec').textContent=p.opp.hp+'hp · real-world ET';
+  document.getElementById('rcMeta').textContent='¼ mile · '+m.toFixed(2)+'s gap'+(win&&m>=0.08?' — '+ml:'');
+  document.getElementById('resultPanel').style.display='flex';
+}
+
+function rerunRace(){document.getElementById('resultPanel').style.display='none';runRace();}
+
+function updateMyBuildSpec(){
+  const fam=FAMILIES[currentFamily];const yr=fam.years[currentYearIdx]||fam.years[0];
+  const hp=isDemonMode?(yr.hp===840?840:yr.hp):yr.hp;
+  const wt=yr.w||fam.weight;
+  const el=document.getElementById('dragMyBuildLabel');
+  if(el)el.textContent=`${yr.y} ${fam.name} · ${hp}hp · ${(wt||0).toLocaleString()}lbs`;
+  const el2=document.getElementById('myBuildSpec');
+  if(el2)el2.textContent=`${yr.y} ${fam.name} · ${hp}hp · ${(wt||0).toLocaleString()}lbs`;
 }
 
 function populateLeaderboard(){
-  const lb=document.getElementById('leaderboard');
-  if(!lb) return;
-  lb.innerHTML=LEADERBOARD.map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:.7rem"><span style="color:${i===0?'var(--amber)':'var(--dim)'}">🏆 ${e.name}</span><span style="font-family:var(--fm);color:var(--white)">${e.et}s · ${e.trap}</span></div>`).join('');
+  const lb=document.getElementById('leaderboard');if(!lb)return;
+  lb.innerHTML=LEADERBOARD.map((e,i)=>`<div class="lbRow"><span style="color:${i===0?'rgba(242,169,0,0.9)':'rgba(240,240,240,0.5)'}">🏆 ${e.name}</span><span style="font-family:var(--fm);color:var(--white)">${e.et}s · ${e.trap}</span></div>`).join('');
 }
+
 
 function resetBuild(){
   activeParts={wheels:'stock_wheels',tires:'ps4s',suspension:null,color:0,exhaust:null,exterior:null};
@@ -2134,14 +2564,6 @@ function buildHotspotOverlay(){
   });
 }
 
-// Rebuild hotspot layer when X-ray is toggled
-const origToggleXray = toggleXray;
-// Patch xray toggle to also rebuild hotspots
-const _origApplyXray = applyXray;
-function applyXray(on){
-  _origApplyXray(on);
-  setTimeout(buildHotspotOverlay, 50);
-}
 
 // Add CSS for pulse animation (inject into head)
 const styleEl = document.createElement('style');
@@ -2287,22 +2709,6 @@ function setSketchfabPrimaryViewer(sfId, vehicleLabel) {
   }
 }
 
-// Override selectFamily and updateVehicleInfo to handle Sketchfab
-const _origUpdateVehicleInfo = updateVehicleInfo;
-function updateVehicleInfo(){
-  _origUpdateVehicleInfo();
-  const fam = FAMILIES[currentFamily];
-  const yr = fam.years[currentYearIdx] || fam.years[0];
-  // Always set primary viewer — Sketchfab if model exists, spec card if not
-  setSketchfabPrimaryViewer(yr.sf || null, `${yr.y} ${fam.name}`);
-  // Also keep the secondary button for explicit launch
-  if(yr.has3d && yr.sf){
-    addSketchfabButton(yr.sf, `${yr.y} ${fam.name}`);
-  } else {
-    const ex = document.getElementById('sf-launch-btn');
-    if(ex) ex.remove();
-  }
-}
 
 // ========= SPEC PANEL (shown when no 3D model) =========
 function showSpecCard(){
@@ -2345,39 +2751,10 @@ function showSpecCard(){
   vw.appendChild(card);
 }
 
-// Hook into year selection to show/hide spec card
-const _origBuildLeftPanel = buildLeftPanel;
-function buildLeftPanel(){
-  _origBuildLeftPanel();
-  const fam = FAMILIES[currentFamily];
-  const yr = fam.years[currentYearIdx] || fam.years[0];
-  if(!yr.has3d){ setTimeout(showSpecCard, 100); }
-  else {
-    const ex = document.getElementById('spec-card');
-    if(ex) ex.remove();
-  }
-}
 
 // Demon crate tooltip
 function showDemonCrateTooltip(){
   alert('🔥 DEMON CRATE — $1 Factory Option\n\nIncludes:\n• Skinny P185/70R17 front drag tires on 17" steel wheels\n• Mickey Thompson drag radials rear\n• Second key fob (unlocks Demon Mode: 840hp)\n• High-flow air filter (SoCalSuperchargers)\n• Harness bar bracket (bolts into trunk)\n• Floor jack puck\n\nOnly 3,300 built. The $1 option that changed drag racing forever.');
-}
-
-// ========= FINAL INIT PATCHES =========
-// Patch enterApp to also call updateVehicleInfo for Sketchfab button
-const _origEnterApp = enterApp;
-function enterApp(){
-  document.getElementById('hero').classList.add('out');
-  document.getElementById('app').classList.add('vis');
-  setTimeout(()=>{
-    document.getElementById('hero').style.display='none';
-    init();
-    buildFamilyNav();
-    buildLeftPanel();
-    updateVehicleInfo();
-    updateRightPanel();
-    updateCamera();
-  }, 300);
 }
 
 </script>
