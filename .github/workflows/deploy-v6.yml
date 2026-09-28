@@ -14,9 +14,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download v6 HTML
+      - name: Download fixed HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_30831407927a4107a47c757f656f4d8b.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_11fcf5c18b344cf6806dd7f21a4f3144.txt"
           echo "Downloaded $(wc -c < index.html) bytes"
 
       - name: Commit and push
@@ -25,5 +25,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html
           git diff --staged --stat
-          git commit -m "Deploy BlowerBuildz v6 - Three.js full rebuild with Iron Man X-Ray" || echo "Nothing to commit"
+          git commit -m "Fix: BlowerBuildz brand, Sketchfab primary viewer, wired selectors, real drag race physics" || echo "Nothing to commit"
           git push
