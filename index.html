@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name='impact-site-verification' value='cc214b1f-31f1-433f-94a0-ec193a25801b'>
-<title>HellcatBuilds — 3D Configurator</title>
+<title>BlowerBuildz — 3D Configurator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -195,7 +195,7 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
   <div class="smoke" style="width:400px;height:300px;background:radial-gradient(circle,rgba(242,169,0,.15),transparent);bottom:15%;right:-5%;animation-duration:14s;animation-delay:-7s"></div>
   <div class="smoke" style="width:350px;height:250px;background:radial-gradient(circle,rgba(100,100,200,.1),transparent);top:40%;right:20%;animation-duration:22s;animation-delay:-3s"></div>
   <div class="hc">
-    <div class="hlogo">HELLCAT<b>BUILDS</b></div>
+    <div class="hlogo">BLOWER<b>BUILDZ</b></div>
     <div class="htag">Build it. Know it. Own it.</div>
     <div class="hchips">
       <div class="hchip">6 MODELS</div>
@@ -212,7 +212,7 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
 <div id="app">
   <!-- HEADER -->
   <div id="hdr">
-    <div class="hdr-logo">HELLCAT<span>BUILDS</span></div>
+    <div class="hdr-logo">BLOWER<span>BUILDZ</span></div>
     <nav class="hdr-nav" id="famNav"></nav>
     <div class="hdr-tools">
       <button class="tb" id="xrayBtn" onclick="toggleXray()">X-RAY</button>
@@ -299,24 +299,35 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
       <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;border-radius:4px">
         <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:6px">OPPONENT</div>
         <select id="oppSelect" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem;margin-bottom:6px">
-          <option value="camaro_ss">Camaro SS 1LE (455hp)</option>
-          <option value="mustang_gt500">Mustang GT500 (760hp)</option>
-          <option value="corvette_z06">Corvette Z06 (670hp)</option>
-          <option value="bmw_m5">BMW M5 Competition (617hp)</option>
-          <option value="lambo_huracan">Lamborghini Huracan (602hp)</option>
-          <option value="dodge_demon_170">Demon 170 (1025hp E85)</option>
+          <option value="camaro_zl1">Camaro ZL1 1LE (650hp)</option>
+          <option value="mustang_gt500">Mustang Shelby GT500 (760hp)</option>
+          <option value="corvette_z06">Corvette Z06 C8 (670hp)</option>
+          <option value="bmw_m5cs">BMW M5 CS (627hp)</option>
+          <option value="lambo_huracan">Lamborghini Huracan EVO (631hp)</option>
+          <option value="dodge_demon_170">Demon 170 E85 (1025hp)</option>
         </select>
         <div id="oppSpec" style="font-family:var(--fm);font-size:.72rem;color:var(--dim)"></div>
       </div>
     </div>
     <button onclick="runRace()" style="width:100%;padding:13px;background:var(--red);color:#fff;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;margin-bottom:12px">LAUNCH</button>
-    <!-- TRACK -->
+    <!-- TRACK ANIMATION -->
     <div id="trackBox" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:14px;display:none">
-      <div style="position:relative;height:40px;margin-bottom:12px">
-        <div style="position:absolute;top:50%;left:14%;transform:translateY(-50%);font-size:1.5rem;transition:left 2s ease-out" id="myCar">🚗</div>
-        <div style="position:absolute;top:50%;left:14%;transform:translateY(-50%);font-size:1.5rem;transition:left 2.2s ease-out;margin-top:20px" id="oppCar">🏎️</div>
-        <div style="position:absolute;right:12%;top:0;bottom:0;width:3px;background:rgba(255,255,255,.15)"></div>
+      <!-- Track road surface -->
+      <div style="position:relative;height:80px;background:linear-gradient(180deg,#111 0%,#1a1a1a 50%,#111 100%);border-radius:4px;overflow:hidden;margin-bottom:12px">
+        <!-- Road markings -->
+        <div style="position:absolute;top:39px;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.15) 0px,rgba(255,255,255,.15) 20px,transparent 20px,transparent 40px)"></div>
+        <!-- Start line -->
+        <div style="position:absolute;left:12%;top:0;bottom:0;width:3px;background:rgba(242,169,0,.5)"></div>
+        <!-- Finish line -->
+        <div id="finishLine" style="position:absolute;right:12%;top:0;bottom:0;width:4px;background:repeating-linear-gradient(180deg,#fff 0px,#fff 8px,#000 8px,#000 16px);opacity:.7"></div>
+        <!-- My car lane -->
+        <div id="myCar" style="position:absolute;top:12px;left:12%;font-size:1.4rem;transition:left 0s;filter:drop-shadow(0 0 8px rgba(232,71,42,.8))">🔴</div>
+        <!-- Opponent car lane -->
+        <div id="oppCar" style="position:absolute;top:42px;left:12%;font-size:1.4rem;transition:left 0s;filter:drop-shadow(0 0 6px rgba(255,255,255,.4))">⬜</div>
+        <!-- Speed blur effect -->
+        <div id="speedBlur" style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(232,71,42,.05) 100%);opacity:0;pointer-events:none"></div>
       </div>
+      <!-- Results -->
       <div id="raceResult" style="font-family:var(--fh);font-size:1.1rem;color:var(--white);text-align:center"></div>
     </div>
     <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
@@ -543,12 +554,12 @@ const PARTS_DATA = {
 };
 
 const OPPONENTS = {
-  camaro_ss: {name:'Camaro SS 1LE',hp:455,weight:3728,zero60:4.0},
-  mustang_gt500: {name:'Mustang GT500',hp:760,weight:3910,zero60:3.3},
-  corvette_z06: {name:'Corvette Z06',hp:670,weight:3572,zero60:2.95},
-  bmw_m5: {name:'BMW M5 Competition',hp:617,weight:4387,zero60:3.1},
-  lambo_huracan: {name:'Lamborghini Huracan',hp:602,weight:3135,zero60:2.9},
-  dodge_demon_170: {name:'Demon 170 (E85)',hp:1025,weight:4280,zero60:1.66}
+  camaro_zl1: {name:'Camaro ZL1 1LE',hp:650,weight:3770,zero60:3.5,trap:128,qtm:11.4},
+  mustang_gt500: {name:'Mustang Shelby GT500',hp:760,weight:4225,zero60:3.3,trap:131,qtm:10.6},
+  corvette_z06: {name:'Corvette Z06 (C8)',hp:670,weight:3366,zero60:2.6,trap:132,qtm:10.6},
+  bmw_m5cs: {name:'BMW M5 CS',hp:627,weight:4035,zero60:2.9,trap:127,qtm:10.8},
+  lambo_huracan: {name:'Lamborghini Huracan EVO',hp:631,weight:3135,zero60:2.9,trap:134,qtm:10.4},
+  dodge_demon_170: {name:'Dodge Demon 170 (E85)',hp:1025,weight:4280,zero60:1.66,trap:152,qtm:8.91}
 };
 
 const LEADERBOARD = [
@@ -1832,49 +1843,146 @@ if(document.getElementById('oppSelect')){
   document.getElementById('oppSelect').addEventListener('change',updateOppSpec);
 }
 
-function calcET(hp,weight,tireBns,launchBns){
-  const bsp=weight/hp;
-  const base=14.2-(14.2-5.5)*Math.min(1,1/Math.pow(bsp/4.5,0.8));
-  return Math.max(5.5,Math.min(18,base-tireBns-launchBns));
+// Physics-accurate ET calculator
+// Uses a power-to-weight trap speed model + traction coefficient correction
+// Based on empirical Hellcat drag data (11.5s stock, 8.9s Demon 170)
+function calcET(hp, weight, tractionCoeff, launchBonus) {
+  // Step 1: Theoretical trap speed from kinetic energy at the 1/4 mile finish
+  // Power delivered = hp * efficiency; at 1/4 mile in ~10-12s the car is running ~peak power
+  const efficiency = 0.85; // drivetrain + aero loss
+  const hpW = hp * 745.7 * efficiency; // watts
+  const massKg = weight * 0.453592;
+  // Trap KE = (1/2)*m*v^2 = hpW * t; solve numerically for consistent t+v
+  // Use empirical formula: trap_mph ≈ 234 * cbrt(hp / weight)
+  let trapMph = 234 * Math.pow(hp / weight, 1/3);
+  // Traction correction: poor traction = less effective hp at launch
+  trapMph *= (0.85 + tractionCoeff * 0.15);
+  
+  // Step 2: ET from trap speed using distance-time relationship
+  // 1/4 mile = 1320 ft; avg speed = trapMph * 0.59 (acceleration curve factor)
+  const avgMph = trapMph * 0.59;
+  const etRaw = (1320 / (avgMph * 5280 / 3600));
+  
+  // Step 3: Launch quality correction
+  const et = etRaw - launchBonus;
+  
+  // Clamp to realistic range
+  return Math.max(8.5, Math.min(16.5, et));
 }
 
+// Calculate trap speed separately for display
+function calcTrap(hp, weight, tractionCoeff) {
+  const trapMph = 234 * Math.pow(hp / weight, 1/3);
+  return Math.round(trapMph * (0.85 + tractionCoeff * 0.15));
+}
+
+let raceAnimFrame = null;
+let raceRunning = false;
+
 function runRace(){
-  const fam=FAMILIES[currentFamily];
-  const yr=fam.years[currentYearIdx]||fam.years[0];
-  const hp=isDemonMode?yr.hp:(yr.hp||707);
-  const wt=yr.w||fam.weight;
-  const tireBns=parseFloat(document.getElementById('dragTires')?.value||0);
-  const launchBns=parseFloat(document.getElementById('dragLaunch')?.value||0);
-  const oppKey=document.getElementById('oppSelect')?.value||'camaro_ss';
-  const opp=OPPONENTS[oppKey];
-  const myET=calcET(hp,wt,tireBns,launchBns);
-  const oppET=calcET(opp.hp,opp.weight,0,0);
-  const myTrap=Math.round(50+(hp/wt)*65);
-  const oppTrap=Math.round(50+(opp.hp/opp.weight)*65);
-  const box=document.getElementById('trackBox');
-  box.style.display='block';
-  // Animate
-  setTimeout(()=>{
-    document.getElementById('myCar').style.left='84%';
-    document.getElementById('oppCar').style.left=(myET<oppET?'80%':'86%');
-  },50);
-  setTimeout(()=>{
-    const win=myET<=oppET;
-    document.getElementById('raceResult').innerHTML=`
-<div style="font-family:var(--fh);font-size:1.5rem;font-weight:700;color:${win?'#4ade80':'#f87171'};margin-bottom:8px">${win?'🏆 WIN':'❌ LOSS'}</div>
+  if(raceRunning) return;
+  
+  const fam = FAMILIES[currentFamily];
+  const yr = fam.years[currentYearIdx] || fam.years[0];
+  const hp = isDemonMode ? yr.hp : (yr.hp || 707);
+  const wt = yr.w || fam.weight;
+  
+  // Traction coefficients by tire selection
+  const tireSel = document.getElementById('dragTires')?.value || '0';
+  let tractionCoeff, tireName;
+  if(tireSel === '0.7') { tractionCoeff = 0.98; tireName = 'Drag Radials'; }
+  else if(tireSel === '0.3') { tractionCoeff = 0.88; tireName = 'Sticky 200TW'; }
+  else { tractionCoeff = 0.72; tireName = 'Street Tires'; }
+  
+  // Launch bonus in seconds
+  const launchBonus = parseFloat(document.getElementById('dragLaunch')?.value || 0);
+  
+  const oppKey = document.getElementById('oppSelect')?.value || 'camaro_zl1';
+  const opp = OPPONENTS[oppKey];
+  
+  // My ET uses configured traction + launch bonus
+  const myET = calcET(hp, wt, tractionCoeff, launchBonus);
+  const myTrap = calcTrap(hp, wt, tractionCoeff);
+  
+  // Opponent uses their real-world known ET (not formula) for authenticity
+  const oppET = opp.qtm;
+  const oppTrap = opp.trap;
+  
+  const win = myET <= oppET;
+  const box = document.getElementById('trackBox');
+  box.style.display = 'block';
+  document.getElementById('raceResult').innerHTML = '';
+  
+  // Reset car positions
+  const myCar = document.getElementById('myCar');
+  const oppCar = document.getElementById('oppCar');
+  myCar.style.transition = 'left 0s';
+  oppCar.style.transition = 'left 0s';
+  myCar.style.left = '12%';
+  oppCar.style.left = '12%';
+  
+  // Speed blur
+  const blur = document.getElementById('speedBlur');
+  
+  raceRunning = true;
+  
+  // Countdown then launch
+  let count = 3;
+  document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--amber)">${count}</div>`;
+  
+  const countInterval = setInterval(() => {
+    count--;
+    if(count > 0) {
+      document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--amber)">${count}</div>`;
+    } else {
+      clearInterval(countInterval);
+      document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:var(--red);text-shadow:0 0 20px rgba(232,71,42,.8)">GO!</div>`;
+      
+      // Calculate finish positions proportionally
+      // The winner goes to 84%, loser goes slightly less
+      const myFinish = win ? '85%' : (84 - (oppET - myET) * 5) + '%';
+      const oppFinish = win ? (85 - (myET - oppET) * 5) + '%' : '85%';
+      
+      // Animate: use ET ratio to set speed (lower ET = faster animation)
+      const raceScale = 2.2; // base duration multiplier
+      const myDuration = (myET / 11.5) * raceScale;
+      const oppDuration = (oppET / 11.5) * raceScale;
+      
+      setTimeout(() => {
+        if(blur) { blur.style.transition = 'opacity .3s'; blur.style.opacity = '1'; }
+        myCar.style.transition = `left ${myDuration.toFixed(2)}s cubic-bezier(0.2,0,0.8,1)`;
+        oppCar.style.transition = `left ${oppDuration.toFixed(2)}s cubic-bezier(0.2,0,0.8,1)`;
+        myCar.style.left = myFinish;
+        oppCar.style.left = oppFinish;
+        
+        // Show results after the winner crosses the line
+        const resultDelay = Math.min(myDuration, oppDuration) * 1000 + 400;
+        setTimeout(() => {
+          if(blur) blur.style.opacity = '0';
+          raceRunning = false;
+          const margin = Math.abs(myET - oppET);
+          const marginLabel = margin < 0.1 ? 'BY A BUMPER' : margin < 0.3 ? 'CLOSE' : margin < 0.8 ? 'SOLID WIN' : 'DOMINANT';
+          document.getElementById('raceResult').innerHTML = `
+<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:${win?'#4ade80':'#f87171'};margin-bottom:8px;text-shadow:${win?'0 0 20px rgba(74,222,128,.5)':'0 0 20px rgba(248,113,113,.5)'}">${win ? '🏆 WIN' : '❌ LOSS'} ${win && margin >= 0.1 ? '— ' + marginLabel : ''}</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--fm);font-size:.72rem">
-<div style="background:var(--bg3);padding:8px;border-radius:3px;border:1px solid ${win?'rgba(74,222,128,.3)':'var(--border)'}">
-<div style="color:var(--dim2);margin-bottom:2px">MY BUILD</div>
-<div style="color:var(--amber);font-size:1.1rem;font-weight:700">${myET.toFixed(2)}s</div>
-<div style="color:var(--dim)">@${myTrap} mph</div>
+  <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${win?'rgba(74,222,128,.35)':'var(--border)'}">
+    <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">MY BUILD</div>
+    <div style="font-family:var(--fh);color:var(--amber);font-size:1.3rem;font-weight:700">${myET.toFixed(2)}s</div>
+    <div style="color:var(--dim);margin-top:2px">@ ${myTrap} mph trap</div>
+    <div style="color:var(--dim2);font-size:.62rem;margin-top:4px">${hp}hp · ${wt.toLocaleString()}lbs · ${tireName}</div>
+  </div>
+  <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${!win?'rgba(74,222,128,.35)':'var(--border)'}">
+    <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">${opp.name.split(' ').slice(0,3).join(' ')}</div>
+    <div style="font-family:var(--fh);color:var(--white);font-size:1.3rem;font-weight:700">${oppET.toFixed(2)}s</div>
+    <div style="color:var(--dim);margin-top:2px">@ ${oppTrap} mph trap</div>
+    <div style="color:var(--dim2);font-size:.62rem;margin-top:4px">${opp.hp}hp · real-world ET</div>
+  </div>
 </div>
-<div style="background:var(--bg3);padding:8px;border-radius:3px;border:1px solid ${!win?'rgba(74,222,128,.3)':'var(--border)'}">
-<div style="color:var(--dim2);margin-bottom:2px">${opp.name}</div>
-<div style="color:var(--white);font-size:1.1rem;font-weight:700">${oppET.toFixed(2)}s</div>
-<div style="color:var(--dim)">@${oppTrap} mph</div>
-</div>
-</div>`;
-  },2600);
+<div style="margin-top:8px;font-family:var(--fm);font-size:.65rem;color:var(--dim2);text-align:center">Quarter mile · 1320 ft · ${Math.abs(myET-oppET).toFixed(2)}s gap</div>`;
+        }, resultDelay);
+      }, 150);
+    }
+  }, 800);
 }
 
 function populateLeaderboard(){
@@ -2092,12 +2200,102 @@ function addSketchfabButton(sfId, yearLabel){
   abx.prepend(btn);
 }
 
+// Primary viewer: Sketchfab iframe (swaps on every vehicle/year change)
+// Three.js canvas stays for X-Ray isolation mode only
+function setSketchfabPrimaryViewer(sfId, vehicleLabel) {
+  const vw = document.getElementById('vw');
+  const canvas = document.getElementById('tc');
+  
+  // Remove existing primary embed
+  const ex = document.getElementById('sf-primary');
+  if(ex) ex.remove();
+  
+  if(sfId) {
+    // Hide Three.js canvas, show Sketchfab as primary
+    canvas.style.opacity = '0';
+    canvas.style.pointerEvents = 'none';
+    
+    const wrap = document.createElement('div');
+    wrap.id = 'sf-primary';
+    wrap.style.cssText = 'position:absolute;inset:0;z-index:3;background:var(--bg)';
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://sketchfab.com/models/${sfId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_watermark=0&ui_watermark_link=0&ui_ar=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=1&ui_annotations=0&transparent=0&dnt=1&camera=0`;
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block';
+    iframe.allowFullscreen = true;
+    iframe.allow = 'autoplay; fullscreen; xr-spatial-tracking';
+    
+    // X-Ray toggle button to switch to Three.js
+    const xrayBtn = document.createElement('button');
+    xrayBtn.textContent = '⚡ X-RAY MODE';
+    xrayBtn.style.cssText = 'position:absolute;bottom:60px;left:50%;transform:translateX(-50%);z-index:10;font-family:var(--fm);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;background:rgba(10,10,12,0.9);border:1px solid rgba(242,169,0,0.5);color:var(--amber);padding:7px 14px;border-radius:3px;cursor:pointer;white-space:nowrap';
+    xrayBtn.onclick = () => {
+      wrap.remove();
+      canvas.style.opacity = '1';
+      canvas.style.pointerEvents = 'auto';
+      // Trigger x-ray
+      isXray = true;
+      applyXray(true);
+      showHotspots();
+      document.getElementById('xrayBtn').classList.add('on');
+    };
+    
+    wrap.appendChild(iframe);
+    wrap.appendChild(xrayBtn);
+    vw.appendChild(wrap);
+  } else {
+    // No model: show spec placeholder card over canvas
+    canvas.style.opacity = '0.15';
+    canvas.style.pointerEvents = 'none';
+    
+    const ex2 = document.getElementById('sf-primary');
+    if(ex2) ex2.remove();
+    
+    const placeholder = document.createElement('div');
+    placeholder.id = 'sf-primary';
+    placeholder.style.cssText = 'position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px';
+    
+    const fam = FAMILIES[currentFamily];
+    const yr = fam.years[currentYearIdx] || fam.years[0];
+    placeholder.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:24px 32px;max-width:380px;width:90%;text-align:center">
+        <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.25em;color:var(--amber);text-transform:uppercase;margin-bottom:8px">3D MODEL</div>
+        <div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:var(--white);margin-bottom:4px">${yr.y} ${fam.name}</div>
+        <div style="font-family:var(--fm);font-size:.75rem;color:var(--dim);margin-bottom:16px">${yr.variants[0]}</div>
+        <div style="display:inline-block;background:rgba(242,169,0,.1);border:1px solid rgba(242,169,0,.3);color:var(--amber);font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;padding:6px 14px;border-radius:3px;margin-bottom:20px">Model Coming Soon</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;margin-top:4px">
+          <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;border-radius:4px">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;color:var(--dim2);text-transform:uppercase;margin-bottom:4px">Power</div>
+            <div style="font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--amber)">${yr.hp} hp</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;border-radius:4px">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;color:var(--dim2);text-transform:uppercase;margin-bottom:4px">Torque</div>
+            <div style="font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--white)">${yr.tq} lb-ft</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;border-radius:4px">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;color:var(--dim2);text-transform:uppercase;margin-bottom:4px">0-60 mph</div>
+            <div style="font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--white)">${yr.zero60 || fam.zero60}s</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;border-radius:4px">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;color:var(--dim2);text-transform:uppercase;margin-bottom:4px">Weight</div>
+            <div style="font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--white)">${(yr.w||fam.weight).toLocaleString()} lbs</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-family:var(--fm);font-size:.65rem;color:var(--dim2)">Select the parts panel to configure your build</div>
+      </div>`;
+    vw.appendChild(placeholder);
+  }
+}
+
 // Override selectFamily and updateVehicleInfo to handle Sketchfab
 const _origUpdateVehicleInfo = updateVehicleInfo;
 function updateVehicleInfo(){
   _origUpdateVehicleInfo();
   const fam = FAMILIES[currentFamily];
   const yr = fam.years[currentYearIdx] || fam.years[0];
+  // Always set primary viewer — Sketchfab if model exists, spec card if not
+  setSketchfabPrimaryViewer(yr.sf || null, `${yr.y} ${fam.name}`);
+  // Also keep the secondary button for explicit launch
   if(yr.has3d && yr.sf){
     addSketchfabButton(yr.sf, `${yr.y} ${fam.name}`);
   } else {
