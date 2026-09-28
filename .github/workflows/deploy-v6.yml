@@ -1,0 +1,23 @@
+name: Deploy v6
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download v6 HTML
+        run: |
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_30831407927a4107a47c757f656f4d8b.txt"
+          wc -c index.html
+
+      - name: Commit and push
+        run: |
+          git config user.email "blowerbuildz@gmail.com"
+          git config user.name "BlowerBuildz Deploy"
+          git add index.html
+          git commit -m "Deploy BlowerBuildz v6 — Three.js full rebuild with Iron Man X-Ray"
+          git push
