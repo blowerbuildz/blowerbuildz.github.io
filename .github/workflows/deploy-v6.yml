@@ -14,9 +14,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download fixed HTML
+      - name: Download updated HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_f6863512f6b24e518360955383994f64.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_31757efa03cc40779856fb38222e408e.txt"
           echo "Downloaded $(wc -c < index.html) bytes"
 
       - name: Commit and push
@@ -25,5 +25,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html
           git diff --staged --stat
-          git commit -m "Fix: broken handlers + immersive drag race cockpit/chase/wide cam" || echo "Nothing to commit"
+          git commit -m "Add Summit Racing + JEGS affiliate fallbacks (25 parts swapped)" || echo "Nothing to commit"
           git push
