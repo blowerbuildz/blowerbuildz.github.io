@@ -16,7 +16,7 @@ jobs:
 
       - name: Download fixed HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_11fcf5c18b344cf6806dd7f21a4f3144.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_f6863512f6b24e518360955383994f64.txt"
           echo "Downloaded $(wc -c < index.html) bytes"
 
       - name: Commit and push
@@ -25,5 +25,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html
           git diff --staged --stat
-          git commit -m "Fix: BlowerBuildz brand, Sketchfab primary viewer, wired selectors, real drag race physics" || echo "Nothing to commit"
+          git commit -m "Fix: broken handlers + immersive drag race cockpit/chase/wide cam" || echo "Nothing to commit"
           git push
