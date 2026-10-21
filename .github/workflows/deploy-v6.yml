@@ -16,7 +16,7 @@ jobs:
 
       - name: Download updated HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_6b07f7da54e0415fa57819db12cd3663.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_ee32faf9db334f04b2d81fab53897483.txt"
           echo "Downloaded $(wc -c < index.html) bytes"
 
       - name: Commit and push
@@ -25,5 +25,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html
           git diff --staged --stat
-          git commit -m "BlowerBuildz v9: sedan/SUV bodies, wheel widths + deep dish, white-letter tires, pop sunroof, body-kit previews" || echo "Nothing to commit"
+          git commit -m "BlowerBuildz v9b: distinct front ends (Charger bar grille, Trackhawk Jeep slots), dash-free copy" || echo "Nothing to commit"
           git push
