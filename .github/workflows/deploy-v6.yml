@@ -16,7 +16,7 @@ jobs:
 
       - name: Download updated HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_31757efa03cc40779856fb38222e408e.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_3d8c062300034423abca5b56b0959b23.txt"
           echo "Downloaded $(wc -c < index.html) bytes"
 
       - name: Commit and push
@@ -25,5 +25,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html
           git diff --staged --stat
-          git commit -m "Add Summit Racing + JEGS affiliate fallbacks (25 parts swapped)" || echo "Nothing to commit"
+          git commit -m "BlowerBuildz v7: realism pass, fixed enter crash, blowerbuildz-20 tag" || echo "Nothing to commit"
           git push
