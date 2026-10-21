@@ -270,134 +270,78 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
   </div>
 </div>
 
-<!-- DRAG RACE MODAL — immersive rebuild -->
-<style>
-#dragModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;flex-direction:column;align-items:stretch;justify-content:flex-start}
-#dragModal.open{display:flex}
-#dragConfig{flex-shrink:0;background:rgba(10,10,12,.98);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
-.dclabel{font-family:var(--fm);font-size:.56rem;letter-spacing:.15em;color:var(--dim2);text-transform:uppercase;margin-bottom:2px}
-.dcsel{background:var(--bg3);border:1px solid var(--border);color:var(--white);padding:4px 7px;border-radius:3px;font-family:var(--fm);font-size:.66rem;min-width:120px}
-#dragMyBuildLabel{font-family:var(--fh);font-size:.8rem;color:var(--amber);white-space:nowrap;flex-shrink:0;max-width:200px;overflow:hidden;text-overflow:ellipsis}
-.dcspacer{flex:1}
-#btnCloseDrag{background:none;border:1px solid var(--border);color:var(--dim);width:28px;height:28px;border-radius:3px;cursor:pointer;font-size:.9rem;flex-shrink:0}
-#camBar{flex-shrink:0;background:rgba(10,10,12,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:4px}
-.camBtn{font-family:var(--fm);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);padding:7px 10px;cursor:pointer;transition:all .15s}
-.camBtn.active{color:var(--amber);border-bottom-color:var(--amber)}
-.camBtn:hover:not(.active){color:var(--white)}
-#raceStage{flex:1;position:relative;overflow:hidden;background:#0a0a0c;min-height:0}
-#raceCanvas{display:block;width:100%;height:100%}
-#raceHUD{position:absolute;inset:0;pointer-events:none;display:none}
-#demonBanner{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:var(--fh);font-size:.78rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#ff2200;text-shadow:0 0 16px rgba(255,34,0,.9);opacity:0;transition:opacity .4s;white-space:nowrap}
-#raceOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-#raceMsg{font-family:var(--fh);font-size:4.5rem;font-weight:700;color:var(--amber);text-shadow:0 0 40px rgba(242,169,0,.9);opacity:0;transition:opacity .1s;text-align:center;line-height:1.1}
-#flashOverlay{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
-#launchBtn{flex-shrink:0;width:100%;padding:14px;background:var(--red);color:#fff;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;box-shadow:0 -4px 20px rgba(232,71,42,.3)}
-#launchBtn:hover{background:var(--red2)}
-#launchBtn:disabled{opacity:.4;cursor:default}
-#resultPanel{position:absolute;inset:0;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
-#resultInner{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px;max-width:400px;width:100%}
-#resultTitle{font-family:var(--fh);font-size:1.9rem;font-weight:700;text-align:center;margin-bottom:12px}
-.resultGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.resultCard{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:9px}
-.rcLabel{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;color:var(--dim2);text-transform:uppercase;margin-bottom:3px}
-.rcET{font-family:var(--fh);font-size:1.35rem;font-weight:700;color:var(--amber)}
-.rcTrap{font-family:var(--fm);font-size:.66rem;color:var(--dim);margin-top:2px}
-.rcSpec2{font-family:var(--fm);font-size:.58rem;color:var(--dim2);margin-top:3px}
-.rcMeta{font-family:var(--fm);font-size:.62rem;color:var(--dim2);text-align:center;margin-bottom:12px}
-#btnRerun{width:100%;padding:10px;background:var(--red);color:#fff;font-family:var(--fh);font-size:.88rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;margin-bottom:7px}
-#btnRerun:hover{background:var(--red2)}
-#dragLBStrip{flex-shrink:0;background:rgba(10,10,12,.97);border-top:1px solid var(--border);padding:6px 12px;display:none}
-.lbTitle{font-family:var(--fm);font-size:.56rem;letter-spacing:.18em;color:var(--dim2);text-transform:uppercase;margin-bottom:4px}
-.lbRow{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.65rem}
-</style>
-
-<div id="dragModal">
-  <div id="dragConfig">
-    <div>
-      <div class="dclabel">My Build</div>
-      <div id="dragMyBuildLabel">—</div>
+<!-- DRAG RACE MODAL -->
+<div id="dragModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:24px;max-width:580px;width:90%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-family:var(--fh);font-size:1.4rem;font-weight:700;color:var(--amber)">DRAG RACE SIMULATOR</div>
+      <button onclick="closeDrag()" style="background:none;border:1px solid var(--border);color:var(--dim);width:28px;height:28px;border-radius:3px;cursor:pointer;font-size:.9rem">✕</button>
     </div>
-    <div>
-      <div class="dclabel">Tires</div>
-      <select id="dragTires" class="dcsel">
-        <option value="0">Street (+0.0s)</option>
-        <option value="0.3">Sticky 200TW (-0.3s)</option>
-        <option value="0.7">Drag Radials (-0.7s)</option>
-      </select>
-    </div>
-    <div>
-      <div class="dclabel">Launch Tune</div>
-      <select id="dragLaunch" class="dcsel">
-        <option value="0">Stock (+0.0s)</option>
-        <option value="0.2">Launch Control (-0.2s)</option>
-        <option value="0.5">Demon Mode (-0.5s)</option>
-      </select>
-    </div>
-    <div>
-      <div class="dclabel">Opponent</div>
-      <select id="oppSelect" class="dcsel" onchange="updateOppSpec()">
-        <option value="camaro_zl1">Camaro ZL1 1LE (650hp)</option>
-        <option value="mustang_gt500">Mustang GT500 (760hp)</option>
-        <option value="corvette_z06">Corvette Z06 C8 (670hp)</option>
-        <option value="bmw_m5cs">BMW M5 CS (627hp)</option>
-        <option value="lambo_huracan">Huracan EVO (631hp)</option>
-        <option value="dodge_demon_170">Demon 170 E85 (1025hp)</option>
-      </select>
-    </div>
-    <div id="oppSpec" style="font-family:var(--fm);font-size:.62rem;color:var(--dim);align-self:flex-end;min-width:120px"></div>
-    <div class="dcspacer"></div>
-    <button id="btnCloseDrag" onclick="closeDrag()">✕</button>
-  </div>
-  <div id="camBar">
-    <button class="camBtn active" id="camBtn_cockpit" onclick="setCam('cockpit')">🎮 COCKPIT</button>
-    <button class="camBtn" id="camBtn_chase" onclick="setCam('chase')">🚗 CHASE CAM</button>
-    <button class="camBtn" id="camBtn_wide" onclick="setCam('wide')">🔭 WIDE</button>
-    <div style="flex:1"></div>
-    <span id="oppSpecCam" style="font-family:var(--fm);font-size:.6rem;color:var(--dim2)"></span>
-  </div>
-  <div id="raceStage">
-    <canvas id="raceCanvas"></canvas>
-    <div id="raceHUD">
-      <canvas id="hudRPM" width="88" height="88" style="position:absolute;bottom:16px;left:16px"></canvas>
-      <canvas id="hudSpeedo" width="88" height="88" style="position:absolute;bottom:16px;right:16px"></canvas>
-      <div id="demonBanner">DEMON MODE ACTIVE</div>
-    </div>
-    <div id="raceOverlay"><div id="raceMsg"></div></div>
-    <div id="flashOverlay"></div>
-    <div id="resultPanel">
-      <div id="resultInner">
-        <div id="resultTitle"></div>
-        <div class="resultGrid">
-          <div class="resultCard" id="rcMe">
-            <div class="rcLabel">My Build</div>
-            <div class="rcET" id="rcMyET"></div>
-            <div class="rcTrap" id="rcMyTrap"></div>
-            <div class="rcSpec2" id="rcMySpec"></div>
-          </div>
-          <div class="resultCard" id="rcOpp">
-            <div class="rcLabel" id="rcOppLabel"></div>
-            <div class="rcET" id="rcOppET" style="color:var(--white)"></div>
-            <div class="rcTrap" id="rcOppTrap"></div>
-            <div class="rcSpec2" id="rcOppSpec"></div>
-          </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;border-radius:4px">
+        <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:6px">MY BUILD</div>
+        <div id="myBuildSpec" style="font-family:var(--fh);font-size:.9rem;color:var(--white)">—</div>
+        <div style="margin-top:8px">
+          <label style="font-family:var(--fm);font-size:.62rem;color:var(--dim2);letter-spacing:.1em;display:block;margin-bottom:4px">TIRES</label>
+          <select id="dragTires" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem">
+            <option value="0">Street Tires (+0.0s)</option>
+            <option value="0.3">Sticky 200TW (-0.3s)</option>
+            <option value="0.7">Drag Radials (-0.7s)</option>
+          </select>
+          <label style="font-family:var(--fm);font-size:.62rem;color:var(--dim2);letter-spacing:.1em;display:block;margin-bottom:4px;margin-top:6px">LAUNCH TUNE</label>
+          <select id="dragLaunch" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem">
+            <option value="0">Stock Launch (+0.0s)</option>
+            <option value="0.2">Launch Control (-0.2s)</option>
+            <option value="0.5">Demon Mode (-0.5s)</option>
+          </select>
         </div>
-        <div class="rcMeta" id="rcMeta"></div>
-        <button id="btnRerun" onclick="rerunRace()">RUN AGAIN</button>
-        <button onclick="closeDrag()" style="width:100%;padding:8px;background:none;border:1px solid var(--border);color:var(--dim);font-family:var(--fm);font-size:.68rem;border-radius:3px;cursor:pointer">CLOSE</button>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;border-radius:4px">
+        <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:6px">OPPONENT</div>
+        <select id="oppSelect" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem;margin-bottom:6px">
+          <option value="camaro_zl1">Camaro ZL1 1LE (650hp)</option>
+          <option value="mustang_gt500">Mustang Shelby GT500 (760hp)</option>
+          <option value="corvette_z06">Corvette Z06 C8 (670hp)</option>
+          <option value="bmw_m5cs">BMW M5 CS (627hp)</option>
+          <option value="lambo_huracan">Lamborghini Huracan EVO (631hp)</option>
+          <option value="dodge_demon_170">Demon 170 E85 (1025hp)</option>
+        </select>
+        <div id="oppSpec" style="font-family:var(--fm);font-size:.72rem;color:var(--dim)"></div>
       </div>
     </div>
-  </div>
-  <button id="launchBtn" onclick="runRace()">⚡ LAUNCH</button>
-  <div id="dragLBStrip">
-    <div class="lbTitle">Community Leaderboard</div>
-    <div id="leaderboard"></div>
+    <button onclick="runRace()" style="width:100%;padding:13px;background:var(--red);color:#fff;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;margin-bottom:12px">LAUNCH</button>
+    <!-- TRACK ANIMATION -->
+    <div id="trackBox" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:14px;display:none">
+      <!-- Track road surface -->
+      <div style="position:relative;height:80px;background:linear-gradient(180deg,#111 0%,#1a1a1a 50%,#111 100%);border-radius:4px;overflow:hidden;margin-bottom:12px">
+        <!-- Road markings -->
+        <div style="position:absolute;top:39px;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.15) 0px,rgba(255,255,255,.15) 20px,transparent 20px,transparent 40px)"></div>
+        <!-- Start line -->
+        <div style="position:absolute;left:12%;top:0;bottom:0;width:3px;background:rgba(242,169,0,.5)"></div>
+        <!-- Finish line -->
+        <div id="finishLine" style="position:absolute;right:12%;top:0;bottom:0;width:4px;background:repeating-linear-gradient(180deg,#fff 0px,#fff 8px,#000 8px,#000 16px);opacity:.7"></div>
+        <!-- My car lane -->
+        <div id="myCar" style="position:absolute;top:12px;left:12%;font-size:1.4rem;transition:left 0s;filter:drop-shadow(0 0 8px rgba(232,71,42,.8))">🔴</div>
+        <!-- Opponent car lane -->
+        <div id="oppCar" style="position:absolute;top:42px;left:12%;font-size:1.4rem;transition:left 0s;filter:drop-shadow(0 0 6px rgba(255,255,255,.4))">⬜</div>
+        <!-- Speed blur effect -->
+        <div id="speedBlur" style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(232,71,42,.05) 100%);opacity:0;pointer-events:none"></div>
+      </div>
+      <!-- Results -->
+      <div id="raceResult" style="font-family:var(--fh);font-size:1.1rem;color:var(--white);text-align:center"></div>
+    </div>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:8px">COMMUNITY LEADERBOARD</div>
+      <div id="leaderboard"></div>
+    </div>
   </div>
 </div>
+
 <div id="toast"></div>
 
 <script>
 // ============================================================
-// HELLCATBUILDS v6 — DATA
+// BLOWERBUILDZ v6 — DATA
 // ============================================================
 const FAMILIES = {
   challenger: {
@@ -497,139 +441,115 @@ const OEM_COLORS = [
   {name:'B5 Blue',code:'PB5',hex:'#0A3A6B'}
 ];
 
-/* ============================================================
-   AFFILIATE LINKS — STATUS (Updated Sept 28, 2026)
-   ============================================================
-   AMAZON ASSOCIATES:
-     Tag: hellcatbuilds-20 (pending approval)
-     Covers: wheels, security, audio, cameras, radar, interior,
-             some exterior and badging parts
-     Status: Application submitted — activate once approved
-
-   SUMMIT RACING (Impact.com):
-     Current tag: NONE (application pending)
-     Signup URL: https://app.impact.com/campaign-promo-signup/Summit-Racing-Equipment.brand?execution=e1s1
-     Covers: tires, suspension, engine, supercharger, exhaust, brakes
-     Status: 25 Summit Racing search URLs are already wired in.
-             Once approved on Impact.com, add your affiliate tag to each URL:
-             Replace: summitracing.com/search/keyword/TERM
-             With:    autosalesinc.pxf.io/YOUR_LINK (use the link generator in Impact dashboard)
-             Commission: up to 5% | Cookie: 7 days
-
-   JEGS (Impact.com) — RECOMMENDED SECONDARY:
-     Signup URL: https://app.impact.com/campaign-promo-signup/JEGS-High-Performance.brand?execution=e1s1
-     Commission: 1-3% | Cookie: 5 days
-     Use as fallback for parts Summit Racing doesn't stock.
-   ============================================================ */
 const PARTS_DATA = {
   wheels: [
-    {id:'forgeline_cf1',name:'Forgeline CF1',brand:'Forgeline',spec:'20x9.5 ET25 · 5x115 · 71.5mm bore',delta:'+handling',price:'$3,200/set',url:'https://www.amazon.com/s?k=forgeline+wheels+5x115&tag=hellcatbuilds-20',category:'wheels',hexColor:'#C8C8C8',type:'multi-spoke'},
-    {id:'vossen_hf5',name:'Vossen HF-5',brand:'Vossen',spec:'20x10.5 ET24 · 5x115 · flow-formed',delta:'-28 lbs rotational',price:'$2,400/set',url:'https://www.amazon.com/s?k=vossen+wheels+5x115&tag=hellcatbuilds-20',category:'wheels',hexColor:'#888888',type:'mesh'},
-    {id:'hre_ff15',name:'HRE FlowForm FF15',brand:'HRE',spec:'20x10 ET22 · 5x115 · concave',delta:'-32 lbs vs OEM',price:'$2,800/set',url:'https://www.amazon.com/s?k=hre+wheels&tag=hellcatbuilds-20',category:'wheels',hexColor:'#A0A0A0',type:'concave'},
-    {id:'niche_misano',name:'Niche Misano M117',brand:'Niche',spec:'20x9 ET20 · 5x115 · gloss black',delta:'budget pick',price:'$1,100/set',url:'https://www.amazon.com/s?k=niche+misano+wheels&tag=hellcatbuilds-20',category:'wheels',hexColor:'#222222',type:'spoke'},
+    {id:'forgeline_cf1',name:'Forgeline CF1',brand:'Forgeline',spec:'20x9.5 ET25 · 5x115 · 71.5mm bore',delta:'+handling',price:'$3,200/set',url:'https://www.amazon.com/s?k=forgeline+wheels+5x115&tag=blowerbuildz-20',category:'wheels',hexColor:'#C8C8C8',type:'multi-spoke'},
+    {id:'vossen_hf5',name:'Vossen HF-5',brand:'Vossen',spec:'20x10.5 ET24 · 5x115 · flow-formed',delta:'-28 lbs rotational',price:'$2,400/set',url:'https://www.amazon.com/s?k=vossen+wheels+5x115&tag=blowerbuildz-20',category:'wheels',hexColor:'#888888',type:'mesh'},
+    {id:'hre_ff15',name:'HRE FlowForm FF15',brand:'HRE',spec:'20x10 ET22 · 5x115 · concave',delta:'-32 lbs vs OEM',price:'$2,800/set',url:'https://www.amazon.com/s?k=hre+wheels&tag=blowerbuildz-20',category:'wheels',hexColor:'#A0A0A0',type:'concave'},
+    {id:'niche_misano',name:'Niche Misano M117',brand:'Niche',spec:'20x9 ET20 · 5x115 · gloss black',delta:'budget pick',price:'$1,100/set',url:'https://www.amazon.com/s?k=niche+misano+wheels&tag=blowerbuildz-20',category:'wheels',hexColor:'#222222',type:'spoke'},
     {id:'stock_wheels',name:'OEM Hellcat 20"',brand:'Mopar',spec:'20x9 ET20 · 5x115 · stock satin grey',delta:'stock',price:'Stock',url:'#',category:'wheels',hexColor:'#6A6A6A',type:'stock'},
-    {id:'demon_skinny',name:'Demon Drag Fronts',brand:'Mopar Demon Crate',spec:'P185/70R17 · 17x4.5 · skinny drag',delta:'Demon Crate only',price:'Demon Crate',url:'https://www.amazon.com/s?k=dodge+demon+skinny+front+wheels&tag=hellcatbuilds-20',category:'wheels',hexColor:'#444444',type:'demon',demonOnly:true}
+    {id:'demon_skinny',name:'Demon Drag Fronts',brand:'Mopar Demon Crate',spec:'P185/70R17 · 17x4.5 · skinny drag',delta:'Demon Crate only',price:'Demon Crate',url:'https://www.amazon.com/s?k=dodge+demon+skinny+front+wheels&tag=blowerbuildz-20',category:'wheels',hexColor:'#444444',type:'demon',demonOnly:true}
   ],
   tires: [
-    {id:'ps4s',name:'Michelin Pilot Sport 4S',brand:'Michelin',spec:'305/35ZR20 rear · 275/40ZR20 front · summer UHP',delta:'Best grip/noise balance',price:'$420/ea',url:'https://www.summitracing.com/search/keyword/michelin+pilot+sport+4s+305+35+20',category:'tires'},
-    {id:'nt555',name:'Nitto NT555 G2',brand:'Nitto',spec:'305/35ZR20 · XL rated · summer',delta:'Popular value pick',price:'$295/ea',url:'https://www.summitracing.com/search/keyword/nitto+nt555+g2+305+35+20',category:'tires'},
-    {id:'proxes',name:'Toyo Proxes Sport A/S',brand:'Toyo',spec:'305/35ZR20 · all-season UHP',delta:'Daily driver',price:'$310/ea',url:'https://www.summitracing.com/search/keyword/toyo+proxes+sport+305+35+20',category:'tires'},
-    {id:'drag_radials',name:'Mickey Thompson ET Street R',brand:'Mickey Thompson',spec:'315/50R17 · drag radial · DOT legal',delta:'-0.7s 60-foot',price:'$225/ea',url:'https://www.summitracing.com/search/keyword/mickey+thompson+et+street+r+315+50+17',category:'tires'}
+    {id:'ps4s',name:'Michelin Pilot Sport 4S',brand:'Michelin',spec:'305/35ZR20 rear · 275/40ZR20 front · summer UHP',delta:'Best grip/noise balance',price:'$420/ea',url:'https://www.amazon.com/s?k=michelin+pilot+sport+4s+305+35+20&tag=blowerbuildz-20',category:'tires'},
+    {id:'nt555',name:'Nitto NT555 G2',brand:'Nitto',spec:'305/35ZR20 · XL rated · summer',delta:'Popular value pick',price:'$295/ea',url:'https://www.amazon.com/s?k=nitto+nt555+g2+305+35+20&tag=blowerbuildz-20',category:'tires'},
+    {id:'proxes',name:'Toyo Proxes Sport A/S',brand:'Toyo',spec:'305/35ZR20 · all-season UHP',delta:'Daily driver',price:'$310/ea',url:'https://www.amazon.com/s?k=toyo+proxes+sport+305+35+20&tag=blowerbuildz-20',category:'tires'},
+    {id:'drag_radials',name:'Mickey Thompson ET Street R',brand:'Mickey Thompson',spec:'315/50R17 · drag radial · DOT legal',delta:'-0.7s 60-foot',price:'$225/ea',url:'https://www.amazon.com/s?k=mickey+thompson+et+street+r+315+50+17&tag=blowerbuildz-20',category:'tires'}
   ],
   suspension: [
-    {id:'bilstein_b16',name:'Bilstein B16 Coilover',brand:'Bilstein',spec:'2-way adjustable · 1"-3" drop range',delta:'-0.8" avg CoG',price:'$2,400',url:'https://www.summitracing.com/search/keyword/bilstein+b16+coilover+challenger',category:'suspension'},
-    {id:'airlift_3p',name:'Air Lift Performance 3P',brand:'Air Lift',spec:'Air ride · 0"-5" drop · remote/app control',delta:'0-5" drop range',price:'$3,800',url:'https://www.amazon.com/s?k=air+lift+performance+challenger&tag=hellcatbuilds-20',category:'suspension'},
-    {id:'accuair',name:'AccuAir e-Level',brand:'AccuAir',spec:'Automatic leveling · Bluetooth · 4-corner',delta:'Self-levels in motion',price:'$4,200',url:'https://www.amazon.com/s?k=accuair+challenger+hellcat&tag=hellcatbuilds-20',category:'suspension'},
-    {id:'whiteline_sway',name:'Whiteline Rear Sway Bar',brand:'Whiteline',spec:'3-way adjustable · 24mm · hollow',delta:'-35% body roll',price:'$340',url:'https://www.summitracing.com/search/keyword/whiteline+sway+bar+challenger',category:'suspension'},
-    {id:'bc_racing',name:'BC Racing BR Coilover',brand:'BC Racing',spec:'30-way adjustable · pillowball top mount',delta:'Track-focused',price:'$1,850',url:'https://www.summitracing.com/search/keyword/bc+racing+coilover+challenger',category:'suspension'}
+    {id:'bilstein_b16',name:'Bilstein B16 Coilover',brand:'Bilstein',spec:'2-way adjustable · 1"-3" drop range',delta:'-0.8" avg CoG',price:'$2,400',url:'https://www.amazon.com/s?k=bilstein+b16+challenger+hellcat&tag=blowerbuildz-20',category:'suspension'},
+    {id:'airlift_3p',name:'Air Lift Performance 3P',brand:'Air Lift',spec:'Air ride · 0"-5" drop · remote/app control',delta:'0-5" drop range',price:'$3,800',url:'https://www.amazon.com/s?k=air+lift+performance+challenger&tag=blowerbuildz-20',category:'suspension'},
+    {id:'accuair',name:'AccuAir e-Level',brand:'AccuAir',spec:'Automatic leveling · Bluetooth · 4-corner',delta:'Self-levels in motion',price:'$4,200',url:'https://www.amazon.com/s?k=accuair+challenger+hellcat&tag=blowerbuildz-20',category:'suspension'},
+    {id:'whiteline_sway',name:'Whiteline Rear Sway Bar',brand:'Whiteline',spec:'3-way adjustable · 24mm · hollow',delta:'-35% body roll',price:'$340',url:'https://www.amazon.com/s?k=whiteline+sway+bar+challenger&tag=blowerbuildz-20',category:'suspension'},
+    {id:'bc_racing',name:'BC Racing BR Coilover',brand:'BC Racing',spec:'30-way adjustable · pillowball top mount',delta:'Track-focused',price:'$1,850',url:'https://www.amazon.com/s?k=bc+racing+challenger+hellcat&tag=blowerbuildz-20',category:'suspension'}
   ],
   engine: [
-    {id:'cai_cold',name:'JLT Cold Air Intake',brand:'JLT',spec:'4" inlet · oiled filter · no tune required',delta:'+27 hp est.',price:'$329',url:'https://www.summitracing.com/search/keyword/cold+air+intake+challenger+hellcat',category:'engine'},
-    {id:'tb_92',name:'Ported 92mm Throttle Body',brand:'Vararam/BBK',spec:'92mm vs OEM 87mm · bolt-on',delta:'+18-22 hp',price:'$420',url:'https://www.summitracing.com/search/keyword/92mm+throttle+body+hellcat',category:'engine'},
-    {id:'e85_kit',name:'E85 Flex Fuel Kit',brand:'Fore/Injector Dynamics',spec:'E85 capable · fuel pump + injectors',delta:'+60-90 hp on E85',price:'$1,800',url:'https://www.amazon.com/s?k=flex+fuel+kit+hellcat+e85&tag=hellcatbuilds-20',category:'engine'},
-    {id:'headers',name:'Long Tube Headers',brand:'American Racing Headers',spec:'1-7/8" primary · catted or catless',delta:'+35-50 hp',price:'$1,600',url:'https://www.summitracing.com/search/keyword/long+tube+headers+challenger+hellcat',category:'engine'},
-    {id:'alt_250',name:'250A High-Output Alternator',brand:'Mechman',spec:'250A output vs stock 160A · drop-in',delta:'+90A at idle',price:'$680',url:'https://www.amazon.com/s?k=mechman+alternator+challenger+hellcat&tag=hellcatbuilds-20',category:'engine'},
-    {id:'alt_320',name:'320A High-Output Alternator',brand:'DC Power',spec:'320A · for max audio/air ride builds',delta:'+160A at idle',price:'$890',url:'https://www.amazon.com/s?k=dc+power+alternator+hellcat&tag=hellcatbuilds-20',category:'engine'}
+    {id:'cai_cold',name:'JLT Cold Air Intake',brand:'JLT',spec:'4" inlet · oiled filter · no tune required',delta:'+27 hp est.',price:'$329',url:'https://www.amazon.com/s?k=jlt+cold+air+intake+challenger+hellcat&tag=blowerbuildz-20',category:'engine'},
+    {id:'tb_92',name:'Ported 92mm Throttle Body',brand:'Vararam/BBK',spec:'92mm vs OEM 87mm · bolt-on',delta:'+18-22 hp',price:'$420',url:'https://www.amazon.com/s?k=92mm+throttle+body+hellcat&tag=blowerbuildz-20',category:'engine'},
+    {id:'e85_kit',name:'E85 Flex Fuel Kit',brand:'Fore/Injector Dynamics',spec:'E85 capable · fuel pump + injectors',delta:'+60-90 hp on E85',price:'$1,800',url:'https://www.amazon.com/s?k=flex+fuel+kit+hellcat+e85&tag=blowerbuildz-20',category:'engine'},
+    {id:'headers',name:'Long Tube Headers',brand:'American Racing Headers',spec:'1-7/8" primary · catted or catless',delta:'+35-50 hp',price:'$1,600',url:'https://www.amazon.com/s?k=long+tube+headers+challenger+hellcat&tag=blowerbuildz-20',category:'engine'},
+    {id:'alt_250',name:'250A High-Output Alternator',brand:'Mechman',spec:'250A output vs stock 160A · drop-in',delta:'+90A at idle',price:'$680',url:'https://www.amazon.com/s?k=mechman+alternator+challenger+hellcat&tag=blowerbuildz-20',category:'engine'},
+    {id:'alt_320',name:'320A High-Output Alternator',brand:'DC Power',spec:'320A · for max audio/air ride builds',delta:'+160A at idle',price:'$890',url:'https://www.amazon.com/s?k=dc+power+alternator+hellcat&tag=blowerbuildz-20',category:'engine'}
   ],
   supercharger: [
-    {id:'pulley_265',name:'2.65" Supercharger Pulley',brand:'Metco',spec:'2.65" vs stock 2.75" · +8% boost',delta:'+35-50 whp',price:'$280',url:'https://www.summitracing.com/search/keyword/metco+supercharger+pulley+hellcat',category:'supercharger'},
-    {id:'sc_chiller',name:'Supercharger Chiller Kit',brand:'Mishimoto',spec:'Methanol pre-chiller · -40°F charge temp',delta:'-40°F IAT · +20 hp',price:'$620',url:'https://www.amazon.com/s?k=mishimoto+hellcat+supercharger+chiller&tag=hellcatbuilds-20',category:'supercharger'},
-    {id:'whipple_3',name:'Whipple 3.0L Supercharger',brand:'Whipple',spec:'3.0L twin-screw · 1100+ whp potential',delta:'+300-400 hp w/ supporting mods',price:'$8,400',url:'https://www.amazon.com/s?k=whipple+supercharger+hellcat&tag=hellcatbuilds-20',category:'supercharger'},
-    {id:'metco_belt',name:'Metco Belt Drive Kit',brand:'Metco',spec:'Idler upgrade · prevents belt slip at high boost',delta:'No-slip above 25 psi',price:'$380',url:'https://www.summitracing.com/search/keyword/metco+belt+drive+hellcat',category:'supercharger'}
+    {id:'pulley_265',name:'2.65" Supercharger Pulley',brand:'Metco',spec:'2.65" vs stock 2.75" · +8% boost',delta:'+35-50 whp',price:'$280',url:'https://www.amazon.com/s?k=metco+supercharger+pulley+hellcat&tag=blowerbuildz-20',category:'supercharger'},
+    {id:'sc_chiller',name:'Supercharger Chiller Kit',brand:'Mishimoto',spec:'Methanol pre-chiller · -40°F charge temp',delta:'-40°F IAT · +20 hp',price:'$620',url:'https://www.amazon.com/s?k=mishimoto+hellcat+supercharger+chiller&tag=blowerbuildz-20',category:'supercharger'},
+    {id:'whipple_3',name:'Whipple 3.0L Supercharger',brand:'Whipple',spec:'3.0L twin-screw · 1100+ whp potential',delta:'+300-400 hp w/ supporting mods',price:'$8,400',url:'https://www.amazon.com/s?k=whipple+supercharger+hellcat&tag=blowerbuildz-20',category:'supercharger'},
+    {id:'metco_belt',name:'Metco Belt Drive Kit',brand:'Metco',spec:'Idler upgrade · prevents belt slip at high boost',delta:'No-slip above 25 psi',price:'$380',url:'https://www.amazon.com/s?k=metco+belt+drive+hellcat&tag=blowerbuildz-20',category:'supercharger'}
   ],
   exhaust: [
-    {id:'borla_atak',name:'Borla ATAK Axle-Back',brand:'Borla',spec:'2.5" stainless · aggressive tone · oval tips',delta:'Loudest daily-driver exhaust',price:'$1,250',url:'https://www.summitracing.com/search/keyword/borla+atak+challenger+hellcat',category:'exhaust'},
-    {id:'corsa_sport',name:'Corsa Sport Cat-Back',brand:'Corsa',spec:'3" cat-back · Active Exhaust compatible',delta:'DriveX technology — quiet cruise / loud WOT',price:'$1,480',url:'https://www.summitracing.com/search/keyword/corsa+cat+back+challenger+hellcat',category:'exhaust'},
-    {id:'flowmaster_outlaw',name:'Flowmaster Outlaw',brand:'Flowmaster',spec:'Extreme aggression · no cat · race only',delta:'Loudest available option',price:'$960',url:'https://www.summitracing.com/search/keyword/flowmaster+outlaw+challenger',category:'exhaust'},
-    {id:'tips_black',name:'Black Powder Coat Tips',brand:'Mopar/Aftermarket',spec:'4" dual outlet · matte black powder coat',delta:'Clean aggressive look',price:'$180/pair',url:'https://www.summitracing.com/search/keyword/black+exhaust+tips+challenger',category:'exhaust'},
-    {id:'tips_carbon',name:'Carbon Fiber Tip Surrounds',brand:'APR Carbon',spec:'Pre-preg CF · 3K weave · bolt-on',delta:'Premium visual upgrade',price:'$340/pair',url:'https://www.amazon.com/s?k=carbon+fiber+exhaust+tips+challenger&tag=hellcatbuilds-20',category:'exhaust'}
+    {id:'borla_atak',name:'Borla ATAK Axle-Back',brand:'Borla',spec:'2.5" stainless · aggressive tone · oval tips',delta:'Loudest daily-driver exhaust',price:'$1,250',url:'https://www.amazon.com/s?k=borla+atak+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
+    {id:'corsa_sport',name:'Corsa Sport Cat-Back',brand:'Corsa',spec:'3" cat-back · Active Exhaust compatible',delta:'DriveX technology — quiet cruise / loud WOT',price:'$1,480',url:'https://www.amazon.com/s?k=corsa+sport+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
+    {id:'flowmaster_outlaw',name:'Flowmaster Outlaw',brand:'Flowmaster',spec:'Extreme aggression · no cat · race only',delta:'Loudest available option',price:'$960',url:'https://www.amazon.com/s?k=flowmaster+outlaw+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
+    {id:'tips_black',name:'Black Powder Coat Tips',brand:'Mopar/Aftermarket',spec:'4" dual outlet · matte black powder coat',delta:'Clean aggressive look',price:'$180/pair',url:'https://www.amazon.com/s?k=hellcat+exhaust+tips+black&tag=blowerbuildz-20',category:'exhaust'},
+    {id:'tips_carbon',name:'Carbon Fiber Tip Surrounds',brand:'APR Carbon',spec:'Pre-preg CF · 3K weave · bolt-on',delta:'Premium visual upgrade',price:'$340/pair',url:'https://www.amazon.com/s?k=carbon+fiber+exhaust+tips+challenger&tag=blowerbuildz-20',category:'exhaust'}
   ],
   brakes: [
-    {id:'brembo_6p',name:'Brembo 6-Piston Front',brand:'Brembo',spec:'6-piston front · 15" cross-drilled rotor',delta:'Best track stopping power',price:'$2,800',url:'https://www.summitracing.com/search/keyword/brembo+6+piston+challenger',category:'brakes'},
-    {id:'hawk_hpplus',name:'Hawk HP+ Street/Track Pads',brand:'Hawk',spec:'Performance compound · low dust · street/track',delta:'+25% bite vs OEM',price:'$185/axle',url:'https://www.summitracing.com/search/keyword/hawk+hp+plus+pads+challenger',category:'brakes'},
-    {id:'goodridge_lines',name:'Goodridge Braided Lines',brand:'Goodridge',spec:'Stainless braided · zero expansion · full kit',delta:'Firm pedal feel',price:'$140',url:'https://www.summitracing.com/search/keyword/goodridge+stainless+brake+lines+challenger',category:'brakes'}
+    {id:'brembo_6p',name:'Brembo 6-Piston Front',brand:'Brembo',spec:'6-piston front · 15" cross-drilled rotor',delta:'Best track stopping power',price:'$2,800',url:'https://www.amazon.com/s?k=brembo+6+piston+challenger+hellcat&tag=blowerbuildz-20',category:'brakes'},
+    {id:'hawk_hpplus',name:'Hawk HP+ Street/Track Pads',brand:'Hawk',spec:'Performance compound · low dust · street/track',delta:'+25% bite vs OEM',price:'$185/axle',url:'https://www.amazon.com/s?k=hawk+hp+plus+challenger+hellcat&tag=blowerbuildz-20',category:'brakes'},
+    {id:'goodridge_lines',name:'Goodridge Braided Lines',brand:'Goodridge',spec:'Stainless braided · zero expansion · full kit',delta:'Firm pedal feel',price:'$140',url:'https://www.amazon.com/s?k=goodridge+brake+lines+challenger&tag=blowerbuildz-20',category:'brakes'}
   ],
   exterior: [
-    {id:'widebody_kit',name:'Widebody Fender Flares',brand:'Mopar/OEM',spec:'OEM widebody conversion kit · bolt-on',delta:'Accepts 305+ rear tires',price:'$2,400',url:'https://www.amazon.com/s?k=challenger+widebody+fender+flares&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'cf_hood',name:'Carbon Fiber Vented Hood',brand:'Seibon',spec:'OEM fitment · gloss or matte CF · heat extractor vents',delta:'15 lbs lighter vs steel',price:'$1,800',url:'https://www.amazon.com/s?k=carbon+fiber+hood+challenger+hellcat&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'cowl_hood',name:'Cowl Induction Hood',brand:'Street Scene',spec:'4" cowl rise · maximum cold air · fiberglass',delta:'+12°F cooler intake',price:'$620',url:'https://www.amazon.com/s?k=cowl+hood+challenger&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'srt_wing',name:'OEM SRT Spoiler',brand:'Mopar',spec:'Factory SRT aero package spoiler',delta:'OEM fitment/look',price:'$480',url:'https://www.amazon.com/s?k=challenger+srt+spoiler+mopar&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'cf_splitter',name:'Carbon Fiber Front Splitter',brand:'Duraflex',spec:'Full-front CF splitter · aggressive rake',delta:'Downforce at speed',price:'$680',url:'https://www.amazon.com/s?k=carbon+fiber+splitter+challenger&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'tint_5',name:'5% Window Tint (Limo)',brand:'LLumar',spec:'5% VLT · maximum privacy',delta:'Full privacy',price:'$350 installed',url:'https://www.amazon.com/s?k=5+percent+window+tint&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'tint_20',name:'20% Window Tint',brand:'3M Crystalline',spec:'20% VLT · heat rejection · legal in most states',delta:'Popular choice',price:'$380 installed',url:'https://www.amazon.com/s?k=20+percent+window+tint&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'morimoto_lights',name:'Morimoto XB LED Headlights',brand:'Morimoto',spec:'Plug-and-play · 5000K · DRL halo ring',delta:'OEM+ look, 3x brighter',price:'$1,050',url:'https://www.amazon.com/s?k=morimoto+xb+led+challenger&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'racing_stripes',name:'Racing Stripes',brand:'3M Vinyl',spec:'Full-length dual stripes · gloss black or satin white',delta:'Classic muscle look',price:'$280 installed',url:'https://www.amazon.com/s?k=racing+stripes+challenger&tag=hellcatbuilds-20',category:'exterior'},
-    {id:'plate_delete',name:'Front Plate Delete',brand:'American Car Craft',spec:'Stainless delete plate · no drill · blacked badges',delta:'Clean front fascia',price:'$65',url:'https://www.amazon.com/s?k=challenger+front+plate+delete&tag=hellcatbuilds-20',category:'exterior'}
+    {id:'widebody_kit',name:'Widebody Fender Flares',brand:'Mopar/OEM',spec:'OEM widebody conversion kit · bolt-on',delta:'Accepts 305+ rear tires',price:'$2,400',url:'https://www.amazon.com/s?k=challenger+widebody+fender+flares&tag=blowerbuildz-20',category:'exterior'},
+    {id:'cf_hood',name:'Carbon Fiber Vented Hood',brand:'Seibon',spec:'OEM fitment · gloss or matte CF · heat extractor vents',delta:'15 lbs lighter vs steel',price:'$1,800',url:'https://www.amazon.com/s?k=carbon+fiber+hood+challenger+hellcat&tag=blowerbuildz-20',category:'exterior'},
+    {id:'cowl_hood',name:'Cowl Induction Hood',brand:'Street Scene',spec:'4" cowl rise · maximum cold air · fiberglass',delta:'+12°F cooler intake',price:'$620',url:'https://www.amazon.com/s?k=cowl+hood+challenger&tag=blowerbuildz-20',category:'exterior'},
+    {id:'srt_wing',name:'OEM SRT Spoiler',brand:'Mopar',spec:'Factory SRT aero package spoiler',delta:'OEM fitment/look',price:'$480',url:'https://www.amazon.com/s?k=challenger+srt+spoiler+mopar&tag=blowerbuildz-20',category:'exterior'},
+    {id:'cf_splitter',name:'Carbon Fiber Front Splitter',brand:'Duraflex',spec:'Full-front CF splitter · aggressive rake',delta:'Downforce at speed',price:'$680',url:'https://www.amazon.com/s?k=carbon+fiber+splitter+challenger&tag=blowerbuildz-20',category:'exterior'},
+    {id:'tint_5',name:'5% Window Tint (Limo)',brand:'LLumar',spec:'5% VLT · maximum privacy',delta:'Full privacy',price:'$350 installed',url:'https://www.amazon.com/s?k=5+percent+window+tint&tag=blowerbuildz-20',category:'exterior'},
+    {id:'tint_20',name:'20% Window Tint',brand:'3M Crystalline',spec:'20% VLT · heat rejection · legal in most states',delta:'Popular choice',price:'$380 installed',url:'https://www.amazon.com/s?k=20+percent+window+tint&tag=blowerbuildz-20',category:'exterior'},
+    {id:'morimoto_lights',name:'Morimoto XB LED Headlights',brand:'Morimoto',spec:'Plug-and-play · 5000K · DRL halo ring',delta:'OEM+ look, 3x brighter',price:'$1,050',url:'https://www.amazon.com/s?k=morimoto+xb+led+challenger&tag=blowerbuildz-20',category:'exterior'},
+    {id:'racing_stripes',name:'Racing Stripes',brand:'3M Vinyl',spec:'Full-length dual stripes · gloss black or satin white',delta:'Classic muscle look',price:'$280 installed',url:'https://www.amazon.com/s?k=racing+stripes+challenger&tag=blowerbuildz-20',category:'exterior'},
+    {id:'plate_delete',name:'Front Plate Delete',brand:'American Car Craft',spec:'Stainless delete plate · no drill · blacked badges',delta:'Clean front fascia',price:'$65',url:'https://www.amazon.com/s?k=challenger+front+plate+delete&tag=blowerbuildz-20',category:'exterior'}
   ],
   security: [
-    {id:'viper_5906',name:'Viper 5906V Alarm',brand:'Viper',spec:'2-way alarm · remote start · 2-mile range',delta:'Industry standard',price:'$380',url:'https://www.amazon.com/dp/B077N9HNVZ?tag=hellcatbuilds-20',category:'security'},
-    {id:'compustar_9900',name:'Compustar CS9900-AS',brand:'Compustar',spec:'Remote start + alarm · Drone mobile app',delta:'App-based control',price:'$520',url:'https://www.amazon.com/s?k=compustar+cs9900&tag=hellcatbuilds-20',category:'security'},
-    {id:'kill_switch_mag',name:'Hidden Magnetic Kill Switch',brand:'Killswitch Kit',spec:'Magnetic trigger · no visible hardware · cuts ignition',delta:'No trace visible',price:'$85',url:'https://www.amazon.com/s?k=hidden+magnetic+kill+switch+car&tag=hellcatbuilds-20',category:'security'},
-    {id:'optimus_gps',name:'Optimus 2.0 GPS Tracker',brand:'Optimus',spec:'Real-time tracking · geofence alerts · $20/mo',delta:'Real-time location',price:'$120',url:'https://www.amazon.com/dp/B01N27Q8TQ?tag=hellcatbuilds-20',category:'security'},
-    {id:'airtag_kit',name:'AirTag 4-Pack + Mounts',brand:'Apple',spec:'4-pack · multiple hidden locations',delta:'Near-field hidden track',price:'$99',url:'https://www.amazon.com/dp/B09K3BFBZF?tag=hellcatbuilds-20',category:'security'},
-    {id:'bouncie_obd',name:'Bouncie OBD Tracker',brand:'Bouncie',spec:'OBD-II plug-in · $8/mo · trip history',delta:'Easiest install',price:'$68',url:'https://www.amazon.com/s?k=bouncie+gps+tracker&tag=hellcatbuilds-20',category:'security'},
-    {id:'landairsea',name:'LandAirSea 54 GPS',brand:'LandAirSea',spec:'Waterproof · magnet mount · under-chassis',delta:'Hidden under car',price:'$50',url:'https://www.amazon.com/dp/B07J5XRS96?tag=hellcatbuilds-20',category:'security'}
+    {id:'viper_5906',name:'Viper 5906V Alarm',brand:'Viper',spec:'2-way alarm · remote start · 2-mile range',delta:'Industry standard',price:'$380',url:'https://www.amazon.com/dp/B077N9HNVZ?tag=blowerbuildz-20',category:'security'},
+    {id:'compustar_9900',name:'Compustar CS9900-AS',brand:'Compustar',spec:'Remote start + alarm · Drone mobile app',delta:'App-based control',price:'$520',url:'https://www.amazon.com/s?k=compustar+cs9900&tag=blowerbuildz-20',category:'security'},
+    {id:'kill_switch_mag',name:'Hidden Magnetic Kill Switch',brand:'Killswitch Kit',spec:'Magnetic trigger · no visible hardware · cuts ignition',delta:'No trace visible',price:'$85',url:'https://www.amazon.com/s?k=hidden+magnetic+kill+switch+car&tag=blowerbuildz-20',category:'security'},
+    {id:'optimus_gps',name:'Optimus 2.0 GPS Tracker',brand:'Optimus',spec:'Real-time tracking · geofence alerts · $20/mo',delta:'Real-time location',price:'$120',url:'https://www.amazon.com/dp/B01N27Q8TQ?tag=blowerbuildz-20',category:'security'},
+    {id:'airtag_kit',name:'AirTag 4-Pack + Mounts',brand:'Apple',spec:'4-pack · multiple hidden locations',delta:'Near-field hidden track',price:'$99',url:'https://www.amazon.com/dp/B09K3BFBZF?tag=blowerbuildz-20',category:'security'},
+    {id:'bouncie_obd',name:'Bouncie OBD Tracker',brand:'Bouncie',spec:'OBD-II plug-in · $8/mo · trip history',delta:'Easiest install',price:'$68',url:'https://www.amazon.com/s?k=bouncie+gps+tracker&tag=blowerbuildz-20',category:'security'},
+    {id:'landairsea',name:'LandAirSea 54 GPS',brand:'LandAirSea',spec:'Waterproof · magnet mount · under-chassis',delta:'Hidden under car',price:'$50',url:'https://www.amazon.com/dp/B07J5XRS96?tag=blowerbuildz-20',category:'security'}
   ],
   audio: [
-    {id:'pioneer_avh',name:'Pioneer AVH-W4500NEX',brand:'Pioneer',spec:'9" floating · Apple CarPlay · Android Auto · CD/DVD',delta:'Most popular Hellcat swap',price:'$680',url:'https://www.amazon.com/dp/B07MN63TZD?tag=hellcatbuilds-20',category:'audio'},
-    {id:'alpine_ilx',name:'Alpine ILX-F259',brand:'Alpine',spec:'9" Halo · wireless CarPlay/AA · OEM+ look',delta:'Cleanest OEM fit',price:'$750',url:'https://www.amazon.com/s?k=alpine+ilx+f259&tag=hellcatbuilds-20',category:'audio'},
-    {id:'jl_sub_12w7',name:'JL Audio 12W7 Subwoofer',brand:'JL Audio',spec:'12" W7 · 600W RMS · IB or sealed box',delta:'Reference-quality bass',price:'$820',url:'https://www.amazon.com/s?k=jl+audio+12w7&tag=hellcatbuilds-20',category:'audio'},
-    {id:'rf_p3',name:'Rockford Fosgate P3',brand:'Rockford Fosgate',spec:'12" P3 · 600W RMS · sealed enclosure',delta:'Best value sub',price:'$320',url:'https://www.amazon.com/s?k=rockford+fosgate+p3+12&tag=hellcatbuilds-20',category:'audio'},
-    {id:'jl_hd900',name:'JL Audio HD900/5 Amp',brand:'JL Audio',spec:'900W · 5ch · CLASS-D efficiency',delta:'Powers full system',price:'$1,100',url:'https://www.amazon.com/s?k=jl+audio+hd900+5&tag=hellcatbuilds-20',category:'audio'},
-    {id:'dual_battery',name:'Dual Battery (Trunk)',brand:'Optima / XS Power',spec:'Secondary trunk battery · Optima YT or XS Power',delta:'Needed for 1000W+ audio',price:'$280',url:'https://www.amazon.com/s?k=optima+yellow+top+trunk+battery&tag=hellcatbuilds-20',category:'audio'}
+    {id:'pioneer_avh',name:'Pioneer AVH-W4500NEX',brand:'Pioneer',spec:'9" floating · Apple CarPlay · Android Auto · CD/DVD',delta:'Most popular Hellcat swap',price:'$680',url:'https://www.amazon.com/dp/B07MN63TZD?tag=blowerbuildz-20',category:'audio'},
+    {id:'alpine_ilx',name:'Alpine ILX-F259',brand:'Alpine',spec:'9" Halo · wireless CarPlay/AA · OEM+ look',delta:'Cleanest OEM fit',price:'$750',url:'https://www.amazon.com/s?k=alpine+ilx+f259&tag=blowerbuildz-20',category:'audio'},
+    {id:'jl_sub_12w7',name:'JL Audio 12W7 Subwoofer',brand:'JL Audio',spec:'12" W7 · 600W RMS · IB or sealed box',delta:'Reference-quality bass',price:'$820',url:'https://www.amazon.com/s?k=jl+audio+12w7&tag=blowerbuildz-20',category:'audio'},
+    {id:'rf_p3',name:'Rockford Fosgate P3',brand:'Rockford Fosgate',spec:'12" P3 · 600W RMS · sealed enclosure',delta:'Best value sub',price:'$320',url:'https://www.amazon.com/s?k=rockford+fosgate+p3+12&tag=blowerbuildz-20',category:'audio'},
+    {id:'jl_hd900',name:'JL Audio HD900/5 Amp',brand:'JL Audio',spec:'900W · 5ch · CLASS-D efficiency',delta:'Powers full system',price:'$1,100',url:'https://www.amazon.com/s?k=jl+audio+hd900+5&tag=blowerbuildz-20',category:'audio'},
+    {id:'dual_battery',name:'Dual Battery (Trunk)',brand:'Optima / XS Power',spec:'Secondary trunk battery · Optima YT or XS Power',delta:'Needed for 1000W+ audio',price:'$280',url:'https://www.amazon.com/s?k=optima+yellow+top+trunk+battery&tag=blowerbuildz-20',category:'audio'}
   ],
   cameras: [
-    {id:'garmin_360',name:'Garmin 360° Surround View',brand:'Garmin',spec:'4-camera surround · stitched 360° view · 1080p',delta:'Full surround coverage',price:'$850',url:'https://www.amazon.com/s?k=garmin+360+surround+camera&tag=hellcatbuilds-20',category:'cameras'},
-    {id:'blackvue_4k',name:'BlackVue DR970X-2CH',brand:'BlackVue',spec:'4K front + 1080p rear · cloud · parking mode',delta:'Best 4K dashcam',price:'$600',url:'https://www.amazon.com/s?k=blackvue+4k+dash+cam&tag=hellcatbuilds-20',category:'cameras'},
-    {id:'vantrue_n4',name:'Vantrue N4 Triple Cam',brand:'Vantrue',spec:'Triple channel · front/interior/rear · IR night vision',delta:'Interior + front + rear',price:'$380',url:'https://www.amazon.com/dp/B08XS3ZWXZ?tag=hellcatbuilds-20',category:'cameras'}
+    {id:'garmin_360',name:'Garmin 360° Surround View',brand:'Garmin',spec:'4-camera surround · stitched 360° view · 1080p',delta:'Full surround coverage',price:'$850',url:'https://www.amazon.com/s?k=garmin+360+surround+camera&tag=blowerbuildz-20',category:'cameras'},
+    {id:'blackvue_4k',name:'BlackVue DR970X-2CH',brand:'BlackVue',spec:'4K front + 1080p rear · cloud · parking mode',delta:'Best 4K dashcam',price:'$600',url:'https://www.amazon.com/s?k=blackvue+4k+dash+cam&tag=blowerbuildz-20',category:'cameras'},
+    {id:'vantrue_n4',name:'Vantrue N4 Triple Cam',brand:'Vantrue',spec:'Triple channel · front/interior/rear · IR night vision',delta:'Interior + front + rear',price:'$380',url:'https://www.amazon.com/dp/B08XS3ZWXZ?tag=blowerbuildz-20',category:'cameras'}
   ],
   radar: [
-    {id:'v1_gen2',name:'Valentine V1 Gen2',brand:'Valentine Research',spec:'360° radar + laser detection · directional arrows',delta:'Most arrows/info',price:'$499',url:'https://www.amazon.com/s?k=valentine+one+gen2&tag=hellcatbuilds-20',category:'radar'},
-    {id:'escort_max360c',name:'Escort MAX 360c MKII',brand:'Escort',spec:'360° · Wi-Fi cloud updates · auto-learn',delta:'Best auto-filtering',price:'$649',url:'https://www.amazon.com/s?k=escort+max+360c&tag=hellcatbuilds-20',category:'radar'},
-    {id:'al_priority',name:'AL Priority Laser Jammer',brand:'Antilaser',spec:'Front + rear heads · legal in most states',delta:'Jams lidar guns',price:'$750',url:'https://www.amazon.com/s?k=antilaser+priority+laser+jammer&tag=hellcatbuilds-20',category:'radar'},
-    {id:'uniden_r8',name:'Uniden R8 Radar',brand:'Uniden',spec:'Long-range · GPS filtering · arrows',delta:'Longest range budget pick',price:'$399',url:'https://www.amazon.com/dp/B07MR3X8NN?tag=hellcatbuilds-20',category:'radar'}
+    {id:'v1_gen2',name:'Valentine V1 Gen2',brand:'Valentine Research',spec:'360° radar + laser detection · directional arrows',delta:'Most arrows/info',price:'$499',url:'https://www.amazon.com/s?k=valentine+one+gen2&tag=blowerbuildz-20',category:'radar'},
+    {id:'escort_max360c',name:'Escort MAX 360c MKII',brand:'Escort',spec:'360° · Wi-Fi cloud updates · auto-learn',delta:'Best auto-filtering',price:'$649',url:'https://www.amazon.com/s?k=escort+max+360c&tag=blowerbuildz-20',category:'radar'},
+    {id:'al_priority',name:'AL Priority Laser Jammer',brand:'Antilaser',spec:'Front + rear heads · legal in most states',delta:'Jams lidar guns',price:'$750',url:'https://www.amazon.com/s?k=antilaser+priority+laser+jammer&tag=blowerbuildz-20',category:'radar'},
+    {id:'uniden_r8',name:'Uniden R8 Radar',brand:'Uniden',spec:'Long-range · GPS filtering · arrows',delta:'Longest range budget pick',price:'$399',url:'https://www.amazon.com/dp/B07MR3X8NN?tag=blowerbuildz-20',category:'radar'}
   ],
   interior: [
-    {id:'recaro_xl',name:'Recaro Sportster CS Seats',brand:'Recaro',spec:'OEM-compatible · bolstered · lateral support',delta:'Best daily/track seat',price:'$2,600/pair',url:'https://www.amazon.com/s?k=recaro+sportster+seats&tag=hellcatbuilds-20',category:'interior'},
-    {id:'sparco_r100',name:'Sparco R100 Racing Seat',brand:'Sparco',spec:'FIA homologated · full harness compatible',delta:'Track/race certified',price:'$580/ea',url:'https://www.amazon.com/s?k=sparco+r100+racing+seat&tag=hellcatbuilds-20',category:'interior'},
-    {id:'seatbelt_red',name:'Red Seatbelt Webbing',brand:'Takata/Schroth',spec:'Red webbing swap · OEM latch · 2-min install',delta:'Clean red accent',price:'$120/set',url:'https://www.amazon.com/s?k=red+seatbelt+webbing+swap&tag=hellcatbuilds-20',category:'interior'},
-    {id:'cf_wheel',name:'Carbon Fiber Flat-Bottom Wheel',brand:'Sparco/Personal',spec:'CF flat-bottom · 350mm · hub adapter req.',delta:'Race cockpit feel',price:'$480',url:'https://www.amazon.com/s?k=carbon+fiber+flat+bottom+steering+wheel&tag=hellcatbuilds-20',category:'interior'},
-    {id:'cf_trim',name:'Carbon Fiber Interior Trim Kit',brand:'American Car Craft',spec:'Full CF dash/console trim · 3K weave gloss',delta:'Full cabin CF look',price:'$380',url:'https://www.amazon.com/s?k=carbon+fiber+interior+trim+challenger&tag=hellcatbuilds-20',category:'interior'},
-    {id:'star_ceiling',name:'Star Ceiling Fiber Optic Kit',brand:'Starlight Headliner',spec:'300+ fiber optic points · color control · shooting stars',delta:'Unique night effect',price:'$2,200 installed',url:'https://www.amazon.com/s?k=star+ceiling+fiber+optic+car&tag=hellcatbuilds-20',category:'interior'},
-    {id:'footwell_led',name:'RGB Footwell LED Kit',brand:'Oracle',spec:'RGB underglow · app control · 4-zone',delta:'Color-matched accents',price:'$120',url:'https://www.amazon.com/s?k=rgb+footwell+led+kit+car&tag=hellcatbuilds-20',category:'interior'},
-    {id:'underbody_glow',name:'Underbody LED Kit',brand:'Oracle',spec:'Multi-color · IP68 waterproof · app Bluetooth',delta:'Night mode ground effect',price:'$180',url:'https://www.amazon.com/s?k=underbody+led+glow+kit&tag=hellcatbuilds-20',category:'interior'},
-    {id:'weathertech',name:'WeatherTech FloorLiners',brand:'WeatherTech',spec:'Laser-measured · all-weather · black',delta:'Best interior protection',price:'$145',url:'https://www.amazon.com/s?k=weathertech+challenger+floorliner&tag=hellcatbuilds-20',category:'interior'}
+    {id:'recaro_xl',name:'Recaro Sportster CS Seats',brand:'Recaro',spec:'OEM-compatible · bolstered · lateral support',delta:'Best daily/track seat',price:'$2,600/pair',url:'https://www.amazon.com/s?k=recaro+sportster+seats&tag=blowerbuildz-20',category:'interior'},
+    {id:'sparco_r100',name:'Sparco R100 Racing Seat',brand:'Sparco',spec:'FIA homologated · full harness compatible',delta:'Track/race certified',price:'$580/ea',url:'https://www.amazon.com/s?k=sparco+r100+racing+seat&tag=blowerbuildz-20',category:'interior'},
+    {id:'seatbelt_red',name:'Red Seatbelt Webbing',brand:'Takata/Schroth',spec:'Red webbing swap · OEM latch · 2-min install',delta:'Clean red accent',price:'$120/set',url:'https://www.amazon.com/s?k=red+seatbelt+webbing+swap&tag=blowerbuildz-20',category:'interior'},
+    {id:'cf_wheel',name:'Carbon Fiber Flat-Bottom Wheel',brand:'Sparco/Personal',spec:'CF flat-bottom · 350mm · hub adapter req.',delta:'Race cockpit feel',price:'$480',url:'https://www.amazon.com/s?k=carbon+fiber+flat+bottom+steering+wheel&tag=blowerbuildz-20',category:'interior'},
+    {id:'cf_trim',name:'Carbon Fiber Interior Trim Kit',brand:'American Car Craft',spec:'Full CF dash/console trim · 3K weave gloss',delta:'Full cabin CF look',price:'$380',url:'https://www.amazon.com/s?k=carbon+fiber+interior+trim+challenger&tag=blowerbuildz-20',category:'interior'},
+    {id:'star_ceiling',name:'Star Ceiling Fiber Optic Kit',brand:'Starlight Headliner',spec:'300+ fiber optic points · color control · shooting stars',delta:'Unique night effect',price:'$2,200 installed',url:'https://www.amazon.com/s?k=star+ceiling+fiber+optic+car&tag=blowerbuildz-20',category:'interior'},
+    {id:'footwell_led',name:'RGB Footwell LED Kit',brand:'Oracle',spec:'RGB underglow · app control · 4-zone',delta:'Color-matched accents',price:'$120',url:'https://www.amazon.com/s?k=rgb+footwell+led+kit+car&tag=blowerbuildz-20',category:'interior'},
+    {id:'underbody_glow',name:'Underbody LED Kit',brand:'Oracle',spec:'Multi-color · IP68 waterproof · app Bluetooth',delta:'Night mode ground effect',price:'$180',url:'https://www.amazon.com/s?k=underbody+led+glow+kit&tag=blowerbuildz-20',category:'interior'},
+    {id:'weathertech',name:'WeatherTech FloorLiners',brand:'WeatherTech',spec:'Laser-measured · all-weather · black',delta:'Best interior protection',price:'$145',url:'https://www.amazon.com/s?k=weathertech+challenger+floorliner&tag=blowerbuildz-20',category:'interior'}
   ],
   badging: [
-    {id:'badge_hellcat_3d',name:'Hellcat 3D Emblem Badge',brand:'Mopar OEM',spec:'OEM replacement · red outline · direct swap',delta:'Factory correct',price:'$75',url:'https://www.amazon.com/s?k=hellcat+emblem+badge+mopar&tag=hellcatbuilds-20',category:'badging'},
-    {id:'badge_srt_billet',name:'SRT Billet Badge',brand:'American Car Craft',spec:'Brushed aluminum · CNC machined · direct bolt-on',delta:'Premium OEM+ look',price:'$65',url:'https://www.amazon.com/s?k=srt+billet+badge+challenger&tag=hellcatbuilds-20',category:'badging'},
-    {id:'badge_delete',name:'Badge Delete Kit',brand:'Various',spec:'Complete blackout · all OEM badges removed',delta:'Sleeper/clean look',price:'$40',url:'https://www.amazon.com/s?k=challenger+badge+delete+kit&tag=hellcatbuilds-20',category:'badging'},
-    {id:'badge_demon_gold',name:'Demon Gold Badge Set',brand:'Custom',spec:'Gold chrome finish · Demon logo · fender + trunk',delta:'Demon 170 inspired',price:'$90',url:'https://www.amazon.com/s?k=demon+gold+badge+challenger&tag=hellcatbuilds-20',category:'badging'}
+    {id:'badge_hellcat_3d',name:'Hellcat 3D Emblem Badge',brand:'Mopar OEM',spec:'OEM replacement · red outline · direct swap',delta:'Factory correct',price:'$75',url:'https://www.amazon.com/s?k=hellcat+emblem+badge+mopar&tag=blowerbuildz-20',category:'badging'},
+    {id:'badge_srt_billet',name:'SRT Billet Badge',brand:'American Car Craft',spec:'Brushed aluminum · CNC machined · direct bolt-on',delta:'Premium OEM+ look',price:'$65',url:'https://www.amazon.com/s?k=srt+billet+badge+challenger&tag=blowerbuildz-20',category:'badging'},
+    {id:'badge_delete',name:'Badge Delete Kit',brand:'Various',spec:'Complete blackout · all OEM badges removed',delta:'Sleeper/clean look',price:'$40',url:'https://www.amazon.com/s?k=challenger+badge+delete+kit&tag=blowerbuildz-20',category:'badging'},
+    {id:'badge_demon_gold',name:'Demon Gold Badge Set',brand:'Custom',spec:'Gold chrome finish · Demon logo · fender + trunk',delta:'Demon 170 inspired',price:'$90',url:'https://www.amazon.com/s?k=demon+gold+badge+challenger&tag=blowerbuildz-20',category:'badging'}
   ],
   blackout: [
-    {id:'chrome_delete',name:'Full Chrome Delete',brand:'3M 1080 Vinyl',spec:'Gloss or matte black wrap · full chrome strip coverage',delta:'Sinister blacked look',price:'$280 installed',url:'https://www.amazon.com/s?k=chrome+delete+wrap+vinyl&tag=hellcatbuilds-20',category:'blackout'},
-    {id:'grille_blackout',name:'Grille Blackout Insert',brand:'American Car Craft',spec:'Stainless mesh · black powder coat · OEM fitment',delta:'Aggressive front look',price:'$180',url:'https://www.amazon.com/s?k=challenger+grille+insert+black&tag=hellcatbuilds-20',category:'blackout'},
-    {id:'taillight_tint',name:'Taillight Tint Film',brand:'Lamin-X',spec:'Smoked film · self-adhesive · street legal',delta:'Subtle tinted look',price:'$60',url:'https://www.amazon.com/s?k=taillight+tint+film+challenger&tag=hellcatbuilds-20',category:'blackout'}
+    {id:'chrome_delete',name:'Full Chrome Delete',brand:'3M 1080 Vinyl',spec:'Gloss or matte black wrap · full chrome strip coverage',delta:'Sinister blacked look',price:'$280 installed',url:'https://www.amazon.com/s?k=chrome+delete+wrap+vinyl&tag=blowerbuildz-20',category:'blackout'},
+    {id:'grille_blackout',name:'Grille Blackout Insert',brand:'American Car Craft',spec:'Stainless mesh · black powder coat · OEM fitment',delta:'Aggressive front look',price:'$180',url:'https://www.amazon.com/s?k=challenger+grille+insert+black&tag=blowerbuildz-20',category:'blackout'},
+    {id:'taillight_tint',name:'Taillight Tint Film',brand:'Lamin-X',spec:'Smoked film · self-adhesive · street legal',delta:'Subtle tinted look',price:'$60',url:'https://www.amazon.com/s?k=taillight+tint+film+challenger&tag=blowerbuildz-20',category:'blackout'}
   ]
 };
 
@@ -652,17 +572,17 @@ const LEADERBOARD = [
 
 // Parts that appear as x-ray hotspots on the 3D model
 const XRAY_PARTS = [
-  {id:'supercharger',name:'Supercharger',cat:'FORCED INDUCTION',desc:'6.2L HEMI V8 with 2.4L Roots-type supercharger. The heart of the Hellcat. 11.6 psi stock boost.',specs:[{k:'Type',v:'Roots-type twin-screw'},{k:'Displacement',v:'2.4L'},{k:'Boost',v:'11.6 psi stock'},{k:'Material',v:'Aluminum housing'}],url:'https://www.amazon.com/s?k=hellcat+supercharger+pulley&tag=hellcatbuilds-20',px:47,py:32},
-  {id:'headers',name:'Long Tube Headers',cat:'EXHAUST',desc:'Factory cast iron manifolds flow 390 cfm. Long tube headers open that to 520+ cfm and drop backpressure.',specs:[{k:'OEM size',v:'Cast iron 1-5/8"'},{k:'Aftermarket',v:'1-7/8" LT headers'},{k:'Material',v:'Stainless / titanium'},{k:'HP gain',v:'+35-50 hp'}],url:'https://www.summitracing.com/search/keyword/long+tube+headers+challenger+hellcat',px:38,py:38},
-  {id:'front_coilover',name:'Front Coilover',cat:'SUSPENSION',desc:'Full monotube coilover with adjustable damping. Controls front wheel travel, camber, and ride height.',specs:[{k:'OEM type',v:'MacPherson strut'},{k:'Drop range',v:'0.5"–2.5"'},{k:'Adjust',v:'32-way rebound'},{k:'Spring rate',v:'350–450 lb/in'}],url:'https://www.summitracing.com/search/keyword/coilover+challenger+hellcat',px:28,py:58},
-  {id:'rear_coilover',name:'Rear Coilover / Air Bag',cat:'SUSPENSION',desc:'Rear suspension unit. Air ride replaces the spring with an inflatable bag — drops from stock to ground level.',specs:[{k:'OEM type',v:'5-link rear'},{k:'Air bag',v:'Convoluted 2-ply'},{k:'Drop',v:'0"–5" air ride'},{k:'Control',v:'App / remote'}],url:'https://www.summitracing.com/search/keyword/air+lift+performance+challenger',px:68,py:58},
-  {id:'brakes',name:'Front Brake Caliper',cat:'BRAKES',desc:'Massive Brembo 6-piston front calipers with 15.4" cross-drilled rotor. Stops 4,400 lbs from 100 mph in 107 feet.',specs:[{k:'OEM',v:'Single-piston sliding'},{k:'Upgrade',v:'6-piston fixed'},{k:'Rotor',v:'15.4" cross-drilled'},{k:'Material',v:'Aluminum housing'}],url:'https://www.summitracing.com/search/keyword/brembo+6+piston+challenger',px:23,py:65},
-  {id:'sway_bar',name:'Rear Sway Bar',cat:'HANDLING',desc:'The rear sway bar transfers lateral load between wheels in cornering. Upgrading from OEM 19mm to aftermarket 24mm cuts body roll 35%.',specs:[{k:'OEM',v:'19mm hollow'},{k:'Upgrade',v:'24mm solid'},{k:'Adjustment',v:'3-way end links'},{k:'Material',v:'Chromoly steel'}],url:'https://www.summitracing.com/search/keyword/whiteline+sway+bar+challenger',px:60,py:62},
-  {id:'exhaust_tips',name:'Exhaust Tips',cat:'EXHAUST',desc:'The Hellcat runs dual 3.5" stainless outlets. Tip style dramatically changes the rear view — black powder, CF surrounds, or polished.',specs:[{k:'OEM',v:'3.5" stainless'},{k:'Options',v:'Black / CF / chrome'},{k:'Config',v:'Quad or dual'},{k:'Diameter',v:'3.5"–4"'}],url:'https://www.summitracing.com/search/keyword/hellcat+exhaust+tips',px:75,py:70},
-  {id:'driver_seat',name:'Driver Seat',cat:'INTERIOR',desc:'Factory Hellcat Laguna leather with Alcantara inserts and lateral bolsters. Aftermarket Recaros add 30mm more lateral support for track use.',specs:[{k:'OEM',v:'Laguna leather w/ heat'},{k:'Upgrade',v:'Recaro Sportster CS'},{k:'Bolster',v:'+30mm lateral support'},{k:'Weight',v:'OEM 42 lbs / Recaro 28 lbs'}],url:'https://www.amazon.com/s?k=recaro+sportster+seats&tag=hellcatbuilds-20',px:44,py:44},
-  {id:'obd_port',name:'OBD2 Port',cat:'ELECTRONICS',desc:'The OBD-II port under the dash gives access to every sensor, fault code, and data stream. Home of tuner devices and GPS trackers.',specs:[{k:'Standard',v:'SAE J1979 OBD-II'},{k:'Location',v:'Under dash left'},{k:'Protocol',v:'CAN bus'},{k:'Uses',v:'Tuner / tracker / scanner'}],url:'https://www.amazon.com/s?k=obd+port+tracker+hellcat&tag=hellcatbuilds-20',px:42,py:48},
-  {id:'subwoofer',name:'Subwoofer / Enclosure',cat:'AUDIO',desc:'The Hellcat trunk has room for a 12" ported box and a 5-channel amp. The stock Beats sub barely hits 60 Hz — a JL W7 hits 25 Hz at 600 watts.',specs:[{k:'OEM',v:'Beats 10" passive'},{k:'Upgrade',v:'JL 12W7 active'},{k:'Power',v:'600W RMS'},{k:'Box',v:'1.5 ft³ ported'}],url:'https://www.amazon.com/s?k=jl+audio+12w7&tag=hellcatbuilds-20',px:72,py:44},
-  {id:'dual_battery',name:'Dual Battery Setup',cat:'ELECTRICAL',desc:'A second battery in the trunk, isolated from the main, powers audio and air ride compressors without touching the engine starting circuit.',specs:[{k:'Primary',v:'Mopar OEM 78-AH'},{k:'Secondary',v:'XS Power S680 or Optima YT'},{k:'Isolator',v:'Mechman D250 relay'},{k:'Wiring',v:'Big 3 upgrade req.'}],url:'https://www.amazon.com/s?k=xs+power+trunk+battery+challenger&tag=hellcatbuilds-20',px:76,py:46}
+  {id:'supercharger',name:'Supercharger',cat:'FORCED INDUCTION',desc:'6.2L HEMI V8 with 2.4L Roots-type supercharger. The heart of the Hellcat. 11.6 psi stock boost.',specs:[{k:'Type',v:'Roots-type twin-screw'},{k:'Displacement',v:'2.4L'},{k:'Boost',v:'11.6 psi stock'},{k:'Material',v:'Aluminum housing'}],url:'https://www.amazon.com/s?k=hellcat+supercharger+pulley&tag=blowerbuildz-20',px:47,py:32},
+  {id:'headers',name:'Long Tube Headers',cat:'EXHAUST',desc:'Factory cast iron manifolds flow 390 cfm. Long tube headers open that to 520+ cfm and drop backpressure.',specs:[{k:'OEM size',v:'Cast iron 1-5/8"'},{k:'Aftermarket',v:'1-7/8" LT headers'},{k:'Material',v:'Stainless / titanium'},{k:'HP gain',v:'+35-50 hp'}],url:'https://www.amazon.com/s?k=long+tube+headers+challenger+hellcat&tag=blowerbuildz-20',px:38,py:38},
+  {id:'front_coilover',name:'Front Coilover',cat:'SUSPENSION',desc:'Full monotube coilover with adjustable damping. Controls front wheel travel, camber, and ride height.',specs:[{k:'OEM type',v:'MacPherson strut'},{k:'Drop range',v:'0.5"–2.5"'},{k:'Adjust',v:'32-way rebound'},{k:'Spring rate',v:'350–450 lb/in'}],url:'https://www.amazon.com/s?k=coilover+challenger+hellcat&tag=blowerbuildz-20',px:28,py:58},
+  {id:'rear_coilover',name:'Rear Coilover / Air Bag',cat:'SUSPENSION',desc:'Rear suspension unit. Air ride replaces the spring with an inflatable bag — drops from stock to ground level.',specs:[{k:'OEM type',v:'5-link rear'},{k:'Air bag',v:'Convoluted 2-ply'},{k:'Drop',v:'0"–5" air ride'},{k:'Control',v:'App / remote'}],url:'https://www.amazon.com/s?k=air+lift+performance+challenger&tag=blowerbuildz-20',px:68,py:58},
+  {id:'brakes',name:'Front Brake Caliper',cat:'BRAKES',desc:'Massive Brembo 6-piston front calipers with 15.4" cross-drilled rotor. Stops 4,400 lbs from 100 mph in 107 feet.',specs:[{k:'OEM',v:'Single-piston sliding'},{k:'Upgrade',v:'6-piston fixed'},{k:'Rotor',v:'15.4" cross-drilled'},{k:'Material',v:'Aluminum housing'}],url:'https://www.amazon.com/s?k=brembo+6+piston+challenger&tag=blowerbuildz-20',px:23,py:65},
+  {id:'sway_bar',name:'Rear Sway Bar',cat:'HANDLING',desc:'The rear sway bar transfers lateral load between wheels in cornering. Upgrading from OEM 19mm to aftermarket 24mm cuts body roll 35%.',specs:[{k:'OEM',v:'19mm hollow'},{k:'Upgrade',v:'24mm solid'},{k:'Adjustment',v:'3-way end links'},{k:'Material',v:'Chromoly steel'}],url:'https://www.amazon.com/s?k=whiteline+sway+bar+challenger&tag=blowerbuildz-20',px:60,py:62},
+  {id:'exhaust_tips',name:'Exhaust Tips',cat:'EXHAUST',desc:'The Hellcat runs dual 3.5" stainless outlets. Tip style dramatically changes the rear view — black powder, CF surrounds, or polished.',specs:[{k:'OEM',v:'3.5" stainless'},{k:'Options',v:'Black / CF / chrome'},{k:'Config',v:'Quad or dual'},{k:'Diameter',v:'3.5"–4"'}],url:'https://www.amazon.com/s?k=hellcat+exhaust+tips&tag=blowerbuildz-20',px:75,py:70},
+  {id:'driver_seat',name:'Driver Seat',cat:'INTERIOR',desc:'Factory Hellcat Laguna leather with Alcantara inserts and lateral bolsters. Aftermarket Recaros add 30mm more lateral support for track use.',specs:[{k:'OEM',v:'Laguna leather w/ heat'},{k:'Upgrade',v:'Recaro Sportster CS'},{k:'Bolster',v:'+30mm lateral support'},{k:'Weight',v:'OEM 42 lbs / Recaro 28 lbs'}],url:'https://www.amazon.com/s?k=recaro+sportster+seats&tag=blowerbuildz-20',px:44,py:44},
+  {id:'obd_port',name:'OBD2 Port',cat:'ELECTRONICS',desc:'The OBD-II port under the dash gives access to every sensor, fault code, and data stream. Home of tuner devices and GPS trackers.',specs:[{k:'Standard',v:'SAE J1979 OBD-II'},{k:'Location',v:'Under dash left'},{k:'Protocol',v:'CAN bus'},{k:'Uses',v:'Tuner / tracker / scanner'}],url:'https://www.amazon.com/s?k=obd+port+tracker+hellcat&tag=blowerbuildz-20',px:42,py:48},
+  {id:'subwoofer',name:'Subwoofer / Enclosure',cat:'AUDIO',desc:'The Hellcat trunk has room for a 12" ported box and a 5-channel amp. The stock Beats sub barely hits 60 Hz — a JL W7 hits 25 Hz at 600 watts.',specs:[{k:'OEM',v:'Beats 10" passive'},{k:'Upgrade',v:'JL 12W7 active'},{k:'Power',v:'600W RMS'},{k:'Box',v:'1.5 ft³ ported'}],url:'https://www.amazon.com/s?k=jl+audio+12w7&tag=blowerbuildz-20',px:72,py:44},
+  {id:'dual_battery',name:'Dual Battery Setup',cat:'ELECTRICAL',desc:'A second battery in the trunk, isolated from the main, powers audio and air ride compressors without touching the engine starting circuit.',specs:[{k:'Primary',v:'Mopar OEM 78-AH'},{k:'Secondary',v:'XS Power S680 or Optima YT'},{k:'Isolator',v:'Mechman D250 relay'},{k:'Wiring',v:'Big 3 upgrade req.'}],url:'https://www.amazon.com/s?k=xs+power+trunk+battery+challenger&tag=blowerbuildz-20',px:76,py:46}
 ];
 
 const FITMENT_RULES = {
@@ -673,7 +593,7 @@ const FITMENT_RULES = {
 const RP_TABS = ['Config','Specs','Fitment','Demon'];
 
 // ============================================================
-// HELLCATBUILDS v6 — THREE.JS ENGINE + APP LOGIC
+// BLOWERBUILDZ v6 — THREE.JS ENGINE + APP LOGIC
 // ============================================================
 
 // STATE
@@ -944,6 +864,8 @@ function buildCar(family){
 
   // Shadow
   carGroup.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+  carGroup.traverse(o=>{if(o.material&&typeof R_GLASS!=='undefined'&&o.material===R_GLASS)o.castShadow=false;});
+  if(typeof R_applyTint==='function')R_applyTint();
 }
 
 function buildChallenger(col){
@@ -1311,7 +1233,7 @@ function addInternalParts(g){
   obd.position.set(-0.35,0.58,0.95); obd.name='obd_port'; g.add(obd);
 }
 
-function applyXray(on){
+function applyXrayBase(on){
   isXray=on;
   const col=currentColor.hex;
   carGroup.traverse(o=>{
@@ -1647,7 +1569,7 @@ function buildFamilyNav(){
   });
 }
 
-function buildLeftPanel(){
+function buildLeftPanelBase(){
   const lp=document.getElementById('lp');
   const fam=FAMILIES[currentFamily];
   lp.innerHTML='';
@@ -1670,14 +1592,6 @@ function buildLeftPanel(){
     }
     lp.appendChild(div);
   });
-  // Show spec card overlay if no 3D model for selected year
-  const _fam2 = FAMILIES[currentFamily];
-  const _yr2 = _fam2.years[currentYearIdx] || _fam2.years[0];
-  if(!_yr2.has3d){ setTimeout(showSpecCard, 100); }
-  else {
-    const _exsc = document.getElementById('spec-card');
-    if(_exsc) _exsc.remove();
-  }
 }
 
 function selectFamily(fk){
@@ -1695,7 +1609,7 @@ function selectFamily(fk){
   document.getElementById('demonBtn').style.display=(fk==='demon'||yr?.demon)?'':'none';
 }
 
-function updateVehicleInfo(){
+function updateVehicleInfoBase(){
   const fam=FAMILIES[currentFamily];
   const yr=fam.years[currentYearIdx]||fam.years[0];
   const variant=yr.variants[currentVariantIdx]||yr.variants[0];
@@ -1707,6 +1621,13 @@ function updateVehicleInfo(){
   updateMyBuildSpec();
 }
 
+function updateMyBuildSpec(){
+  const fam=FAMILIES[currentFamily];
+  const yr=fam.years[currentYearIdx]||fam.years[0];
+  const hp=isDemonMode?(yr.hp==='840'?840:yr.hp):yr.hp;
+  const spec=document.getElementById('myBuildSpec');
+  if(spec) spec.textContent=`${yr.y} ${fam.name} · ${hp}hp · ${yr.w||fam.weight}lbs`;
+}
 
 // RIGHT PANEL TABS
 const PART_CATS=[
@@ -1782,6 +1703,7 @@ function buildRpBody(){
       activeParts[cat]=part.id;
       // Apply visual changes
       if(cat==='wheels') applyWheels(part.id);
+      if(cat==='tires') buildCar(currentFamily);
       if(cat==='exhaust'){
         activeParts.exhaust=part.id;
         carGroup.children.filter(c=>c.name==='exhaust_tip').forEach(t=>carGroup.remove(t));
@@ -1813,7 +1735,7 @@ function buildStancePanel(body){
   <div class="pc-n">Widebody Conversion</div>
   <div class="pc-br">MOPAR / OEM</div>
   <div class="pc-sp">Fender flares · accepts 305+ rear tires · ${isWidebody?'✓ ACTIVE':'Available for Challenger/Charger'}</div>
-  <div class="pc-foot"><span class="pc-pr">$2,400</span><a class="buy-btn" href="https://www.amazon.com/s?k=challenger+widebody+fender+flares&tag=hellcatbuilds-20" target="_blank" rel="noopener">BUY NOW →</a></div>
+  <div class="pc-foot"><span class="pc-pr">$2,400</span><a class="buy-btn" href="https://www.amazon.com/s?k=challenger+widebody+fender+flares&tag=blowerbuildz-20" target="_blank" rel="noopener">BUY NOW →</a></div>
 </div>`;
 
   // Fitment row
@@ -1833,7 +1755,7 @@ function buildStancePanel(body){
   });
 }
 
-function buildExteriorPanel(body){
+function buildExteriorPanelBase(body){
   // Color grid
   const sh=document.createElement('div'); sh.className='sh'; sh.textContent='BODY COLOR'; body.appendChild(sh);
   const grid=document.createElement('div'); grid.className='cgrid'; body.appendChild(grid);
@@ -1875,8 +1797,6 @@ function toggleWidebody(){
   isWidebody=!isWidebody;
   updateFitmentWarning();
   buildRpBody();
-  // Rebuild hotspot overlay when xray state changes
-  setTimeout(buildHotspotOverlay, 50);
 }
 
 function toggleXray(){
@@ -1908,542 +1828,171 @@ function toggleDemon(){
   showToast(isDemonMode?`🔥 DEMON MODE ACTIVE — ${yr.hp}hp unlocked`:`Demon Mode off — 808hp street mode`);
 }
 
-
-// ─── AUDIO ────────────────────────────────────────────────────────────────
-let _ac=null;
-function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
-function resumeAC(){try{getAC().resume();}catch(e){}}
-
-function playBeep(freq,dur,vol,type,delay){
-  try{
-    const ac=getAC();const o=ac.createOscillator(),g=ac.createGain();
-    o.connect(g);g.connect(ac.destination);
-    o.type=type||'sine';o.frequency.setValueAtTime(freq,ac.currentTime+(delay||0));
-    g.gain.setValueAtTime(0,ac.currentTime+(delay||0));
-    g.gain.linearRampToValueAtTime(vol||0.3,ac.currentTime+(delay||0)+0.01);
-    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+(delay||0)+(dur||0.1));
-    o.start(ac.currentTime+(delay||0));o.stop(ac.currentTime+(delay||0)+(dur||0.1)+0.03);
-  }catch(e){}
-}
-
-function playCountBeep(n){playBeep(n===0?1320:880,0.06,0.4,'square');}
-
-function playEngineRev(hp,dragRadials,demonMode,durMs,onDone){
-  try{
-    const ac=getAC();
-    const baseF=60+(hp/1025)*80,topF=baseF*(demonMode?4.8:3.8);
-    const vol=demonMode?0.5:0.38;const dur=durMs/1000;
-    const o=ac.createOscillator(),o2=ac.createOscillator();
-    const g=ac.createGain(),g2=ac.createGain();
-    const dist=ac.createWaveShaper();
-    const curve=new Float32Array(256);
-    for(let i=0;i<256;i++){const x=(i*2/256)-1;curve[i]=Math.tanh(x*2.5);}
-    dist.curve=curve;
-    o.type='sawtooth';o2.type='square';
-    o.connect(dist);dist.connect(g);o2.connect(g2);g2.connect(g);g.connect(ac.destination);
-    const t=ac.currentTime;
-    o.frequency.setValueAtTime(baseF,t);o.frequency.linearRampToValueAtTime(topF,t+dur*0.72);o.frequency.linearRampToValueAtTime(topF*0.88,t+dur);
-    o2.frequency.setValueAtTime(baseF*2,t);o2.frequency.linearRampToValueAtTime(topF*1.4,t+dur*0.72);
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.1);g.gain.setValueAtTime(vol,t+dur-0.12);g.gain.linearRampToValueAtTime(0,t+dur+0.06);
-    g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(vol*0.15,t+0.15);g2.gain.linearRampToValueAtTime(0,t+dur+0.06);
-    o.start(t);o2.start(t);o.stop(t+dur+0.1);o2.stop(t+dur+0.1);
-    if(!dragRadials){for(let i=0;i<3;i++)playBeep(100+Math.random()*60,0.05,0.2,'sawtooth',0.02+i*0.04);}
-    if(onDone)setTimeout(onDone,durMs+120);
-  }catch(e){if(onDone)setTimeout(onDone,durMs+120);}
-}
-
-function playTireScreech(durMs){
-  try{
-    const ac=getAC();const sr=ac.sampleRate;
-    const buf=ac.createBuffer(1,sr*Math.ceil(durMs/1000+0.2),sr);
-    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.6;
-    const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
-    f.type='bandpass';f.frequency.value=3800;f.Q.value=1.5;
-    s.buffer=buf;s.connect(f);f.connect(g);g.connect(ac.destination);
-    const t=ac.currentTime;const dur=durMs/1000;
-    g.gain.setValueAtTime(0.38,t);g.gain.linearRampToValueAtTime(0.001,t+dur);
-    s.start(t);s.stop(t+dur+0.05);
-  }catch(e){}
-}
-
-function playGoSound(demonMode){
-  try{
-    const ac=getAC();const f=demonMode?50:68;
-    for(let i=0;i<3;i++){
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.connect(g);g.connect(ac.destination);
-      o.type='sawtooth';o.frequency.setValueAtTime(f*(i+1),ac.currentTime);
-      o.frequency.exponentialRampToValueAtTime(f*(i+1)*0.68,ac.currentTime+0.32);
-      g.gain.setValueAtTime(0.25-i*0.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.38);
-      o.start();o.stop(ac.currentTime+0.4);
-    }
-  }catch(e){}
-}
-
-// ─── CAMERA STATE ─────────────────────────────────────────────────────────
-let currentCam='cockpit';
-
-function setCam(mode){
-  currentCam=mode;
-  document.querySelectorAll('.camBtn').forEach(b=>b.classList.remove('active'));
-  const btn=document.getElementById('camBtn_'+mode);
-  if(btn)btn.classList.add('active');
-  if(!raceRunning)drawIdleTrack();
-}
-
-// ─── MODAL OPEN / CLOSE ───────────────────────────────────────────────────
 function openDrag(){
-  const m=document.getElementById('dragModal');m.style.display='flex';
-  updateMyBuildSpec();updateOppSpec();populateLeaderboard();
-  document.getElementById('dragLBStrip').style.display='block';
-  requestAnimationFrame(()=>{resizeRC();drawIdleTrack();});
+  document.getElementById('dragModal').style.display='flex';
+  updateMyBuildSpec();
+  updateOppSpec();
+  populateLeaderboard();
 }
-function closeDrag(){
-  cancelRaceAnim();
-  document.getElementById('dragModal').style.display='none';
-  document.getElementById('resultPanel').style.display='none';
-  document.getElementById('raceHUD').style.display='none';
-  const lb=document.getElementById('launchBtn');if(lb){lb.disabled=false;lb.textContent='⚡ LAUNCH';}
-}
+function closeDrag(){document.getElementById('dragModal').style.display='none';}
 
 function updateOppSpec(){
-  const sel=document.getElementById('oppSelect');if(!sel)return;
+  const sel=document.getElementById('oppSelect');
+  if(!sel) return;
   const opp=OPPONENTS[sel.value];
-  if(opp){
-    const e=document.getElementById('oppSpec');if(e)e.textContent=`${opp.hp}hp · ${opp.weight.toLocaleString()}lbs · ${opp.qtm}s ET`;
-    const e2=document.getElementById('oppSpecCam');if(e2)e2.textContent=`vs ${opp.name} · ${opp.qtm}s`;
-  }
+  if(opp) document.getElementById('oppSpec').textContent=`${opp.hp}hp · ${opp.weight}lbs · ${opp.zero60}s 0-60`;
 }
-if(document.getElementById('oppSelect'))document.getElementById('oppSelect').addEventListener('change',updateOppSpec);
-
-// ─── CANVAS + RESIZE ──────────────────────────────────────────────────────
-let _raceAnimId=null;
-function cancelRaceAnim(){if(_raceAnimId){cancelAnimationFrame(_raceAnimId);_raceAnimId=null;}}
-
-function resizeRC(){
-  const stage=document.getElementById('raceStage');
-  const c=document.getElementById('raceCanvas');
-  if(!stage||!c)return;
-  c.width=stage.clientWidth||window.innerWidth;
-  c.height=stage.clientHeight||Math.round(window.innerHeight*0.52);
-}
-window.addEventListener('resize',()=>{
-  if(document.getElementById('dragModal')&&document.getElementById('dragModal').style.display==='flex'){resizeRC();}
-});
-
-// ─── DRAWING HELPERS ──────────────────────────────────────────────────────
-
-function drawCockpit(ctx,W,H,prog,spd,oppProg,demon){
-  ctx.clearRect(0,0,W,H);
-  // Sky
-  const sg=ctx.createLinearGradient(0,0,0,H*0.37);
-  sg.addColorStop(0,'#06060e');sg.addColorStop(1,'#111124');
-  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H*0.37);
-  // Horizon glow
-  const hg=ctx.createRadialGradient(W/2,H*0.37,0,W/2,H*0.37,W*0.44);
-  hg.addColorStop(0,'rgba(232,71,42,0.18)');hg.addColorStop(1,'transparent');
-  ctx.fillStyle=hg;ctx.fillRect(0,0,W,H*0.5);
-  // Road perspective
-  const VY=H*0.37,rL=W*0.04,rR=W*0.96,hL=W*0.42,hR=W*0.58;
-  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.lineTo(hR,VY);ctx.lineTo(rR,H);ctx.closePath();
-  const rg=ctx.createLinearGradient(W/2,VY,W/2,H);
-  rg.addColorStop(0,'#141414');rg.addColorStop(1,'#1e1e1e');
-  ctx.fillStyle=rg;ctx.fill();
-  // Curbs
-  ctx.strokeStyle='rgba(232,71,42,0.45)';ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(rR,H);ctx.lineTo(hR,VY);ctx.stroke();
-  // Scrolling lane dashes
-  const scroll=(prog*1800)%80;
-  for(let t=0.02;t<0.99;t+=0.04){
-    const mt=((t*40)+scroll/80)%1;if(mt>0.44)continue;
-    const cx1=(rL+(hL-rL)*t+rR+(hR-rR)*t)/2;
-    const cx2=(rL+(hL-rL)*(t+0.02)+rR+(hR-rR)*(t+0.02))/2;
-    const y1=H+(VY-H)*t,y2=H+(VY-H)*(t+0.02);
-    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=Math.max(0.5,(1-t)*3.8);
-    ctx.beginPath();ctx.moveTo(cx1,y1);ctx.lineTo(cx2,y2);ctx.stroke();
-  }
-  // Finish line
-  if(prog>0.65){
-    const ft=Math.min(1,(prog-0.65)/0.2);
-    const fy=H+(VY-H)*ft*0.84;
-    const fxL=rL+(hL-rL)*ft*0.84,fxR=rR+(hR-rR)*ft*0.84;
-    const fw=Math.max(1,(1-ft*0.78)*18);
-    const segs=8;
-    for(let s=0;s<segs;s++){
-      const sx1=fxL+(fxR-fxL)*(s/segs),sx2=fxL+(fxR-fxL)*((s+1)/segs);
-      ctx.fillStyle=s%2===0?'#fff':'#000';ctx.fillRect(sx1,fy-fw/2,sx2-sx1,fw);
-    }
-  }
-  // Opponent
-  const rd=oppProg-prog;
-  const dep=Math.max(0.05,Math.min(0.93,0.5+rd*1.2));
-  const oy=H+(VY-H)*dep;
-  const ox=(rL+(hL-rL)*dep+rR+(hR-rR)*dep)/2+(W*0.05);
-  const ow=W*(1-dep)*0.28*0.55,oh=ow*0.38;
-  if(ow>4)drawCar(ctx,ox,oy,ow,oh,'#9ab',false,false);
-  // Windshield + wheel
-  drawWindshield(ctx,W,H,demon,prog);
-  drawWheel(ctx,W,H,demon);
-  // Speed flash near line
-  if(prog>0.9&&prog<1){
-    ctx.fillStyle='rgba(255,255,255,'+(0.08*(prog-0.9)/0.1)+')';
-    ctx.fillRect(0,0,W,H);
-  }
+if(document.getElementById('oppSelect')){
+  document.getElementById('oppSelect').addEventListener('change',updateOppSpec);
 }
 
-function drawChase(ctx,W,H,prog,spd,oppProg,demon){
-  ctx.clearRect(0,0,W,H);
-  const sg=ctx.createLinearGradient(0,0,0,H*0.4);
-  sg.addColorStop(0,'#08080f');sg.addColorStop(1,'#141420');
-  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H*0.4);
-  const hg=ctx.createRadialGradient(W/2,H*0.4,0,W/2,H*0.4,W*0.5);
-  hg.addColorStop(0,'rgba(232,71,42,0.1)');hg.addColorStop(1,'transparent');
-  ctx.fillStyle=hg;ctx.fillRect(0,0,W,H*0.52);
-  const VY=H*0.38,rL=W*0.05,rR=W*0.95,hL=W*0.39,hR=W*0.61;
-  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.lineTo(hR,VY);ctx.lineTo(rR,H);ctx.closePath();
-  const rg=ctx.createLinearGradient(0,VY,0,H);rg.addColorStop(0,'#151515');rg.addColorStop(1,'#1e1e1e');
-  ctx.fillStyle=rg;ctx.fill();
-  ctx.strokeStyle='rgba(232,71,42,0.38)';ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(rL,H);ctx.lineTo(hL,VY);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(rR,H);ctx.lineTo(hR,VY);ctx.stroke();
-  const scroll=(prog*2200)%80;
-  for(let t=0.02;t<0.99;t+=0.044){
-    const mt=((t*38)+scroll/80)%1;if(mt>0.42)continue;
-    const cx1=(rL+(hL-rL)*t+rR+(hR-rR)*t)/2;
-    const cx2=(rL+(hL-rL)*(t+0.025)+rR+(hR-rR)*(t+0.025))/2;
-    const y1=H+(VY-H)*t,y2=H+(VY-H)*(t+0.025);
-    ctx.strokeStyle='rgba(255,255,255,0.48)';ctx.lineWidth=Math.max(0.4,(1-t)*3.2);
-    ctx.beginPath();ctx.moveTo(cx1,y1);ctx.lineTo(cx2,y2);ctx.stroke();
-  }
-  if(prog>0.68){
-    const ft=Math.min(1,(prog-0.68)/0.22);
-    const fy=H+(VY-H)*ft*0.8;
-    const fxL=rL+(hL-rL)*ft*0.8,fxR=rR+(hR-rR)*ft*0.8;
-    const fw=Math.max(1,(1-ft*0.72)*15);const segs=8;
-    for(let s=0;s<segs;s++){const sx1=fxL+(fxR-fxL)*(s/segs),sx2=fxL+(fxR-fxL)*((s+1)/segs);ctx.fillStyle=s%2===0?'#fff':'#000';ctx.fillRect(sx1,fy-fw/2,sx2-sx1,fw);}
-  }
-  // Opponent ahead
-  const rd=oppProg-prog;
-  const dep=Math.max(0.08,Math.min(0.92,0.42+rd*1.4));
-  const oy=H+(VY-H)*dep;
-  const ox=(rL+(hL-rL)*dep+rR+(hR-rR)*dep)/2+(W*0.04);
-  const ow=W*(1-dep)*0.28*0.55,oh=ow*0.38;
-  if(ow>4)drawCar(ctx,ox,oy,ow,oh,'#8ab',false,false);
-  // Player car bottom-center
-  const pw=W*0.26,ph=pw*0.38;
-  drawCar(ctx,W/2,H*0.72,pw,ph,demon?'#cc1100':'#E8472A',true,demon);
-  // Speed blur behind player
-  if(spd>45){
-    const ba=Math.min(0.3,(spd-45)/110);ctx.save();ctx.globalAlpha=ba;
-    for(let i=0;i<5;i++){
-      const bx=W/2+(Math.random()-0.5)*pw*0.8;const by=H*0.72+ph*0.1+Math.random()*ph*0.25;
-      const bl=pw*0.28*(0.6+Math.random()*0.4);
-      const bg=ctx.createLinearGradient(bx,by,bx+bl,by);
-      bg.addColorStop(0,'rgba(232,71,42,0.5)');bg.addColorStop(1,'transparent');
-      ctx.fillStyle=bg;ctx.fillRect(bx,by,bl,1.5);
-    }
-    ctx.restore();
-  }
-}
-
-function drawWide(ctx,W,H,prog,spd,oppProg,demon){
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#0c0c14';ctx.fillRect(0,0,W,H*0.36);
-  const hg=ctx.createLinearGradient(0,H*0.3,0,H*0.42);
-  hg.addColorStop(0,'transparent');hg.addColorStop(1,'rgba(232,71,42,0.08)');
-  ctx.fillStyle=hg;ctx.fillRect(0,H*0.3,W,H*0.12);
-  ctx.save();ctx.transform(1,0,-0.05,1,W*0.025,0);
-  const ry=H*0.38,rh=H*0.45;
-  ctx.fillStyle='#181818';ctx.fillRect(0,ry,W,rh);
-  ctx.fillStyle='rgba(232,71,42,0.45)';ctx.fillRect(0,ry,W,3);ctx.fillRect(0,ry+rh-3,W,3);
-  const scx=(prog*2800)%120;
-  for(let x=-scx;x<W+120;x+=120){ctx.fillStyle='rgba(255,255,255,0.32)';ctx.fillRect(x,ry+rh/2-1,58,2);}
-  if(prog>0.72){
-    const fx=W*0.82+(prog-0.72)*W*1.8;
-    if(fx<W+20){const sh=13;for(let r=0;r<Math.floor(rh/sh);r++)for(let c=0;c<3;c++){ctx.fillStyle=(r+c)%2===0?'#fff':'#000';ctx.fillRect(fx+c*sh,ry+r*sh,sh,sh);}}
-  }
-  const ox=W*(0.15+oppProg*0.7),px=W*(0.15+prog*0.7);
-  drawCarWide(ctx,ox,ry+rh*0.24,W*0.1,W*0.1*0.38,'#8ab');
-  drawCarWide(ctx,px,ry+rh*0.64,W*0.13,W*0.13*0.38,demon?'#cc1100':'#E8472A');
-  ctx.restore();
-  ctx.save();
-  ctx.fillStyle='rgba(10,10,12,0.6)';ctx.fillRect(8,H*0.4,92,24);
-  ctx.fillStyle='rgba(242,169,0,0.88)';ctx.font=`bold 11px "JetBrains Mono",monospace`;
-  ctx.fillText(`${Math.round(spd)} MPH`,14,H*0.4+16);
-  ctx.restore();
-}
-
-function drawWindshield(ctx,W,H,demon,prog){
-  ctx.save();
-  // Left A-pillar
-  const lg=ctx.createLinearGradient(0,0,W*0.15,0);
-  lg.addColorStop(0,demon?'rgba(70,0,0,0.98)':'rgba(8,8,10,0.98)');lg.addColorStop(1,'transparent');
-  ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*0.17,0);ctx.lineTo(W*0.09,H*0.37);ctx.lineTo(0,H*0.39);ctx.closePath();ctx.fill();
-  // Right A-pillar
-  const rg2=ctx.createLinearGradient(W,0,W*0.85,0);
-  rg2.addColorStop(0,demon?'rgba(70,0,0,0.98)':'rgba(8,8,10,0.98)');rg2.addColorStop(1,'transparent');
-  ctx.fillStyle=rg2;ctx.beginPath();ctx.moveTo(W,0);ctx.lineTo(W*0.83,0);ctx.lineTo(W*0.91,H*0.37);ctx.lineTo(W,H*0.39);ctx.closePath();ctx.fill();
-  if(demon&&prog>0){ctx.fillStyle='rgba(160,0,0,0.07)';ctx.fillRect(0,0,W,H*0.37);}
-  // Dash
-  const dg=ctx.createLinearGradient(0,H*0.68,0,H);
-  dg.addColorStop(0,demon?'rgba(28,0,0,0.97)':'rgba(14,14,16,0.97)');dg.addColorStop(1,demon?'rgba(18,0,0,1)':'rgba(10,10,12,1)');
-  ctx.fillStyle=dg;
-  ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W,H);ctx.lineTo(W,H*0.7);ctx.bezierCurveTo(W*0.78,H*0.63,W*0.22,H*0.63,0,H*0.7);ctx.closePath();ctx.fill();
-  ctx.strokeStyle=demon?'rgba(180,20,0,0.35)':'rgba(255,255,255,0.05)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(0,H*0.7);ctx.bezierCurveTo(W*0.22,H*0.63,W*0.78,H*0.63,W,H*0.7);ctx.stroke();
-  ctx.restore();
-}
-
-function drawWheel(ctx,W,H,demon){
-  const cx=W/2,cy=H*0.865,r=Math.min(W,H)*0.105;
-  ctx.save();
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(255,255,255,0.16)';ctx.lineWidth=r*0.15;ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle=demon?'#2a0000':'#181818';ctx.lineWidth=r*0.12;ctx.stroke();
-  for(let i=0;i<3;i++){
-    const a=Math.PI/2+(i/3)*Math.PI*2;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r*0.86,cy+Math.sin(a)*r*0.86);
-    ctx.strokeStyle='rgba(255,255,255,0.09)';ctx.lineWidth=r*0.07;ctx.stroke();
-  }
-  ctx.beginPath();ctx.arc(cx,cy,r*0.2,0,Math.PI*2);ctx.fillStyle=demon?'#800000':'#1e1e1e';ctx.fill();
-  if(demon){ctx.beginPath();ctx.arc(cx,cy,r*0.12,0,Math.PI*2);ctx.fillStyle='#cc0000';ctx.fill();}
-  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*1.14,Math.PI*1.86);
-  ctx.strokeStyle=demon?'rgba(200,20,0,0.4)':'rgba(255,255,255,0.1)';ctx.lineWidth=r*0.1;ctx.stroke();
-  ctx.restore();
-}
-
-function drawCar(ctx,x,y,w,h,col,isPlayer,demon){
-  ctx.save();ctx.translate(x,y);
-  ctx.fillStyle=col;ctx.beginPath();
-  if(ctx.roundRect)ctx.roundRect(-w/2,-h*0.35,w,h*0.7,h*0.08);
-  else{ctx.rect(-w/2,-h*0.35,w,h*0.7);}
-  ctx.fill();
-  ctx.fillStyle=isPlayer?(demon?'#5a0000':'#1e1e1e'):'#2e2e2e';
-  if(ctx.roundRect)ctx.roundRect(-w*0.3,-h*0.8,w*0.6,h*0.48,h*0.07);
-  else ctx.rect(-w*0.3,-h*0.8,w*0.6,h*0.48);
-  ctx.fill();
-  ctx.fillStyle='rgba(100,180,255,0.12)';
-  if(ctx.roundRect)ctx.roundRect(-w*0.22,-h*0.76,w*0.44,h*0.38,h*0.04);
-  else ctx.rect(-w*0.22,-h*0.76,w*0.44,h*0.38);
-  ctx.fill();
-  const ww=h*0.36,wr=ww/2;
-  [[-w*0.31,h*0.22],[w*0.31,h*0.22],[-w*0.31,-h*0.08],[w*0.31,-h*0.08]].forEach(([wx,wy])=>{
-    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(wx,wy,wr,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=wr*0.28;ctx.stroke();
-  });
-  ctx.fillStyle=isPlayer?'rgba(255,100,50,0.9)':'rgba(220,220,255,0.75)';
-  [[-w*0.43,-h*0.1],[w*0.43,-h*0.1]].forEach(([lx,ly])=>{
-    ctx.beginPath();ctx.ellipse(lx,ly,w*0.04,h*0.08,0,0,Math.PI*2);ctx.fill();
-  });
-  ctx.restore();
-}
-
-function drawCarWide(ctx,x,y,w,h,col){
-  ctx.save();ctx.translate(x,y);
-  ctx.fillStyle=col;
-  if(ctx.roundRect)ctx.roundRect(-w/2,-h*0.4,w,h*0.75,h*0.09);else ctx.rect(-w/2,-h*0.4,w,h*0.75);
-  ctx.fill();
-  ctx.fillStyle='#222';
-  if(ctx.roundRect)ctx.roundRect(-w*0.2,-h*0.85,w*0.5,h*0.5,h*0.06);else ctx.rect(-w*0.2,-h*0.85,w*0.5,h*0.5);
-  ctx.fill();
-  const ww=h*0.4;
-  [[-w*0.32,h*0.28],[w*0.3,h*0.28]].forEach(([wx,wy])=>{
-    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(wx,wy,ww/2,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=ww*0.26;ctx.stroke();
-  });
-  ctx.restore();
-}
-
-function drawIdleTrack(){
-  const c=document.getElementById('raceCanvas');if(!c)return;
-  const ctx=c.getContext('2d');const W=c.width,H=c.height;if(!W||!H)return;
-  drawCockpit(ctx,W,H,0,0,0,false);
-  ctx.save();
-  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(W/2-130,H/2-28,260,56);
-  ctx.strokeStyle='rgba(242,169,0,0.45)';ctx.lineWidth=1;ctx.strokeRect(W/2-130,H/2-28,260,56);
-  ctx.fillStyle='rgba(242,169,0,0.88)';ctx.font=`bold 17px "Rajdhani",sans-serif`;
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('⚡ PRESS LAUNCH TO RACE',W/2,H/2);
-  ctx.restore();
-}
-
-function drawGauge(canvasId,val,maxVal,label,color){
-  const c=document.getElementById(canvasId);if(!c)return;
-  const ctx=c.getContext('2d');const W=c.width,H=c.height,cx=W/2,cy=H/2,r=W*0.41;
-  ctx.clearRect(0,0,W,H);
-  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*0.8,Math.PI*2.2);
-  ctx.strokeStyle='rgba(255,255,255,0.09)';ctx.lineWidth=r*0.22;ctx.stroke();
-  const f=Math.min(1,val/maxVal);
-  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*0.8,Math.PI*0.8+Math.PI*1.4*f);
-  ctx.strokeStyle=color;ctx.lineWidth=r*0.19;ctx.shadowBlur=8;ctx.shadowColor=color;ctx.stroke();ctx.shadowBlur=0;
-  ctx.fillStyle='#fff';ctx.font=`bold ${Math.round(W*0.19)}px "JetBrains Mono",monospace`;
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.round(val),cx,cy-1);
-  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font=`${Math.round(W*0.11)}px "JetBrains Mono",monospace`;
-  ctx.fillText(label,cx,cy+W*0.17);
-}
-
-// ─── RACE STATE ───────────────────────────────────────────────────────────
-let raceRunning=false;
-let _lastRP=null;
-
-// ─── PHYSICS (unchanged from v6) ─────────────────────────────────────────
+// Physics-accurate ET calculator
+// Uses a power-to-weight trap speed model + traction coefficient correction
+// Based on empirical Hellcat drag data (11.5s stock, 8.9s Demon 170)
 function calcET(hp, weight, tractionCoeff, launchBonus) {
+  // Step 1: Theoretical trap speed from kinetic energy at the 1/4 mile finish
+  // Power delivered = hp * efficiency; at 1/4 mile in ~10-12s the car is running ~peak power
+  const efficiency = 0.85; // drivetrain + aero loss
+  const hpW = hp * 745.7 * efficiency; // watts
+  const massKg = weight * 0.453592;
+  // Trap KE = (1/2)*m*v^2 = hpW * t; solve numerically for consistent t+v
+  // Use empirical formula: trap_mph ≈ 234 * cbrt(hp / weight)
   let trapMph = 234 * Math.pow(hp / weight, 1/3);
+  // Traction correction: poor traction = less effective hp at launch
   trapMph *= (0.85 + tractionCoeff * 0.15);
+  
+  // Step 2: ET from trap speed using distance-time relationship
+  // 1/4 mile = 1320 ft; avg speed = trapMph * 0.59 (acceleration curve factor)
   const avgMph = trapMph * 0.59;
   const etRaw = (1320 / (avgMph * 5280 / 3600));
+  
+  // Step 3: Launch quality correction
   const et = etRaw - launchBonus;
+  
+  // Clamp to realistic range
   return Math.max(8.5, Math.min(16.5, et));
 }
 
+// Calculate trap speed separately for display
 function calcTrap(hp, weight, tractionCoeff) {
   const trapMph = 234 * Math.pow(hp / weight, 1/3);
   return Math.round(trapMph * (0.85 + tractionCoeff * 0.15));
 }
 
+let raceAnimFrame = null;
+let raceRunning = false;
 
 function runRace(){
-  if(raceRunning)return;
-  resumeAC();
-  const fam=FAMILIES[currentFamily];
-  const yr=fam.years[currentYearIdx]||fam.years[0];
-  const hp=isDemonMode?yr.hp:(yr.hp||707);
-  const wt=yr.w||fam.weight;
-  const tireSel=document.getElementById('dragTires')?.value||'0';
-  let tc,tn,dr=false;
-  if(tireSel==='0.7'){tc=0.98;tn='Drag Radials';dr=true;}
-  else if(tireSel==='0.3'){tc=0.88;tn='Sticky 200TW';}
-  else{tc=0.72;tn='Street Tires';}
-  const lb=parseFloat(document.getElementById('dragLaunch')?.value||0);
-  const oppKey=document.getElementById('oppSelect')?.value||'camaro_zl1';
-  const opp=OPPONENTS[oppKey];
-  const myET=calcET(hp,wt,tc,lb);
-  const myTrap=calcTrap(hp,wt,tc);
-  const oppET=opp.qtm,oppTrap=opp.trap;
-  const win=myET<=oppET;
-  _lastRP={hp,wt,tn,dr,myET,myTrap,oppET,oppTrap,opp,win,oppKey};
-
-  document.getElementById('resultPanel').style.display='none';
-  document.getElementById('raceHUD').style.display='block';
-  const lbtn=document.getElementById('launchBtn');
-  if(lbtn){lbtn.disabled=true;lbtn.textContent='RACING...';}
-
-  const db=document.getElementById('demonBanner');
-  if(db)db.style.opacity=isDemonMode?'1':'0';
-
-  raceRunning=true;
-  resizeRC();
-  const c=document.getElementById('raceCanvas'),ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-
-  const msgEl=document.getElementById('raceMsg');
-  function showCount(n){
-    msgEl.textContent=n===0?'GO!':String(n);
-    msgEl.style.color=n===0?'rgba(232,71,42,0.95)':'rgba(242,169,0,0.95)';
-    msgEl.style.fontSize=n===0?'5.5rem':'5rem';
-    msgEl.style.opacity='1';
-    playCountBeep(n);
-    setTimeout(()=>{msgEl.style.opacity='0';},480);
-  }
-
-  drawFrameByMode(ctx,W,H,0,0,0,isDemonMode,win);
-  showCount(3);
-  let count=3;
-
-  const timer=setInterval(()=>{
+  if(raceRunning) return;
+  
+  const fam = FAMILIES[currentFamily];
+  const yr = fam.years[currentYearIdx] || fam.years[0];
+  const hp = isDemonMode ? yr.hp : (yr.hp || 707);
+  const wt = yr.w || fam.weight;
+  
+  // Traction coefficients by tire selection
+  const tireSel = document.getElementById('dragTires')?.value || '0';
+  let tractionCoeff, tireName;
+  if(tireSel === '0.7') { tractionCoeff = 0.98; tireName = 'Drag Radials'; }
+  else if(tireSel === '0.3') { tractionCoeff = 0.88; tireName = 'Sticky 200TW'; }
+  else { tractionCoeff = 0.72; tireName = 'Street Tires'; }
+  
+  // Launch bonus in seconds
+  const launchBonus = parseFloat(document.getElementById('dragLaunch')?.value || 0);
+  
+  const oppKey = document.getElementById('oppSelect')?.value || 'camaro_zl1';
+  const opp = OPPONENTS[oppKey];
+  
+  // My ET uses configured traction + launch bonus
+  const myET = calcET(hp, wt, tractionCoeff, launchBonus);
+  const myTrap = calcTrap(hp, wt, tractionCoeff);
+  
+  // Opponent uses their real-world known ET (not formula) for authenticity
+  const oppET = opp.qtm;
+  const oppTrap = opp.trap;
+  
+  const win = myET <= oppET;
+  const box = document.getElementById('trackBox');
+  box.style.display = 'block';
+  document.getElementById('raceResult').innerHTML = '';
+  
+  // Reset car positions
+  const myCar = document.getElementById('myCar');
+  const oppCar = document.getElementById('oppCar');
+  myCar.style.transition = 'left 0s';
+  oppCar.style.transition = 'left 0s';
+  myCar.style.left = '12%';
+  oppCar.style.left = '12%';
+  
+  // Speed blur
+  const blur = document.getElementById('speedBlur');
+  
+  raceRunning = true;
+  
+  // Countdown then launch
+  let count = 3;
+  document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--amber)">${count}</div>`;
+  
+  const countInterval = setInterval(() => {
     count--;
-    if(count>0){
-      showCount(count);
-      drawFrameByMode(ctx,W,H,0,0,0,isDemonMode,win);
+    if(count > 0) {
+      document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--amber)">${count}</div>`;
     } else {
-      clearInterval(timer);
-      showCount(0);
-      playGoSound(isDemonMode);
-      doFlash();
-
-      const totalDur=(Math.min(myET,oppET)/11.5)*2.1*1000;
-      const startT=performance.now();
-      playEngineRev(hp,dr,isDemonMode,totalDur*1.1+200);
-      let flashedFinish=false;
-
-      function frame(now){
-        const elapsed=now-startT;
-        const t=Math.min(1,elapsed/totalDur);
-        // ease: slow start, fast middle, slight taper
-        const te=t<0.15?t*t*(1/0.0225)*0.5:t<0.85?0.5+((t-0.15)/0.7)*0.44:0.94+((t-0.85)/0.15)*0.06;
-        const myP=Math.min(1,te*(myET/Math.max(myET,oppET)));
-        const oppP=Math.min(1,te*(oppET/Math.max(myET,oppET)));
-        const curSpd=myTrap*Math.pow(t,0.44);
-        drawFrameByMode(ctx,W,H,myP,curSpd,oppP,isDemonMode,win);
-        drawGauge('hudSpeedo',curSpd,180,'MPH','rgba(232,71,42,0.9)');
-        drawGauge('hudRPM',Math.min(8500,1800+curSpd*54),8500,'RPM','rgba(242,169,0,0.9)');
-        if(t>0.9&&!flashedFinish){flashedFinish=true;doFlash();playTireScreech(320);playBeep(220,0.16,0.45,'sawtooth');}
-        if(t<1){_raceAnimId=requestAnimationFrame(frame);}
-        else {
-          raceRunning=false;
-          if(db)db.style.opacity='0';
-          if(lbtn){lbtn.disabled=false;lbtn.textContent='⚡ LAUNCH';}
-          drawFrameByMode(ctx,W,H,1,myTrap,win?0.94:1.0,isDemonMode,win);
-          drawGauge('hudSpeedo',myTrap,180,'MPH','rgba(232,71,42,0.9)');
-          drawGauge('hudRPM',1800,8500,'RPM','rgba(242,169,0,0.9)');
-          setTimeout(()=>showResult(_lastRP),600);
-        }
-      }
-      _raceAnimId=requestAnimationFrame(frame);
+      clearInterval(countInterval);
+      document.getElementById('raceResult').innerHTML = `<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:var(--red);text-shadow:0 0 20px rgba(232,71,42,.8)">GO!</div>`;
+      
+      // Calculate finish positions proportionally
+      // The winner goes to 84%, loser goes slightly less
+      const myFinish = win ? '85%' : (84 - (oppET - myET) * 5) + '%';
+      const oppFinish = win ? (85 - (myET - oppET) * 5) + '%' : '85%';
+      
+      // Animate: use ET ratio to set speed (lower ET = faster animation)
+      const raceScale = 2.2; // base duration multiplier
+      const myDuration = (myET / 11.5) * raceScale;
+      const oppDuration = (oppET / 11.5) * raceScale;
+      
+      setTimeout(() => {
+        if(blur) { blur.style.transition = 'opacity .3s'; blur.style.opacity = '1'; }
+        myCar.style.transition = `left ${myDuration.toFixed(2)}s cubic-bezier(0.2,0,0.8,1)`;
+        oppCar.style.transition = `left ${oppDuration.toFixed(2)}s cubic-bezier(0.2,0,0.8,1)`;
+        myCar.style.left = myFinish;
+        oppCar.style.left = oppFinish;
+        
+        // Show results after the winner crosses the line
+        const resultDelay = Math.min(myDuration, oppDuration) * 1000 + 400;
+        setTimeout(() => {
+          if(blur) blur.style.opacity = '0';
+          raceRunning = false;
+          const margin = Math.abs(myET - oppET);
+          const marginLabel = margin < 0.1 ? 'BY A BUMPER' : margin < 0.3 ? 'CLOSE' : margin < 0.8 ? 'SOLID WIN' : 'DOMINANT';
+          document.getElementById('raceResult').innerHTML = `
+<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:${win?'#4ade80':'#f87171'};margin-bottom:8px;text-shadow:${win?'0 0 20px rgba(74,222,128,.5)':'0 0 20px rgba(248,113,113,.5)'}">${win ? '🏆 WIN' : '❌ LOSS'} ${win && margin >= 0.1 ? '— ' + marginLabel : ''}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--fm);font-size:.72rem">
+  <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${win?'rgba(74,222,128,.35)':'var(--border)'}">
+    <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">MY BUILD</div>
+    <div style="font-family:var(--fh);color:var(--amber);font-size:1.3rem;font-weight:700">${myET.toFixed(2)}s</div>
+    <div style="color:var(--dim);margin-top:2px">@ ${myTrap} mph trap</div>
+    <div style="color:var(--dim2);font-size:.62rem;margin-top:4px">${hp}hp · ${wt.toLocaleString()}lbs · ${tireName}</div>
+  </div>
+  <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${!win?'rgba(74,222,128,.35)':'var(--border)'}">
+    <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">${opp.name.split(' ').slice(0,3).join(' ')}</div>
+    <div style="font-family:var(--fh);color:var(--white);font-size:1.3rem;font-weight:700">${oppET.toFixed(2)}s</div>
+    <div style="color:var(--dim);margin-top:2px">@ ${oppTrap} mph trap</div>
+    <div style="color:var(--dim2);font-size:.62rem;margin-top:4px">${opp.hp}hp · real-world ET</div>
+  </div>
+</div>
+<div style="margin-top:8px;font-family:var(--fm);font-size:.65rem;color:var(--dim2);text-align:center">Quarter mile · 1320 ft · ${Math.abs(myET-oppET).toFixed(2)}s gap</div>`;
+        }, resultDelay);
+      }, 150);
     }
-  },800);
-}
-
-function drawFrameByMode(ctx,W,H,myP,spd,oppP,demon){
-  if(currentCam==='cockpit')drawCockpit(ctx,W,H,myP,spd,oppP,demon);
-  else if(currentCam==='chase')drawChase(ctx,W,H,myP,spd,oppP,demon);
-  else drawWide(ctx,W,H,myP,spd,oppP,demon);
-}
-
-function doFlash(){
-  const f=document.getElementById('flashOverlay');if(!f)return;
-  f.style.transition='none';f.style.opacity='0.5';
-  setTimeout(()=>{f.style.transition='opacity 0.3s';f.style.opacity='0';},55);
-  setTimeout(()=>{f.style.transition='';},380);
-}
-
-function showResult(p){
-  const win=p.win,m=Math.abs(p.myET-p.oppET);
-  const ml=m<0.1?'BY A BUMPER':m<0.3?'CLOSE RACE':m<0.8?'SOLID WIN':'DOMINANT';
-  document.getElementById('resultTitle').textContent=win?'🏆 WIN':'❌ LOSS';
-  document.getElementById('resultTitle').style.color=win?'#4ade80':'#f87171';
-  document.getElementById('rcMe').style.borderColor=win?'rgba(74,222,128,0.4)':'rgba(255,255,255,0.08)';
-  document.getElementById('rcOpp').style.borderColor=!win?'rgba(74,222,128,0.4)':'rgba(255,255,255,0.08)';
-  document.getElementById('rcMyET').textContent=p.myET.toFixed(2)+'s';
-  document.getElementById('rcMyTrap').textContent='@ '+p.myTrap+' mph trap';
-  document.getElementById('rcMySpec').textContent=p.hp+'hp · '+p.wt.toLocaleString()+'lbs · '+p.tn;
-  document.getElementById('rcOppLabel').textContent=p.opp.name.split(' ').slice(0,3).join(' ');
-  document.getElementById('rcOppET').textContent=p.oppET.toFixed(2)+'s';
-  document.getElementById('rcOppTrap').textContent='@ '+p.oppTrap+' mph trap';
-  document.getElementById('rcOppSpec').textContent=p.opp.hp+'hp · real-world ET';
-  document.getElementById('rcMeta').textContent='¼ mile · '+m.toFixed(2)+'s gap'+(win&&m>=0.08?' — '+ml:'');
-  document.getElementById('resultPanel').style.display='flex';
-}
-
-function rerunRace(){document.getElementById('resultPanel').style.display='none';runRace();}
-
-function updateMyBuildSpec(){
-  const fam=FAMILIES[currentFamily];const yr=fam.years[currentYearIdx]||fam.years[0];
-  const hp=isDemonMode?(yr.hp===840?840:yr.hp):yr.hp;
-  const wt=yr.w||fam.weight;
-  const el=document.getElementById('dragMyBuildLabel');
-  if(el)el.textContent=`${yr.y} ${fam.name} · ${hp}hp · ${(wt||0).toLocaleString()}lbs`;
-  const el2=document.getElementById('myBuildSpec');
-  if(el2)el2.textContent=`${yr.y} ${fam.name} · ${hp}hp · ${(wt||0).toLocaleString()}lbs`;
+  }, 800);
 }
 
 function populateLeaderboard(){
-  const lb=document.getElementById('leaderboard');if(!lb)return;
-  lb.innerHTML=LEADERBOARD.map((e,i)=>`<div class="lbRow"><span style="color:${i===0?'rgba(242,169,0,0.9)':'rgba(240,240,240,0.5)'}">🏆 ${e.name}</span><span style="font-family:var(--fm);color:var(--white)">${e.et}s · ${e.trap}</span></div>`).join('');
+  const lb=document.getElementById('leaderboard');
+  if(!lb) return;
+  lb.innerHTML=LEADERBOARD.map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:.7rem"><span style="color:${i===0?'var(--amber)':'var(--dim)'}">🏆 ${e.name}</span><span style="font-family:var(--fm);color:var(--white)">${e.et}s · ${e.trap}</span></div>`).join('');
 }
-
 
 function resetBuild(){
   activeParts={wheels:'stock_wheels',tires:'ps4s',suspension:null,color:0,exhaust:null,exterior:null};
@@ -2588,6 +2137,14 @@ function buildHotspotOverlay(){
   });
 }
 
+// Rebuild hotspot layer when X-ray is toggled
+const origToggleXray = toggleXray;
+// Patch xray toggle to also rebuild hotspots
+const _origApplyXray = applyXrayBase;
+function applyXray(on){
+  _origApplyXray(on);
+  setTimeout(buildHotspotOverlay, 50);
+}
 
 // Add CSS for pulse animation (inject into head)
 const styleEl = document.createElement('style');
@@ -2639,7 +2196,7 @@ function addSketchfabButton(sfId, yearLabel){
   const btn = document.createElement('button');
   btn.id = 'sf-launch-btn';
   btn.className = 'ab';
-  btn.innerHTML = '🔍 PHOTOREALISTIC 3D';
+  btn.innerHTML = 'REAL MODEL VIEW';
   btn.style.cssText += 'border-color:rgba(242,169,0,0.4);color:var(--amber)';
   btn.title = `Load full photorealistic Sketchfab model for ${yearLabel}`;
   btn.onclick = () => loadSketchfabModel(sfId);
@@ -2656,6 +2213,7 @@ function setSketchfabPrimaryViewer(sfId, vehicleLabel) {
   const ex = document.getElementById('sf-primary');
   if(ex) ex.remove();
   
+  if(!sfId){canvas.style.opacity='1';canvas.style.pointerEvents='auto';return;}
   if(sfId) {
     // Hide Three.js canvas, show Sketchfab as primary
     canvas.style.opacity = '0';
@@ -2733,6 +2291,22 @@ function setSketchfabPrimaryViewer(sfId, vehicleLabel) {
   }
 }
 
+// Override selectFamily and updateVehicleInfo to handle Sketchfab
+const _origUpdateVehicleInfo = updateVehicleInfoBase;
+function updateVehicleInfo(){
+  _origUpdateVehicleInfo();
+  const fam = FAMILIES[currentFamily];
+  const yr = fam.years[currentYearIdx] || fam.years[0];
+  // Always set primary viewer — Sketchfab if model exists, spec card if not
+  setSketchfabPrimaryViewer(null, `${yr.y} ${fam.name}`);
+  // Also keep the secondary button for explicit launch
+  if(yr.has3d && yr.sf){
+    addSketchfabButton(yr.sf, `${yr.y} ${fam.name}`);
+  } else {
+    const ex = document.getElementById('sf-launch-btn');
+    if(ex) ex.remove();
+  }
+}
 
 // ========= SPEC PANEL (shown when no 3D model) =========
 function showSpecCard(){
@@ -2749,7 +2323,7 @@ function showSpecCard(){
   const vw = document.getElementById('vw');
   const card = document.createElement('div');
   card.id = 'spec-card';
-  card.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8;background:rgba(10,10,12,0.92);border:1px solid rgba(242,169,0,0.2);border-radius:6px;padding:24px 28px;min-width:320px;max-width:420px;text-align:center';
+  card.style.cssText = 'position:absolute;bottom:64px;left:14px;z-index:8;background:rgba(10,10,12,0.86);border:1px solid rgba(242,169,0,0.2);border-radius:6px;padding:12px 14px;min-width:240px;max-width:300px;transform:scale(.82);transform-origin:bottom left;text-align:center';
   card.innerHTML = `
     <div style="font-family:var(--fm);font-size:0.62rem;letter-spacing:0.25em;color:var(--dim2);text-transform:uppercase;margin-bottom:8px">FULL SPEC CARD</div>
     <div style="font-family:var(--fh);font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:4px">${yr.y} ${fam.label}</div>
@@ -2770,15 +2344,575 @@ function showSpecCard(){
       </div>`).join('')}
     </div>
     <div style="font-family:var(--fm);font-size:0.65rem;color:var(--dim2);border-top:1px solid var(--border);padding-top:10px">
-      3D model not yet available for this variant · Use the configurator panels to build it out
+      Live configurator view. Pick a year marked 3D to open the real model view.
     </div>`;
   vw.appendChild(card);
 }
 
+// Hook into year selection to show/hide spec card
+const _origBuildLeftPanel = buildLeftPanelBase;
+function buildLeftPanel(){
+  _origBuildLeftPanel();
+  const fam = FAMILIES[currentFamily];
+  const yr = fam.years[currentYearIdx] || fam.years[0];
+  if(!yr.has3d){ setTimeout(showSpecCard, 100); }
+  else {
+    const ex = document.getElementById('spec-card');
+    if(ex) ex.remove();
+  }
+}
 
 // Demon crate tooltip
 function showDemonCrateTooltip(){
   alert('🔥 DEMON CRATE — $1 Factory Option\n\nIncludes:\n• Skinny P185/70R17 front drag tires on 17" steel wheels\n• Mickey Thompson drag radials rear\n• Second key fob (unlocks Demon Mode: 840hp)\n• High-flow air filter (SoCalSuperchargers)\n• Harness bar bracket (bolts into trunk)\n• Floor jack puck\n\nOnly 3,300 built. The $1 option that changed drag racing forever.');
+}
+
+// ========= FINAL INIT PATCHES =========
+
+/* ================= v7 REALISM MODULE (Challenger quality bar) ================= */
+const R_PI=Math.PI;
+function R_ss(a,b,x){x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x);}
+function R_sg(v){return v<0?-1:1;}
+function R_cr(tbl,z){
+  const n=tbl.length; if(z<=tbl[0][0])return tbl[0][1]; if(z>=tbl[n-1][0])return tbl[n-1][1];
+  let i=0; while(z>tbl[i+1][0]) i++;
+  const p0=tbl[Math.max(i-1,0)],p1=tbl[i],p2=tbl[i+1],p3=tbl[Math.min(i+2,n-1)];
+  const dz=p2[0]-p1[0], t=(z-p1[0])/dz;
+  const m1=(p2[1]-p0[1])/(p2[0]-p0[0])*dz, m2=(p3[1]-p1[1])/(p3[0]-p1[0])*dz;
+  const t2=t*t,t3=t2*t;
+  return (2*t3-3*t2+1)*p1[1]+(t3-2*t2+t)*m1+(-2*t3+3*t2)*p2[1]+(t3-t2)*m2;
+}
+function R_lin(hex){return new THREE.Color(hex).convertSRGBToLinear();}
+function R_canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function R_tex(c,srgb,rep){const t=new THREE.CanvasTexture(c);if(srgb)t.encoding=THREE.sRGBEncoding;if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1]);}t.anisotropy=8;return t;}
+
+/* ---------- studio environment (reflections) ---------- */
+function R_makeEnv(rend){
+  const pm=new THREE.PMREMGenerator(rend);
+  const es=new THREE.Scene();
+  const gc=R_canvas(16,256),g=gc.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,256);
+  gr.addColorStop(0,'#59616d');gr.addColorStop(0.42,'#2b3038');gr.addColorStop(0.5,'#14161a');gr.addColorStop(0.52,'#07080a');gr.addColorStop(1,'#030304');
+  g.fillStyle=gr;g.fillRect(0,0,16,256);
+  const gt=new THREE.CanvasTexture(gc);gt.encoding=THREE.sRGBEncoding;
+  es.add(new THREE.Mesh(new THREE.SphereGeometry(60,32,24),new THREE.MeshBasicMaterial({map:gt,side:THREE.BackSide})));
+  function box(w,h,x,y,z,I,tint){
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));
+    m.material.color.setRGB(I*(tint?tint[0]:1),I*(tint?tint[1]:1),I*(tint?tint[2]:1));
+    m.position.set(x,y,z);m.lookAt(0,1,0);es.add(m);return m;}
+  box(16,24,0,22,0,6.5);            // big overhead softbox
+  box(5,26,-20,9,0,4.2);            // side strip L
+  box(5,26,20,9,0,4.2);             // side strip R
+  box(18,4,0,5,-26,3.0,[1,0.9,0.8]);// warm rear strip
+  box(14,3,0,3,28,2.2);             // front low fill
+  box(3,10,-12,14,16,2.4,[0.85,0.92,1]);
+  box(3,10,12,14,-16,2.4);
+  const rt=pm.fromScene(es,0.025);pm.dispose();
+  return rt.texture;
+}
+
+/* ---------- materials ---------- */
+let R_PAINT=null,R_GLASS=null,R_FINISH='gloss';
+function R_flakeMap(){
+  if(R_flakeMap.t) return R_flakeMap.t;
+  const c=R_canvas(512,512),g=c.getContext('2d'),id=g.createImageData(512,512);
+  for(let i=0;i<id.data.length;i+=4){id.data[i]=128+(Math.random()-0.5)*90;id.data[i+1]=128+(Math.random()-0.5)*90;id.data[i+2]=255;id.data[i+3]=255;}
+  g.putImageData(id,0,0);
+  const t=R_tex(c,false,[7,7]);R_flakeMap.t=t;return t;
+}
+function R_applyFinish(){
+  if(!R_PAINT) return;
+  const f=R_FINISH,m=R_PAINT;
+  if(f==='gloss'){m.metalness=0.5;m.roughness=0.34;m.clearcoat=1;m.clearcoatRoughness=0.025;m.envMapIntensity=1.15;m.normalScale.set(0.22,0.22);}
+  if(f==='satin'){m.metalness=0.45;m.roughness=0.5;m.clearcoat=0.35;m.clearcoatRoughness=0.35;m.envMapIntensity=0.9;m.normalScale.set(0.1,0.1);}
+  if(f==='matte'){m.metalness=0.2;m.roughness=0.88;m.clearcoat=0;m.clearcoatRoughness=0.6;m.envMapIntensity=0.55;m.normalScale.set(0.04,0.04);}
+  if(f==='chrome'){m.metalness=1;m.roughness=0.06;m.clearcoat=0;m.envMapIntensity=1.5;m.normalScale.set(0,0);}
+  m.needsUpdate=true;
+}
+function R_ensurePaint(hex){
+  if(!R_PAINT){
+    R_PAINT=new THREE.MeshPhysicalMaterial({color:R_lin(hex),normalMap:R_flakeMap(),clearcoat:1});
+    R_PAINT.userData.paint=true; R_applyFinish();
+  } else R_PAINT.color.copy(R_lin(hex));
+  return R_PAINT;
+}
+function carBodyMat(hex,xray){return R_ensurePaint(hex||currentColor.hex);}
+function glassMat(xray){
+  if(!R_GLASS){R_GLASS=new THREE.MeshPhysicalMaterial({color:new THREE.Color(0x020304),metalness:0,roughness:0.03,transparent:true,opacity:0.88,side:THREE.DoubleSide,depthWrite:false,envMapIntensity:0.75,clearcoat:1,clearcoatRoughness:0.02});}
+  return R_GLASS;
+}
+const R_M={};
+function R_mat(key,fn){return R_M[key]||(R_M[key]=fn());}
+function chromeMat(){return R_mat('chrome',()=>new THREE.MeshStandardMaterial({color:R_lin('#e8eaee'),metalness:1,roughness:0.05,envMapIntensity:1.4}));}
+function carbonMat(){return R_mat('carbon',()=>{
+  const c=R_canvas(128,128),g=c.getContext('2d');g.fillStyle='#0b0b0d';g.fillRect(0,0,128,128);
+  for(let y=0;y<128;y+=8)for(let x=0;x<128;x+=8){const a=((x+y)/8)%2===0;g.fillStyle=a?'#1d1e22':'#050506';g.fillRect(x,y,8,8);g.fillStyle=a?'#2a2c31':'#101114';g.fillRect(x,y,8,2);}
+  const t=R_tex(c,true,[6,6]);
+  return new THREE.MeshPhysicalMaterial({map:t,metalness:0.3,roughness:0.35,clearcoat:1,clearcoatRoughness:0.05});});}
+function R_black(){return R_mat('trimblk',()=>new THREE.MeshStandardMaterial({color:0x0b0b0c,metalness:0.2,roughness:0.55,envMapIntensity:0.7}));}
+function R_plastic(){return R_mat('plastic',()=>new THREE.MeshStandardMaterial({color:0x151517,metalness:0,roughness:0.7}));}
+function R_rubber(){return R_mat('rubber',()=>new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.9,metalness:0}));}
+function redMat(){return R_mat('red',()=>new THREE.MeshPhysicalMaterial({color:R_lin('#d4281c'),metalness:0.4,roughness:0.35,clearcoat:1,clearcoatRoughness:0.08}));}
+function interiorMat(){return R_mat('interior',()=>new THREE.MeshStandardMaterial({color:0x0e0d0d,roughness:0.85,metalness:0}));}
+function wheelMat(hex){return R_mat('wheel'+hex,()=>new THREE.MeshStandardMaterial({color:R_lin(hex||'#aaaaaa'),metalness:0.92,roughness:0.24,envMapIntensity:1.3}));}
+function R_rotorMat(){return R_mat('rotor',()=>{
+  const c=R_canvas(512,512),g=c.getContext('2d');g.fillStyle='#8c8f94';g.fillRect(0,0,512,512);
+  for(let i=0;i<3000;i++){g.strokeStyle='rgba(255,255,255,'+Math.random()*0.08+')';g.beginPath();g.arc(256,256,40+Math.random()*210,0,R_PI*2);g.stroke();}
+  g.fillStyle='#25272b';
+  for(let r=0;r<4;r++){const rad=105+r*34,n=18+r*5;for(let i=0;i<n;i++){const a=i/n*R_PI*2+r*0.15;g.beginPath();g.arc(256+Math.cos(a)*rad,256+Math.sin(a)*rad,7,0,R_PI*2);g.fill();}}
+  g.fillStyle='#17181b';g.beginPath();g.arc(256,256,70,0,R_PI*2);g.fill();
+  return new THREE.MeshStandardMaterial({map:R_tex(c,true),metalness:0.85,roughness:0.4,envMapIntensity:1.0});});}
+function tireMat(){return R_rubber();}
+
+function R_tireTex(label){
+  const c=R_canvas(1024,512),g=c.getContext('2d');
+  g.fillStyle='#171718';g.fillRect(0,0,1024,512);
+  for(let k=0;k<2;k++){const y0=k?512*0.72:512*0.04,y1=k?512*0.96:512*0.28;
+    for(let i=0;i<260;i++){g.strokeStyle='rgba(255,255,255,'+(0.012+Math.random()*0.03)+')';const yy=y0+Math.random()*(y1-y0);g.beginPath();g.moveTo(0,yy);g.lineTo(1024,yy);g.stroke();}
+    g.fillStyle='rgba(200,200,200,0.78)';g.font='bold 34px Arial';g.textBaseline='middle';
+    const y=(y0+y1)/2;
+    g.fillText(label,50,y);g.font='bold 20px Arial';g.fillText('TREADWEAR 300  TRACTION AA  TEMPERATURE A  M+S',540,y-8);
+    g.fillText('MADE IN USA   RADIAL TUBELESS  DOT',540,y+16);
+  }
+  g.fillStyle='#0b0b0c';g.fillRect(0,512*0.3,1024,512*0.4);
+  for(let i=1;i<5;i++){g.fillStyle='#000';g.fillRect(0,512*(0.3+i*0.08)-3,1024,6);}
+  for(let x=0;x<1024;x+=18){g.fillStyle='#000';g.fillRect(x,512*0.3,5,512*0.4);}
+  g.fillStyle='rgba(255,255,255,0.03)';for(let i=0;i<3000;i++)g.fillRect(Math.random()*1024,Math.random()*512,1,1);
+  return R_tex(c,true);
+}
+
+/* ---------- lofted body engine ---------- */
+function R_loftBuild(secFn,zs){
+  const secs=zs.map(z=>secFn(z));
+  const nL=secs[0].length, nS=zs.length;
+  const pos=new Float32Array((nS*nL+2*(nL+1))*3);
+  const P=[];
+  for(let i=0;i<nS;i++){const row=[];for(let j=0;j<nL;j++){const v=new THREE.Vector3(secs[i][j].x,secs[i][j].y,zs[i]);row.push(v);const k=(i*nL+j)*3;pos[k]=v.x;pos[k+1]=v.y;pos[k+2]=v.z;}P.push(row);}
+  const idx=[];
+  for(let i=0;i<nS-1;i++)for(let j=0;j<nL;j++){const j2=(j+1)%nL;const a=i*nL+j,b=i*nL+j2,c=(i+1)*nL+j,d=(i+1)*nL+j2;idx.push(a,b,c,b,d,c);}
+  // caps
+  let base=nS*nL;
+  [[0,1],[nS-1,-1]].forEach(([si,dir],ci)=>{
+    let cx=0,cy=0;for(let j=0;j<nL;j++){cx+=P[si][j].x;cy+=P[si][j].y;}cx/=nL;cy/=nL;
+    const cz=zs[si];const c0=base;pos.set([cx,cy,cz],c0*3);
+    for(let j=0;j<nL;j++){const v=P[si][j];pos.set([v.x,v.y,v.z],(c0+1+j)*3);}
+    for(let j=0;j<nL;j++){const j2=(j+1)%nL;if(dir>0)idx.push(c0,c0+1+j2,c0+1+j);else idx.push(c0,c0+1+j,c0+1+j2);}
+    base+=nL+1;
+  });
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setIndex(idx);geo.computeVertexNormals();
+  // orientation: top-centre vertex normal should point +y
+  const ntop=geo.attributes.normal;const mid=(nS>>1)*nL;let topj=0,ty=-1e9;for(let j=0;j<nL;j++)if(P[nS>>1][j].y>ty){ty=P[nS>>1][j].y;topj=j;}
+  let flip=false;if(ntop.getY(mid+topj)<0){flip=true;const ia=geo.index.array;for(let t=0;t<ia.length;t+=3){const x=ia[t+1];ia[t+1]=ia[t+2];ia[t+2]=x;}geo.computeVertexNormals();}
+  return {geo,P,nL,nS,flip,nrm:geo.attributes.normal,zs};
+}
+function R_patch(L,i0,i1,jfn,off,mat,name){
+  const rows=[];for(let i=i0;i<=i1;i++){const [ja,jb]=jfn(i);const row=[];for(let j=ja;j<=jb;j++){const jj=((j%L.nL)+L.nL)%L.nL;const p=L.P[i][jj],k=i*L.nL+jj;row.push([p.x+L.nrm.getX(k)*off,p.y+L.nrm.getY(k)*off,p.z+L.nrm.getZ(k)*off]);}rows.push(row);}
+  const nr=rows.length,nc=rows[0].length;const pos=[],idx=[];
+  rows.forEach(r=>{for(let c=0;c<nc;c++){const q=r[Math.min(c,r.length-1)];pos.push(q[0],q[1],q[2]);}});
+  for(let r=0;r<nr-1;r++)for(let c=0;c<nc-1;c++){const a=r*nc+c,b=a+1,cc=(r+1)*nc+c,d=cc+1;if(L.flip)idx.push(a,b,cc,b,d,cc);else idx.push(a,b,cc,b,d,cc);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();
+  const m=new THREE.Mesh(g,mat);m.name=name||'patch';return m;
+}
+function R_line(L,iList,jfn,rad,mat){
+  const pts=iList.map(i=>{const j=jfn(i);const jj=((j%L.nL)+L.nL)%L.nL,k=i*L.nL+jj,p=L.P[i][jj];return new THREE.Vector3(p.x+L.nrm.getX(k)*0.0025,p.y+L.nrm.getY(k)*0.0025,p.z+L.nrm.getZ(k)*0.0025);});
+  const c=new THREE.CatmullRomCurve3(pts);return new THREE.Mesh(new THREE.TubeGeometry(c,pts.length*2,rad,5,false),mat);
+}
+function R_closestJ(L,i,x,jmin,jmax){let best=jmin,bd=1e9;for(let j=jmin;j<=jmax;j++){const d=Math.abs(L.P[i][j].x-x);if(d<bd){bd=d;best=j;}}return best;}
+
+/* ---------- Challenger geometry parameters ---------- */
+const R_AX={zf:1.50,zr:-1.45,rf:0.364,rr:0.364};
+const R_LB=[ // z, ybot, ytop, w, wt
+ [-2.52,.34,1.040,.80,.54],[-2.46,.26,1.085,.90,.62],[-2.30,.215,1.115,.955,.72],[-2.00,.19,1.115,.975,.79],
+ [-1.60,.17,1.090,.985,.84],[-1.10,.15,1.060,.975,.855],[-0.40,.15,1.050,.972,.86],[0.30,.15,1.055,.970,.84],
+ [0.80,.16,1.075,.975,.80],[1.30,.18,1.055,.975,.78],[1.90,.20,1.000,.970,.74],[2.30,.235,0.935,.950,.70],[2.45,.28,0.820,.910,.63],[2.52,.37,0.640,.790,.52]];
+function R_lbP(z,k){const t=R_LB.map(r=>[r[0],r[k]]);return R_cr(t,z);}
+function R_flare(z){ if(!isWidebody) return 0; return 0.065*Math.max(Math.exp(-Math.pow((z-R_AX.zf)/0.62,2)),Math.exp(-Math.pow((z-R_AX.zr)/0.78,2)))*0.85;}
+function R_archTop(z){ // lowest y the underside may have
+  let y=0;
+  [[R_AX.zf,0.405],[R_AX.zr,0.415]].forEach(([za,ra])=>{const d=Math.abs(z-za);if(d<ra){const rr=ra+(isWidebody?0.012:0);y=Math.max(y,0.364+Math.sqrt(Math.max(rr*rr-d*d,0)));}});
+  return y;
+}
+function R_lowerSec(z){
+  let yb=Math.max(R_lbP(z,1),R_archTop(z)); const yt=R_lbP(z,2); const w=R_lbP(z,3)+R_flare(z), wt=R_lbP(z,4)+R_flare(z)*0.55; const h=yt-yb;
+  const c=[[0,yb],[w*0.78,yb],[w*0.965,yb+0.05+0.03*h],[w,yb+0.42*h],[w*0.985,yb+0.76*h],[wt+(w-wt)*0.30,yt-0.026],[wt,yt-0.004],[wt*0.5,yt],[0,yt]];
+  return R_half(c,4);
+}
+function R_half(c,k){
+  const pts=c.map(p=>new THREE.Vector2(p[0],p[1]));
+  const sp=new THREE.SplineCurve(pts);const Rr=sp.getPoints((pts.length-1)*k).map(p=>new THREE.Vector2(Math.max(p.x,0),p.y));
+  const loop=Rr.slice();for(let j=Rr.length-2;j>=1;j--)loop.push(new THREE.Vector2(-Rr[j].x,Rr[j].y));
+  loop.M=Rr.length;loop.k=k;return loop;
+}
+const R_CB=[ // z, yb, wb, yt, wt
+ [0.96,1.00,.775,1.082,.74],[0.80,1.00,.785,1.150,.725],[0.58,1.00,.795,1.245,.705],[0.34,1.00,.800,1.335,.690],[0.08,1.00,.805,1.402,.672],[-0.22,1.00,.815,1.440,.660],
+ [-0.50,1.00,.825,1.449,.652],[-0.80,1.00,.835,1.432,.650],[-1.05,1.00,.845,1.375,.660],[-1.30,1.00,.855,1.275,.690],[-1.50,1.00,.862,1.178,.730],[-1.64,1.00,.866,1.108,.775],[-1.72,1.00,.868,1.080,.800]];
+function R_cbP(z,k){return R_cr(R_CB.map(r=>[r[0],r[k]]).reverse(),z);}
+function R_cabinSec(z){
+  const yb=1.0,wb=R_cbP(z,2),yt=R_cbP(z,3),wt=R_cbP(z,4),h=yt-yb;
+  const c=[[0,yb],[wb*0.9,yb],[wb,yb+0.02],[wb+(wt-wb)*0.62,yb+0.62*h],[wt+0.042,yt-0.085],[wt,yt-0.03],[wt*0.55,yt-0.005],[0,yt]];
+  return R_half(c,4);
+}
+function R_zList(a,b,step,fine){
+  const s=new Set();for(let z=a;z<=b+1e-6;z+=step)s.add(+z.toFixed(4));
+  (fine||[]).forEach(([zc,r,st])=>{for(let z=zc-r;z<=zc+r;z+=st)if(z>=a&&z<=b)s.add(+z.toFixed(4));});
+  s.add(a);s.add(b);return [...s].sort((x,y)=>x-y);
+}
+
+/* ---------- wheels, tires, brakes ---------- */
+function R_tireGeo(wid,rIn,rOut){
+  const pts=[],N=24;
+  for(let i=0;i<=N;i++){
+    const t=i/N;let r,a;
+    if(t<0.3){const s=t/0.3;r=rIn+(rOut-0.012-rIn)*Math.pow(s,0.9);a=-wid/2*(0.80+0.20*Math.sin(s*R_PI/2));}
+    else if(t<=0.7){const s=(t-0.3)/0.4;r=rOut-0.012*Math.pow(Math.abs(2*s-1),3)+0.0;a=-wid/2+wid*s;}
+    else{const s=(t-0.7)/0.3;r=(rOut-0.012)-(rOut-0.012-rIn)*Math.pow(s,1.1);a=wid/2*(1-0.20*(1-Math.sin((1-s)*R_PI/2))); if(s>=0.999){a=wid/2*0.80;}}
+    pts.push(new THREE.Vector2(r,a));
+  }
+  const g=new THREE.LatheGeometry(pts,72);g.rotateX(R_PI/2);return g;
+}
+function R_spokeGeo(rIn,rOut,wIn,wOut,depth,dish){
+  const sh=new THREE.Shape();
+  sh.moveTo(rIn,-wIn/2);sh.lineTo(rOut,-wOut/2);sh.lineTo(rOut,wOut/2);sh.lineTo(rIn,wIn/2);sh.closePath();
+  const g=new THREE.ExtrudeGeometry(sh,{depth:depth,bevelEnabled:true,bevelThickness:0.004,bevelSize:0.004,bevelSegments:2});
+  const p=g.attributes.position;
+  for(let i=0;i<p.count;i++){const r=Math.hypot(p.getX(i),p.getY(i));p.setZ(i,p.getZ(i)+dish*Math.pow(Math.max(0,(r-rIn)/(rOut-rIn)),1.5));}
+  g.computeVertexNormals();return g;
+}
+function R_tireLabel(){
+  const m={ps4s:'MICHELIN PILOT SPORT 4S',nt555:'NITTO NT555 G2',proxes:'TOYO PROXES SPORT A/S',drag_radials:'MICKEY THOMPSON ET STREET R'};
+  return m[activeParts.tires]||'MICHELIN PILOT SPORT 4S';
+}
+let R_TIRE_TEX=null,R_TIRE_LBL='';
+function R_tireMaterial(){
+  const l=R_tireLabel();
+  if(!R_TIRE_TEX||R_TIRE_LBL!==l){R_TIRE_TEX=R_tireTex(l);R_TIRE_LBL=l;}
+  return new THREE.MeshStandardMaterial({map:R_TIRE_TEX,roughness:0.88,metalness:0,envMapIntensity:0.35});
+}
+function R_buildWheel(o){
+  // local frame: axle = z, face toward +z. o:{r,wid,face,rear,skinny,hex}
+  const g=new THREE.Group();
+  const rimR=o.rim||0.254, S=o.r/0.364;
+  const tire=new THREE.Mesh(R_tireGeo(o.wid,rimR-0.004,o.r),R_tireMaterial());tire.name='tire';g.add(tire);
+  const wm=wheelMat(o.hex||'#9a9da3');
+  // barrel (dark inner)
+  const bp=[new THREE.Vector2(rimR-0.012,-o.wid*0.46),new THREE.Vector2(rimR-0.014,-o.wid*0.1),new THREE.Vector2(rimR-0.028,o.wid*0.2),new THREE.Vector2(rimR-0.03,o.wid*0.42)];
+  const barrel=new THREE.Mesh(new THREE.LatheGeometry(bp,48),new THREE.MeshStandardMaterial({color:0x2a2c30,metalness:0.9,roughness:0.5,side:THREE.DoubleSide}));
+  barrel.rotateX(R_PI/2);barrel.name='rimbarrel';g.add(barrel);
+  const lip=new THREE.Mesh(new THREE.TorusGeometry(rimR-0.002,0.011,10,64),wm);lip.position.z=o.wid*0.44;lip.name='rim';g.add(lip);
+  const lipB=lip.clone();lipB.position.z=-o.wid*0.44;lipB.name='rim';g.add(lipB);
+  // spokes
+  const nSp=o.skinny?5:10, sp=R_spokeGeo(0.05,rimR-0.012,o.skinny?0.05:0.042,o.skinny?0.06:0.026,0.024,o.skinny?0.01:0.075);
+  for(let i=0;i<nSp;i++){const m=new THREE.Mesh(sp,wm);m.rotation.z=i/nSp*R_PI*2;m.position.z=o.wid*(o.skinny?0.30:0.18);m.name='rim';g.add(m);}
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.085,0.04,32),wm);hub.rotation.x=R_PI/2;hub.position.z=o.wid*0.18+0.012;hub.name='rim';g.add(hub);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.042,0.012,32),R_black());cap.rotation.x=R_PI/2;cap.position.z=o.wid*0.18+0.036;cap.name='center_cap';g.add(cap);
+  const capR=new THREE.Mesh(new THREE.TorusGeometry(0.04,0.004,8,32),chromeMat());capR.position.z=o.wid*0.18+0.042;g.add(capR);
+  for(let i=0;i<5;i++){const a=i/5*R_PI*2;const n=new THREE.Mesh(new THREE.CylinderGeometry(0.0115,0.0115,0.022,6),chromeMat());n.rotation.x=R_PI/2;n.position.set(Math.cos(a)*0.0575*1.0,Math.sin(a)*0.0575,o.wid*0.18+0.036);g.add(n);}
+  // brake
+  const rr=o.rear?0.172:0.196;
+  const rotor=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,0.032,64),R_rotorMat());rotor.rotation.x=R_PI/2;rotor.position.z=-o.wid*0.05;rotor.name='rotor';g.add(rotor);
+  const hat=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.05,32),new THREE.MeshStandardMaterial({color:0x1b1c1f,metalness:0.8,roughness:0.5}));hat.rotation.x=R_PI/2;hat.position.z=-o.wid*0.05+0.015;g.add(hat);
+  const sh=new THREE.Shape(),a0=0.55,a1=1.55,ri=rr-0.075,ro=rr+0.012;
+  sh.absarc(0,0,ro,a0,a1,false);sh.absarc(0,0,ri,a1,a0,true);
+  const cal=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:o.rear?0.07:0.088,bevelEnabled:true,bevelThickness:0.006,bevelSize:0.006,bevelSegments:2}),redMat());
+  cal.position.z=-o.wid*0.05-(o.rear?0.035:0.044);cal.name='caliper';g.add(cal);
+  const piston=new THREE.CylinderGeometry(0.014,0.014,0.01,16);
+  for(let i=0;i<(o.rear?2:3);i++){const a=a0+0.14+i*(a1-a0-0.28)/Math.max(1,(o.rear?1:2));const p=new THREE.Mesh(piston,new THREE.MeshStandardMaterial({color:0x8d9096,metalness:1,roughness:0.3}));p.rotation.x=R_PI/2;p.position.set(Math.cos(a)*(rr-0.04),Math.sin(a)*(rr-0.04),-o.wid*0.05+0.046);g.add(p);}
+  g.scale.setScalar(1);return g;
+}
+function addWheels(g,opts){
+  const wr=opts.wr||0.364,tw=opts.tw||(wr>0.4?0.93:0.80),yoff=opts.yoffset||0;
+  const wide=isWidebody;
+  const hex=(PARTS_DATA.wheels.find(w=>w.id===activeParts.wheels)||{}).hexColor||'#8f9298';
+  const skinny=(activeParts.wheels==='demon_skinny')||isDemonMode&&currentFamily==='demon';
+  const dragR=activeParts.tires==='drag_radials';
+  const defs=[[1,opts.rf,0],[-1,opts.rf,0],[1,-opts.rb,1],[-1,-opts.rb,1]];
+  const nm={'1_0':'wheel_fl','-1_0':'wheel_fr','1_1':'wheel_rl','-1_1':'wheel_rr'};
+  defs.forEach(([sx,z,rear])=>{
+    const front=!rear;const sk=skinny&&front;
+    const r=sk?0.322:wr,wid=sk?0.115:(rear?(wide?0.325:0.30):(wide?0.30:0.275))*(dragR&&rear?1.05:1);
+    const wg=new THREE.Group();wg.name=nm[sx+'_'+rear];
+    const w=R_buildWheel({r:r,wid:wid,rear:rear,skinny:sk,hex:sk?'#5a5c61':hex,rim:sk?0.215:wr*0.698});
+    w.rotation.y=sx>0?R_PI/2:-R_PI/2; wg.add(w);
+    const x=(sk?0.84:tw+(wide?0.035:0))*sx*1;
+    wg.position.set(x,r+yoff,z);
+    if(sk){wg.userData.skinny=true;}
+    g.add(wg);
+  });
+}
+function addSkinnyFronts(){}
+function applyWheels(partId){activeParts.wheels=partId;buildCar(currentFamily);updateFitmentWarning();}
+
+/* ---------- scene: lighting, environment, floor ---------- */
+let R_ENV=null,R_ENV_ISO=null;
+function setupLighting(s){
+  const isMain=(s===scene), rend=isMain?renderer:isoRenderer;
+  const env=R_makeEnv(rend); if(isMain)R_ENV=env;else R_ENV_ISO=env;
+  s.environment=env;
+  rend.outputEncoding=THREE.sRGBEncoding;rend.toneMapping=THREE.ACESFilmicToneMapping;rend.toneMappingExposure=isMain?1.0:1.15;
+  s.add(new THREE.HemisphereLight(0xaab4c4,0x101012,0.25));
+  const key=new THREE.DirectionalLight(0xfff3e4,isMain?2.1:1.4);
+  key.position.set(4.5,9,5.5);
+  if(isMain){key.castShadow=true;key.shadow.mapSize.set(2048,2048);const c=key.shadow.camera;c.near=2;c.far=30;c.left=-4.2;c.right=4.2;c.top=4.2;c.bottom=-4.2;key.shadow.bias=-0.0004;key.shadow.normalBias=0.03;key.shadow.radius=5;}
+  s.add(key);
+  const rim=new THREE.DirectionalLight(0x9fb8ff,0.55);rim.position.set(-6,3,-6);s.add(rim);
+  if(isMain){s.fog=new THREE.Fog(0x0A0A0C,18,34);}
+}
+function setupFloor(s){
+  const c=R_canvas(1024,1024),g=c.getContext('2d');
+  const gr=g.createRadialGradient(512,512,40,512,512,512);
+  gr.addColorStop(0,'#26282d');gr.addColorStop(0.3,'#16171a');gr.addColorStop(0.65,'#0d0d0f');gr.addColorStop(1,'#0A0A0C');
+  g.fillStyle=gr;g.fillRect(0,0,1024,1024);
+  for(let i=0;i<14000;i++){g.fillStyle='rgba(255,255,255,'+Math.random()*0.035+')';g.fillRect(Math.random()*1024,Math.random()*1024,1.5,1.5);}
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(16,64),new THREE.MeshStandardMaterial({map:R_tex(c,true),roughness:0.92,metalness:0.0,envMapIntensity:0.03}));
+  floor.rotation.x=-R_PI/2;floor.receiveShadow=true;floor.name='floor';s.add(floor);
+  // soft contact shadow under the whole car
+  const cs=R_canvas(512,256),h=cs.getContext('2d');
+  const rg=h.createRadialGradient(256,128,10,256,128,256);rg.addColorStop(0,'rgba(0,0,0,0.85)');rg.addColorStop(0.55,'rgba(0,0,0,0.55)');rg.addColorStop(1,'rgba(0,0,0,0)');
+  h.save();h.scale(1,0.5);h.translate(0,128);h.fillStyle=rg;h.fillRect(0,-128,512,512);h.restore();
+  const cp=new THREE.Mesh(new THREE.PlaneGeometry(2.6,6.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(R_rotCanvas(cs)),transparent:true,depthWrite:false}));
+  cp.rotation.x=-R_PI/2;cp.position.y=0.004;cp.name='contactshadow';s.add(cp);
+}
+function R_rotCanvas(c){const o=R_canvas(c.height,c.width),g=o.getContext('2d');g.translate(o.width/2,o.height/2);g.rotate(R_PI/2);g.drawImage(c,-c.width/2,-c.height/2);return o;}
+
+/* ---------- details ---------- */
+function R_frontFaceTex(){
+  const c=R_canvas(1024,320),g=c.getContext('2d');
+  g.fillStyle='#050506';g.fillRect(0,0,1024,320);
+  // main grille opening
+  g.fillStyle='#0a0b0d';g.beginPath();g.moveTo(160,60);g.lineTo(864,60);g.lineTo(900,150);g.lineTo(124,150);g.closePath();g.fill();
+  g.strokeStyle='#26282d';g.lineWidth=2;
+  for(let x=140;x<900;x+=10){g.beginPath();g.moveTo(x,64);g.lineTo(x+(x-512)*0.04,148);g.stroke();}
+  for(let y=78;y<150;y+=11){g.beginPath();g.moveTo(150,y);g.lineTo(874,y);g.stroke();}
+  g.fillStyle='#d4281c';g.fillRect(488,92,48,22);g.fillStyle='#111';g.font='bold 14px Arial';g.fillText('SRT',495,108);
+  // lower intake
+  g.fillStyle='#08090a';g.beginPath();g.moveTo(90,185);g.lineTo(934,185);g.lineTo(980,300);g.lineTo(44,300);g.closePath();g.fill();
+  g.strokeStyle='#1d1f23';for(let x=60;x<980;x+=9){g.beginPath();g.moveTo(x,190);g.lineTo(x,298);g.stroke();}
+  g.fillStyle='#16171a';g.fillRect(230,212,564,10);
+  return R_tex(c,true);
+}
+function R_rearFaceTex(){
+  const c=R_canvas(1024,320),g=c.getContext('2d');
+  g.fillStyle='rgba(0,0,0,0)';g.clearRect(0,0,1024,320);
+  // full-width taillight band
+  const gr=g.createLinearGradient(0,0,1024,0);gr.addColorStop(0,'#7a0c08');gr.addColorStop(0.5,'#c8190f');gr.addColorStop(1,'#7a0c08');
+  g.fillStyle='#050505';g.fillRect(60,70,904,64);
+  g.fillStyle=gr;g.fillRect(72,80,880,44);
+  g.fillStyle='rgba(255,120,100,0.55)';g.fillRect(72,92,880,6);
+  g.fillStyle='#050505';g.fillRect(500,70,24,64);
+  for(let i=0;i<46;i++){g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(72+i*19.2,80,1.5,44);}
+  g.fillStyle='#d9dce1';g.font='bold 20px Arial';g.fillText('D O D G E',420,172);
+  g.fillStyle='#bd1a10';g.fillRect(110,150,90,20);g.fillStyle='#fff';g.font='bold 13px Arial';g.fillText('HELLCAT',116,165);
+  // diffuser
+  g.fillStyle='#08090a';g.beginPath();g.moveTo(80,210);g.lineTo(944,210);g.lineTo(990,310);g.lineTo(34,310);g.closePath();g.fill();
+  g.strokeStyle='#1b1d20';g.lineWidth=3;for(let x=120;x<920;x+=64){g.beginPath();g.moveTo(x,214);g.lineTo(512+(x-512)*1.08,308);g.stroke();}
+  return R_tex(c,true);
+}
+function R_decal(w,h,x,y,z,ry,tex,name,transparent){
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,roughness:0.5,metalness:0.1,transparent:!!transparent,envMapIntensity:0.6}));
+  m.position.set(x,y,z);m.rotation.y=ry||0;m.name=name||'decal';m.userData.xr=1;return m;}
+function R_headlamp(side){
+  const g=new THREE.Group();
+  const hous=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.105,0.05),new THREE.MeshStandardMaterial({color:0x0b0c0e,metalness:0.6,roughness:0.3}));g.add(hous);
+  const lens=new THREE.MeshPhysicalMaterial({color:0xdfe6ee,roughness:0.05,metalness:0,transmission:0,clearcoat:1,transparent:true,opacity:0.35});
+  const led=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xe8f0ff,emissiveIntensity:1.4});
+  [-0.085,0.085].forEach(x=>{
+    const r=new THREE.Mesh(new THREE.TorusGeometry(0.038,0.0075,10,40),led);r.position.set(x,0,0.028);g.add(r);
+    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.012,24),new THREE.MeshStandardMaterial({color:0x111,metalness:1,roughness:0.15}));p.rotation.x=R_PI/2;p.position.set(x,0,0.014);g.add(p);
+    const l=new THREE.Mesh(new THREE.CircleGeometry(0.046,24),lens);l.position.set(x,0,0.034);g.add(l);
+  });
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.012,0.012),led);bar.position.set(0,-0.052,0.03);g.add(bar);
+  g.userData.xr=1;return g;
+}
+function R_mirror(sx){
+  const g=new THREE.Group();
+  const sh=new THREE.Mesh(new THREE.SphereGeometry(0.075,20,14),carBodyMat());sh.scale.set(1.25,0.8,1.0);sh.position.set(0,0,0);g.add(sh);
+  const gl=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.07),chromeMat());gl.position.set(0,0,-0.077);gl.rotation.y=R_PI;gl.scale.set(1,1,1);g.add(gl);
+  const st=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.025,0.05),R_black());st.position.set(-sx*0.08,-0.05,0.02);g.add(st);
+  g.position.set(sx*0.915,1.1,0.52);g.rotation.y=sx*0.15;return g;
+}
+function R_exhaustTip(x,z,style){
+  const g=new THREE.Group();
+  const outer=style==='tips_black'?R_black():(style==='tips_carbon'?carbonMat():chromeMat());
+  const pts=[new THREE.Vector2(0.056,-0.08),new THREE.Vector2(0.062,0.0),new THREE.Vector2(0.066,0.07),new THREE.Vector2(0.060,0.085)];
+  const t=new THREE.Mesh(new THREE.LatheGeometry(pts,40),outer);t.rotation.x=-R_PI/2;g.add(t);
+  const inner=new THREE.Mesh(new THREE.CylinderGeometry(0.052,0.052,0.2,32,1,true),new THREE.MeshStandardMaterial({color:0x050505,roughness:0.9,side:THREE.BackSide}));inner.rotation.x=R_PI/2;inner.position.z=0.0;g.add(inner);
+  const cap=new THREE.Mesh(new THREE.CircleGeometry(0.052,24),new THREE.MeshBasicMaterial({color:0x000000}));cap.position.z=0.03;cap.rotation.y=R_PI;g.add(cap);
+  g.position.set(x,0.38,z);g.name='exhaust_tip';return g;
+}
+function addExhaustTips(g,rz,ry){
+  const z=(rz===undefined?-2.60:rz-0.08);
+  [-0.60,0.60].forEach(x=>{const t=R_exhaustTip(x,z,activeParts.exhaust);t.rotation.y=R_PI;g.add(t);});
+}
+/* ---------- the Challenger ---------- */
+function R_buildLoftBody(){
+  const seams=[2.28,0.88,0.55,-0.50,-2.02,-2.36];
+  const zs=R_zList(-2.52,2.52,0.1,[[R_AX.zf,0.58,0.05],[R_AX.zr,0.58,0.05]]);
+  seams.forEach(z=>zs.push(z));zs.sort((a,b)=>a-b);
+  const uz=[];zs.forEach(z=>{if(!uz.length||z-uz[uz.length-1]>0.012)uz.push(z);});
+  return {L:R_loftBuild(R_lowerSec,uz),zs:uz};
+}
+function R_rowOf(zs,z){let b=0,bd=1e9;zs.forEach((q,i)=>{const d=Math.abs(q-z);if(d<bd){bd=d;b=i;}});return b;}
+function R_ring(L,i,ja,jb,rad,mat){
+  const pts=[];for(let j=ja;j<=jb;j++){const jj=((j%L.nL)+L.nL)%L.nL,k=i*L.nL+jj,p=L.P[i][jj];pts.push(new THREE.Vector3(p.x+L.nrm.getX(k)*0.003,p.y+L.nrm.getY(k)*0.003,p.z+L.nrm.getZ(k)*0.003));}
+  return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),pts.length*2,rad,5,false),mat);
+}
+function buildChallenger(col){
+  const V=window.R_V||{sx:1,sy:1,sz:1,wr:0.364};
+  const g=carGroup, B=new THREE.Group();B.name='bodyG';g.add(B);
+  const paint=carBodyMat(col,false), glass=glassMat(false);
+  const {L,zs}=R_buildLoftBody();
+  const body=new THREE.Mesh(L.geo,paint);body.name='body';B.add(body);
+  const M=((L.nL)>>1)+1; // right half indices 0..M-1
+  // panel gaps
+  const gap=R_mat('gap',()=>new THREE.MeshBasicMaterial({color:0x050505}));
+  const jTop=M-1;
+  [[0.88,6,L.nL-6],[ -2.02,6,L.nL-6],[2.28,5,L.nL-5],[-2.36,5,L.nL-5]].forEach(([z,a,b])=>{
+    const i=R_rowOf(zs,z);
+    // restrict to upper surface only: from j=a to mirrored
+    const arr=[];for(let j=0;j<L.nL;j++){const p=L.P[i][j];arr.push(j);}
+    const lo=Math.floor(M*0.45),hi=L.nL-lo;
+    const m=R_ring(L,i,lo,hi,0.0032,gap);B.add(m);
+  });
+  [0.55,-0.50].forEach(z=>{const i=R_rowOf(zs,z);
+    const mr=R_ring(L,i,Math.floor(M*0.12),Math.floor(M*0.62),0.003,gap);B.add(mr);
+    const ml=R_ring(L,i,L.nL-Math.floor(M*0.62),L.nL-Math.floor(M*0.12),0.003,gap);B.add(ml);});
+  // cabin
+  const czs=R_zList(-1.72,0.96,0.07,[]);[0.55,-0.5].forEach(z=>czs.push(z));czs.sort((a,b)=>a-b);
+  const cz=[];czs.forEach(z=>{if(!cz.length||z-cz[cz.length-1]>0.012)cz.push(z);});
+  const C=R_loftBuild(R_cabinSec,cz);
+  const cabin=new THREE.Mesh(C.geo,glass);cabin.name='windshield';B.add(cabin);
+  const cM=((C.nL)>>1)+1, top=cM-1;
+  const rowRange=(a,b)=>{let i0=0,i1=0;cz.forEach((z,i)=>{if(z<=a+1e-6)i0=i;if(z<=b+1e-6)i1=i;});return [i0,i1];};
+  // roof panel
+  let [r0,r1]=rowRange(-1.36,0.40);
+  const roof=R_patch(C,r0,r1,i=>{const z=cz[i];const k=R_ss(0.5,0.38,z)*0+0;const w=Math.round(10+ (z>0.2?(0.4-z)*18:0) -(z<-1.1?(-1.1-z)*10:0));return [top-Math.max(w,4),top+Math.max(w,4)];},0.003,paint,'roof');B.add(roof);
+  // side pillars (C-pillar) and B-pillar
+  [-1,1].forEach(sx=>{
+    const sj=(a,b)=>sx>0?[a,b]:[C.nL-b,C.nL-a];
+    let [a0,a1]=rowRange(-1.60,-0.95);
+    B.add(R_patch(C,a0,a1,i=>sj(6,top-6),0.003,paint,'pillarC'));
+    let [b0,b1]=rowRange(-0.34,-0.18);
+    B.add(R_patch(C,b0,b1,i=>sj(4,top-5),0.003,R_black(),'pillarB'));
+    let [p0,p1]=rowRange(0.50,0.96);
+    B.add(R_patch(C,p0,p1,i=>sj(Math.round(top-9-(cz[i]-0.5)*-4),top-6),0.003,paint,'pillarA'));
+    // window trim
+    const pts=[];for(let i=0;i<cz.length;i++){const j=sx>0?3:C.nL-3,k=i*C.nL+j,p=C.P[i][j];pts.push(new THREE.Vector3(p.x+C.nrm.getX(k)*0.004,p.y+C.nrm.getY(k)*0.004,p.z+C.nrm.getZ(k)*0.004));}
+    const tr=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,0.011,6,false),chromeMat());tr.userData.xr=1;B.add(tr);
+  });
+  // hood details
+  const hy=z=>R_lbP(z,2)+0.004;
+  [-1,1].forEach(sx=>{
+    const v=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.004,0.38),R_black());v.position.set(sx*0.31,hy(1.55)+0.002,1.55);v.userData.xr=1;B.add(v);
+    for(let k=0;k<6;k++){const s=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.007,0.014),new THREE.MeshStandardMaterial({color:0x2a2c31,metalness:0.8,roughness:0.4}));s.position.set(sx*0.31,hy(1.55)+0.005,1.4+k*0.065);s.userData.xr=1;B.add(s);}
+  });
+  const bulge=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.004,0.34),R_black());bulge.position.set(0,hy(1.93)+0.002,1.93);bulge.userData.xr=1;B.add(bulge);
+  if(currentFamily==='demon'){ // Demon hood scoop
+    const sc=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.07,0.52),paint);sc.position.set(0,hy(1.6)+0.035,1.6);sc.name='hood';B.add(sc);
+    const mouth=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.05,0.01),R_black());mouth.position.set(0,hy(1.6)+0.03,1.862);B.add(mouth);
+  }
+  // front / rear faces
+  const fz=2.5225;
+  const ff=R_decal(1.62,0.3,0,0.5,fz+0.001,0,R_frontFaceTex(),'front_fascia');ff.scale.set(1,1,1);B.add(ff);
+  const rf=R_decal(1.62,0.3,0,0.5,-fz-0.001,R_PI,R_rearFaceTex(),'rear_fascia',true);B.add(rf);
+  [-1,1].forEach(sx=>{const h=R_headlamp(sx);h.position.set(sx*0.70,0.715,2.50);h.rotation.y=sx*-0.12;B.add(h);
+    const sm=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.04,0.03),new THREE.MeshStandardMaterial({color:0xff7a00,emissive:0x552200}));sm.position.set(sx*0.935,0.62,2.35);B.add(sm);});
+  [-1,1].forEach(sx=>B.add(R_mirror(sx)));
+  // door handles
+  [-1,1].forEach(sx=>{[0.1,-0.9].forEach(z=>{const h=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.022,0.14),R_black());h.position.set(sx*0.985,0.93,z);B.add(h);});
+    const ba=new THREE.Mesh(new THREE.BoxGeometry(0.006,0.03,0.1),redMat());ba.position.set(sx*0.972,0.86,1.2);B.add(ba);});
+  // underbody + interior
+  const under=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.36,4.6),R_black());under.position.set(0,0.36,0);under.name='underbody';B.add(under);
+  const iM=interiorMat();
+  const dash=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.2,0.4),iM);dash.position.set(0,1.07,0.62);B.add(dash);
+  [-0.38,0.38].forEach(x=>{const s=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.5,0.22),iM);s.position.set(x,1.2,-0.15);s.rotation.x=-0.18;B.add(s);const sb=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.1,0.5),iM);sb.position.set(x,1.02,0.15);B.add(sb);});
+  const rbench=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.4,0.25),iM);rbench.position.set(0,1.15,-1.1);B.add(rbench);
+  const sw=new THREE.Mesh(new THREE.TorusGeometry(0.13,0.016,8,28),R_black());sw.position.set(0.38,1.2,0.42);sw.rotation.x=-0.9;B.add(sw);
+  // wheels
+  addWheels(g,{rf:R_AX.zf*V.sz,rb:-R_AX.zr*V.sz,wr:V.wr,tw:0.80*V.sx});
+  addExhaustTips(g);
+  addInternalParts(B);
+  R_extras(B);
+  B.scale.set(V.sx,V.sy,V.sz);
+  g.userData.bodyG=B;
+}
+function buildDemon(col){buildChallenger(col);}
+function R_variant(col,v){window.R_V=v;try{buildChallenger(col);}finally{window.R_V=null;}}
+function buildCharger(col){R_variant(col,{sx:1.0,sy:1.02,sz:1.07,wr:0.364});}
+function buildTrackhawk(col){R_variant(col,{sx:1.07,sy:1.26,sz:0.94,wr:0.40});}
+function buildC300(col){R_variant(col,{sx:1.0,sy:1.04,sz:1.08,wr:0.364});}
+/* ---------- exterior add-ons ---------- */
+function R_extras(B){
+  const ex=activeParts.exterior,paint=carBodyMat(),cf=carbonMat();
+  const e=new THREE.Group();e.name='extras';
+  const hy=z=>R_lbP(z,2)+0.006;
+  if(ex==='cf_hood'||ex==='cowl_hood'){
+    const hood=new THREE.Mesh(new THREE.BoxGeometry(1.46,0.012,1.2),cf);hood.position.set(0,hy(1.55),1.58);hood.rotation.x=0.04;e.add(hood);
+    [-1,1].forEach(sx=>{const v=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.016,0.5),R_black());v.position.set(sx*0.34,hy(1.55)+0.01,1.6);e.add(v);});
+    if(ex==='cowl_hood'){const c=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.09,0.55),cf);c.position.set(0,hy(1.5)+0.045,1.5);e.add(c);}
+  }
+  if(ex==='srt_wing'){
+    const w=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.022,0.2),paint);w.position.set(0,1.185,-2.42);w.rotation.x=-0.05;e.add(w);
+    [-1,1].forEach(sx=>{const p=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.07,0.16),paint);p.position.set(sx*0.7,1.14,-2.4);e.add(p);});
+  }
+  if(ex==='cf_splitter'){
+    const s=new THREE.Mesh(new THREE.BoxGeometry(1.86,0.02,0.34),cf);s.position.set(0,0.19,2.52);e.add(s);
+  }
+  if(ex==='racing_stripes'){
+    const sm=new THREE.MeshStandardMaterial({color:0xf2f2f2,roughness:0.4,metalness:0.1,polygonOffset:true,polygonOffsetFactor:-2});
+    [-0.12,0.12].forEach(x=>{
+      const pts=[];for(let z=-2.4;z<=2.0;z+=0.1){pts.push(new THREE.Vector3(x,R_lbP(z,2)+0.0035,z));}
+      const ribbon=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),90,0.05,4,false),sm);ribbon.scale.set(1,0.06,1);
+      // flatten ribbon by scaling around curve is not valid; use thin boxes instead
+      for(let z=-2.4;z<2.0;z+=0.1){const b=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.004,0.105),sm);const y=R_lbP(z+0.05,2)+0.004;b.position.set(x,y,z+0.05);b.rotation.x=-Math.atan2(R_lbP(z+0.1,2)-R_lbP(z,2),0.1);e.add(b);}
+    });
+    // roof section
+    for(let z=-1.3;z<0.4;z+=0.1){const b=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.004,0.105),sm);b.position.set(0,R_cbP(z+0.05,3)+0.005,z+0.05);b.rotation.x=-Math.atan2(R_cbP(z+0.1,3)-R_cbP(z,3),0.1);e.add(b);}
+  }
+  if(ex==='morimoto_lights'){[-1,1].forEach(sx=>{const bar=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.01,0.01),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0x88ccff,emissiveIntensity:2.2}));bar.position.set(sx*0.70,0.78,2.535);e.add(bar);});}
+  e.traverse(o=>{if(o.isMesh){o.castShadow=true;}});
+  B.add(e);
+}
+function R_applyTint(){
+  const t={tint_5:0.97,tint_20:0.86}[activeParts.exterior];
+  if(R_GLASS){R_GLASS.opacity=t||0.78;R_GLASS.color.set(t?0x000000:0x05080b);}
+}
+function buildExteriorPanel(body){
+  buildExteriorPanelBase(body);
+  const B=carGroup.userData.bodyG;if(!B)return;
+  const old=B.getObjectByName('extras');if(old)B.remove(old);
+  R_extras(B);R_applyTint();if(isXray)applyXrayBase(true);
+}
+function toggleWidebody(){isWidebody=!isWidebody;buildCar(currentFamily);updateFitmentWarning();buildRpBody();}
+function setBodyColor(hex){currentColor=OEM_COLORS.find(c=>c.hex===hex)||{hex:hex,name:'Custom'};R_ensurePaint(hex);}
+function applyHeight(drop){
+  heightDrop=drop;const dy=-drop*0.022;
+  carGroup.position.y=0;
+  carGroup.children.forEach(c=>{const n=c.name||'';if(n.indexOf('wheel_')===0)return;c.position.y=dy;});
+  updateFitmentWarning();
+}
+
+/* ---------- x-ray, patched ---------- */
+function applyXrayBase(on){
+  isXray=on;
+  const names=['engine','supercharger','headers','headers_r','front_coilover','front_coilover_r','rear_coilover','rear_coilover_r','sway_bar','brakes','subwoofer','dual_battery','driver_seat','obd_port'];
+  if(R_PAINT){R_PAINT.transparent=on;R_PAINT.opacity=on?0.13:1;R_PAINT.depthWrite=!on;R_PAINT.needsUpdate=true;}
+  if(R_GLASS){R_GLASS.opacity=on?0.06:(R_GLASS.userData.base||0.88);}
+  carGroup.traverse(o=>{
+    if(o.userData&&o.userData.xr) o.visible=!on;
+    if(o.name==='underbody'||o.name==='tire'&&false) o.visible=!on;
+    if(!o.isMesh) return;
+    if(names.indexOf(o.name)>=0){
+      if(!o.userData.cl){o.material=o.material.clone();o.userData.cl=1;}
+      o.material.transparent=true;o.material.opacity=on?0.92:0;o.material.depthWrite=!on;
+      if(on&&o.material.emissive){o.material.emissive.setHex(0x221100);}
+    }
+  });
+}
+function R_applyTint(){
+  const t={tint_5:0.97,tint_20:0.88}[activeParts.exterior];
+  if(R_GLASS){R_GLASS.userData.base=t||0.88;R_GLASS.opacity=isXray?0.06:(t||0.88);R_GLASS.color.set(t?0x000000:0x020304);}
 }
 
 </script>
