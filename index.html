@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name='impact-site-verification' value='cc214b1f-31f1-433f-94a0-ec193a25801b'>
-<title>BlowerBuildz — 3D Configurator</title>
+<title>BlowerBuildz - 3D Configurator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -230,7 +230,7 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
       <canvas id="tc"></canvas>
       <div id="vi">
         <div class="vi-n" id="viName">Select a Vehicle</div>
-        <div class="vi-s" id="viSpec">—</div>
+        <div class="vi-s" id="viSpec"></div>
       </div>
       <div id="abx">
         <button class="ab" onclick="resetBuild()">↺ RESET STOCK</button>
@@ -254,8 +254,8 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
           <div class="iso-hint">DRAG TO ROTATE • SCROLL TO ZOOM</div>
         </div>
         <div id="iso-panel">
-          <div class="ip-name" id="ip-name">—</div>
-          <div class="ip-cat" id="ip-cat">—</div>
+          <div class="ip-name" id="ip-name"></div>
+          <div class="ip-cat" id="ip-cat"></div>
           <div class="ip-desc" id="ip-desc"></div>
           <div id="ip-specs"></div>
           <a class="ip-buy" id="ip-buy" href="#" target="_blank" rel="noopener">VIEW ON AMAZON →</a>
@@ -280,7 +280,7 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
       <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;border-radius:4px">
         <div style="font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;margin-bottom:6px">MY BUILD</div>
-        <div id="myBuildSpec" style="font-family:var(--fh);font-size:.9rem;color:var(--white)">—</div>
+        <div id="myBuildSpec" style="font-family:var(--fh);font-size:.9rem;color:var(--white)"></div>
         <div style="margin-top:8px">
           <label style="font-family:var(--fm);font-size:.62rem;color:var(--dim2);letter-spacing:.1em;display:block;margin-bottom:4px">TIRES</label>
           <select id="dragTires" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);padding:5px;border-radius:3px;font-family:var(--fm);font-size:.72rem">
@@ -341,7 +341,7 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
 
 <script>
 // ============================================================
-// BLOWERBUILDZ v6 — DATA
+// BLOWERBUILDZ v6 - DATA
 // ============================================================
 const FAMILIES = {
   challenger: {
@@ -359,7 +359,7 @@ const FAMILIES = {
       {y:2020, variants:['SRT Hellcat','SRT Hellcat Redeye','SRT Hellcat Redeye Widebody'], has3d:true, sf:'410a034c7d9e4f58b9aac33dd9ada12d', hp:717, tq:656, w:4448, widebody:true},
       {y:2021, variants:['SRT Hellcat','SRT Hellcat Redeye','SRT Super Stock'], has3d:true, sf:'86ae58e2e2e443cb8243df52f407729a', hp:717, tq:656, w:4448},
       {y:2022, variants:['SRT Hellcat','SRT Hellcat Redeye','SRT Hellcat Jailbreak'], has3d:true, sf:'6b48e002dcd441d2b38cc34c5df14fac', hp:717, tq:656, w:4448},
-      {y:2023, variants:['SRT Hellcat','SRT Hellcat Jailbreak','Last Call — Shakedown','Last Call — Swinger','SRT Demon 170'], has3d:false, hp:717, tq:656, w:4448}
+      {y:2023, variants:['SRT Hellcat','SRT Hellcat Jailbreak','Last Call - Shakedown','Last Call - Swinger','SRT Demon 170'], has3d:false, hp:717, tq:656, w:4448}
     ]
   },
   charger: {
@@ -377,7 +377,7 @@ const FAMILIES = {
       {y:2020, variants:['SRT Hellcat','SRT Hellcat Widebody'], has3d:false, hp:717, tq:656, w:4600, widebody:true},
       {y:2021, variants:['SRT Hellcat','SRT Hellcat Widebody'], has3d:false, hp:717, tq:656, w:4600, widebody:true},
       {y:2022, variants:['SRT Hellcat','SRT Hellcat Widebody','SRT Hellcat Jailbreak'], has3d:false, hp:717, tq:656, w:4600, widebody:true},
-      {y:2023, variants:['SRT Hellcat','SRT Hellcat Widebody','King Daytona — Last Call'], has3d:false, hp:807, tq:707, w:4620}
+      {y:2023, variants:['SRT Hellcat','SRT Hellcat Widebody','King Daytona - Last Call'], has3d:false, hp:807, tq:707, w:4620}
     ]
   },
   demon: {
@@ -387,8 +387,8 @@ const FAMILIES = {
     hp: 840, tq: 770, weight: 4254, zero60: 2.3,
     boltPattern: '5x115', hubBore: '71.5mm',
     years: [
-      {y:2018, variants:['SRT Demon (Street — 808hp)','SRT Demon (Demon Mode — 840hp)','SRT Demon (Track Config)'], has3d:false, hp:840, tq:770, w:4254, demon:true, demonMode:true},
-      {y:2023, variants:['SRT Demon 170 (Street — 900hp)','SRT Demon 170 (E85 — 1025hp)'], has3d:false, hp:1025, tq:945, w:4280}
+      {y:2018, variants:['SRT Demon (Street - 808hp)','SRT Demon (Demon Mode - 840hp)','SRT Demon (Track Config)'], has3d:false, hp:840, tq:770, w:4254, demon:true, demonMode:true},
+      {y:2023, variants:['SRT Demon 170 (Street - 900hp)','SRT Demon 170 (E85 - 1025hp)'], has3d:false, hp:1025, tq:945, w:4280}
     ]
   },
   trackhawk: {
@@ -479,7 +479,7 @@ const PARTS_DATA = {
   ],
   exhaust: [
     {id:'borla_atak',name:'Borla ATAK Axle-Back',brand:'Borla',spec:'2.5" stainless · aggressive tone · oval tips',delta:'Loudest daily-driver exhaust',price:'$1,250',url:'https://www.amazon.com/s?k=borla+atak+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
-    {id:'corsa_sport',name:'Corsa Sport Cat-Back',brand:'Corsa',spec:'3" cat-back · Active Exhaust compatible',delta:'DriveX technology — quiet cruise / loud WOT',price:'$1,480',url:'https://www.amazon.com/s?k=corsa+sport+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
+    {id:'corsa_sport',name:'Corsa Sport Cat-Back',brand:'Corsa',spec:'3" cat-back · Active Exhaust compatible',delta:'DriveX technology - quiet cruise / loud WOT',price:'$1,480',url:'https://www.amazon.com/s?k=corsa+sport+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
     {id:'flowmaster_outlaw',name:'Flowmaster Outlaw',brand:'Flowmaster',spec:'Extreme aggression · no cat · race only',delta:'Loudest available option',price:'$960',url:'https://www.amazon.com/s?k=flowmaster+outlaw+challenger+hellcat&tag=blowerbuildz-20',category:'exhaust'},
     {id:'tips_black',name:'Black Powder Coat Tips',brand:'Mopar/Aftermarket',spec:'4" dual outlet · matte black powder coat',delta:'Clean aggressive look',price:'$180/pair',url:'https://www.amazon.com/s?k=hellcat+exhaust+tips+black&tag=blowerbuildz-20',category:'exhaust'},
     {id:'tips_carbon',name:'Carbon Fiber Tip Surrounds',brand:'APR Carbon',spec:'Pre-preg CF · 3K weave · bolt-on',delta:'Premium visual upgrade',price:'$340/pair',url:'https://www.amazon.com/s?k=carbon+fiber+exhaust+tips+challenger&tag=blowerbuildz-20',category:'exhaust'}
@@ -574,26 +574,26 @@ const LEADERBOARD = [
 const XRAY_PARTS = [
   {id:'supercharger',name:'Supercharger',cat:'FORCED INDUCTION',desc:'6.2L HEMI V8 with 2.4L Roots-type supercharger. The heart of the Hellcat. 11.6 psi stock boost.',specs:[{k:'Type',v:'Roots-type twin-screw'},{k:'Displacement',v:'2.4L'},{k:'Boost',v:'11.6 psi stock'},{k:'Material',v:'Aluminum housing'}],url:'https://www.amazon.com/s?k=hellcat+supercharger+pulley&tag=blowerbuildz-20',px:47,py:32},
   {id:'headers',name:'Long Tube Headers',cat:'EXHAUST',desc:'Factory cast iron manifolds flow 390 cfm. Long tube headers open that to 520+ cfm and drop backpressure.',specs:[{k:'OEM size',v:'Cast iron 1-5/8"'},{k:'Aftermarket',v:'1-7/8" LT headers'},{k:'Material',v:'Stainless / titanium'},{k:'HP gain',v:'+35-50 hp'}],url:'https://www.amazon.com/s?k=long+tube+headers+challenger+hellcat&tag=blowerbuildz-20',px:38,py:38},
-  {id:'front_coilover',name:'Front Coilover',cat:'SUSPENSION',desc:'Full monotube coilover with adjustable damping. Controls front wheel travel, camber, and ride height.',specs:[{k:'OEM type',v:'MacPherson strut'},{k:'Drop range',v:'0.5"–2.5"'},{k:'Adjust',v:'32-way rebound'},{k:'Spring rate',v:'350–450 lb/in'}],url:'https://www.amazon.com/s?k=coilover+challenger+hellcat&tag=blowerbuildz-20',px:28,py:58},
-  {id:'rear_coilover',name:'Rear Coilover / Air Bag',cat:'SUSPENSION',desc:'Rear suspension unit. Air ride replaces the spring with an inflatable bag — drops from stock to ground level.',specs:[{k:'OEM type',v:'5-link rear'},{k:'Air bag',v:'Convoluted 2-ply'},{k:'Drop',v:'0"–5" air ride'},{k:'Control',v:'App / remote'}],url:'https://www.amazon.com/s?k=air+lift+performance+challenger&tag=blowerbuildz-20',px:68,py:58},
+  {id:'front_coilover',name:'Front Coilover',cat:'SUSPENSION',desc:'Full monotube coilover with adjustable damping. Controls front wheel travel, camber, and ride height.',specs:[{k:'OEM type',v:'MacPherson strut'},{k:'Drop range',v:'0.5"-2.5"'},{k:'Adjust',v:'32-way rebound'},{k:'Spring rate',v:'350-450 lb/in'}],url:'https://www.amazon.com/s?k=coilover+challenger+hellcat&tag=blowerbuildz-20',px:28,py:58},
+  {id:'rear_coilover',name:'Rear Coilover / Air Bag',cat:'SUSPENSION',desc:'Rear suspension unit. Air ride replaces the spring with an inflatable bag - drops from stock to ground level.',specs:[{k:'OEM type',v:'5-link rear'},{k:'Air bag',v:'Convoluted 2-ply'},{k:'Drop',v:'0"-5" air ride'},{k:'Control',v:'App / remote'}],url:'https://www.amazon.com/s?k=air+lift+performance+challenger&tag=blowerbuildz-20',px:68,py:58},
   {id:'brakes',name:'Front Brake Caliper',cat:'BRAKES',desc:'Massive Brembo 6-piston front calipers with 15.4" cross-drilled rotor. Stops 4,400 lbs from 100 mph in 107 feet.',specs:[{k:'OEM',v:'Single-piston sliding'},{k:'Upgrade',v:'6-piston fixed'},{k:'Rotor',v:'15.4" cross-drilled'},{k:'Material',v:'Aluminum housing'}],url:'https://www.amazon.com/s?k=brembo+6+piston+challenger&tag=blowerbuildz-20',px:23,py:65},
   {id:'sway_bar',name:'Rear Sway Bar',cat:'HANDLING',desc:'The rear sway bar transfers lateral load between wheels in cornering. Upgrading from OEM 19mm to aftermarket 24mm cuts body roll 35%.',specs:[{k:'OEM',v:'19mm hollow'},{k:'Upgrade',v:'24mm solid'},{k:'Adjustment',v:'3-way end links'},{k:'Material',v:'Chromoly steel'}],url:'https://www.amazon.com/s?k=whiteline+sway+bar+challenger&tag=blowerbuildz-20',px:60,py:62},
-  {id:'exhaust_tips',name:'Exhaust Tips',cat:'EXHAUST',desc:'The Hellcat runs dual 3.5" stainless outlets. Tip style dramatically changes the rear view — black powder, CF surrounds, or polished.',specs:[{k:'OEM',v:'3.5" stainless'},{k:'Options',v:'Black / CF / chrome'},{k:'Config',v:'Quad or dual'},{k:'Diameter',v:'3.5"–4"'}],url:'https://www.amazon.com/s?k=hellcat+exhaust+tips&tag=blowerbuildz-20',px:75,py:70},
+  {id:'exhaust_tips',name:'Exhaust Tips',cat:'EXHAUST',desc:'The Hellcat runs dual 3.5" stainless outlets. Tip style dramatically changes the rear view - black powder, CF surrounds, or polished.',specs:[{k:'OEM',v:'3.5" stainless'},{k:'Options',v:'Black / CF / chrome'},{k:'Config',v:'Quad or dual'},{k:'Diameter',v:'3.5"-4"'}],url:'https://www.amazon.com/s?k=hellcat+exhaust+tips&tag=blowerbuildz-20',px:75,py:70},
   {id:'driver_seat',name:'Driver Seat',cat:'INTERIOR',desc:'Factory Hellcat Laguna leather with Alcantara inserts and lateral bolsters. Aftermarket Recaros add 30mm more lateral support for track use.',specs:[{k:'OEM',v:'Laguna leather w/ heat'},{k:'Upgrade',v:'Recaro Sportster CS'},{k:'Bolster',v:'+30mm lateral support'},{k:'Weight',v:'OEM 42 lbs / Recaro 28 lbs'}],url:'https://www.amazon.com/s?k=recaro+sportster+seats&tag=blowerbuildz-20',px:44,py:44},
   {id:'obd_port',name:'OBD2 Port',cat:'ELECTRONICS',desc:'The OBD-II port under the dash gives access to every sensor, fault code, and data stream. Home of tuner devices and GPS trackers.',specs:[{k:'Standard',v:'SAE J1979 OBD-II'},{k:'Location',v:'Under dash left'},{k:'Protocol',v:'CAN bus'},{k:'Uses',v:'Tuner / tracker / scanner'}],url:'https://www.amazon.com/s?k=obd+port+tracker+hellcat&tag=blowerbuildz-20',px:42,py:48},
-  {id:'subwoofer',name:'Subwoofer / Enclosure',cat:'AUDIO',desc:'The Hellcat trunk has room for a 12" ported box and a 5-channel amp. The stock Beats sub barely hits 60 Hz — a JL W7 hits 25 Hz at 600 watts.',specs:[{k:'OEM',v:'Beats 10" passive'},{k:'Upgrade',v:'JL 12W7 active'},{k:'Power',v:'600W RMS'},{k:'Box',v:'1.5 ft³ ported'}],url:'https://www.amazon.com/s?k=jl+audio+12w7&tag=blowerbuildz-20',px:72,py:44},
+  {id:'subwoofer',name:'Subwoofer / Enclosure',cat:'AUDIO',desc:'The Hellcat trunk has room for a 12" ported box and a 5-channel amp. The stock Beats sub barely hits 60 Hz - a JL W7 hits 25 Hz at 600 watts.',specs:[{k:'OEM',v:'Beats 10" passive'},{k:'Upgrade',v:'JL 12W7 active'},{k:'Power',v:'600W RMS'},{k:'Box',v:'1.5 ft³ ported'}],url:'https://www.amazon.com/s?k=jl+audio+12w7&tag=blowerbuildz-20',px:72,py:44},
   {id:'dual_battery',name:'Dual Battery Setup',cat:'ELECTRICAL',desc:'A second battery in the trunk, isolated from the main, powers audio and air ride compressors without touching the engine starting circuit.',specs:[{k:'Primary',v:'Mopar OEM 78-AH'},{k:'Secondary',v:'XS Power S680 or Optima YT'},{k:'Isolator',v:'Mechman D250 relay'},{k:'Wiring',v:'Big 3 upgrade req.'}],url:'https://www.amazon.com/s?k=xs+power+trunk+battery+challenger&tag=blowerbuildz-20',px:76,py:46}
 ];
 
 const FITMENT_RULES = {
   standard: {maxWidth:275, minOffset:20, maxOffset:30, note:'Standard body: 275mm rear max without rubbing'},
-  widebody: {maxWidth:315, minOffset:14, maxOffset:28, note:'Widebody: up to 315mm rear, ET14–ET28'}
+  widebody: {maxWidth:315, minOffset:14, maxOffset:28, note:'Widebody: up to 315mm rear, ET14-ET28'}
 };
 
 const RP_TABS = ['Config','Specs','Fitment','Demon'];
 
 // ============================================================
-// BLOWERBUILDZ v6 — THREE.JS ENGINE + APP LOGIC
+// BLOWERBUILDZ v6 - THREE.JS ENGINE + APP LOGIC
 // ============================================================
 
 // STATE
@@ -806,7 +806,7 @@ function setupFloor(s){
   s.add(ghelper);
 }
 
-// ========== CAR BUILDER — procedural Three.js geometry ==========
+// ========== CAR BUILDER - procedural Three.js geometry ==========
 // Each family gets a uniquely shaped car built from primitives
 // with PBR materials. Parts are added as named child meshes.
 
@@ -872,7 +872,7 @@ function buildChallenger(col){
   const g=carGroup;
   const bm=carBodyMat(col,false);
 
-  // Main body — wide muscle car proportions
+  // Main body - wide muscle car proportions
   const body=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.46,5.0,3,2,4),bm);
   body.position.y=0.62; body.name='body'; g.add(body);
 
@@ -888,7 +888,7 @@ function buildChallenger(col){
   const rg=new THREE.Mesh(new THREE.BoxGeometry(1.82,0.48,0.05),wsMat);
   rg.position.set(0,1.0,-1.28); rg.rotation.x=-0.4; rg.name='rear_glass'; g.add(rg);
 
-  // Front hood — slightly angled
+  // Front hood - slightly angled
   const hood=new THREE.Mesh(new THREE.BoxGeometry(1.98,0.06,1.8,3,1,3),bm);
   hood.position.set(0,0.9,1.9); hood.rotation.x=0.1; hood.name='hood'; g.add(hood);
 
@@ -909,7 +909,7 @@ function buildChallenger(col){
   const sillL=new THREE.Mesh(sillGeo,bm); sillL.position.set(-1.04,0.28,0); g.add(sillL);
   const sillR=new THREE.Mesh(sillGeo,bm); sillR.position.set(1.04,0.28,0); g.add(sillR);
 
-  // Door side panels — slightly larger on each side
+  // Door side panels - slightly larger on each side
   const dpGeo=new THREE.BoxGeometry(0.12,0.52,2.1);
   const dpL=new THREE.Mesh(dpGeo,bm); dpL.position.set(-1.02,0.62,0.05); g.add(dpL);
   const dpR=new THREE.Mesh(dpGeo,bm); dpR.position.set(1.02,0.62,0.05); g.add(dpR);
@@ -941,7 +941,7 @@ function buildCharger(col){
   const g=carGroup;
   const bm=carBodyMat(col,false);
 
-  // 4-door Charger — longer, sleeker than Challenger
+  // 4-door Charger - longer, sleeker than Challenger
   const body=new THREE.Mesh(new THREE.BoxGeometry(1.92,0.44,5.4,3,2,4),bm);
   body.position.y=0.62; body.name='body'; g.add(body);
 
@@ -983,7 +983,7 @@ function buildCharger(col){
 }
 
 function buildDemon(col){
-  // Demon is a Challenger variant — build challenger base, modify
+  // Demon is a Challenger variant - build challenger base, modify
   buildChallenger(col);
   // Add Demon-specific: skinny front wheels if Track Config
   if(isDemonMode){
@@ -997,7 +997,7 @@ function buildTrackhawk(col){
   const g=carGroup;
   const bm=carBodyMat(col,false);
 
-  // SUV proportions — taller, wider, shorter wheelbase
+  // SUV proportions - taller, wider, shorter wheelbase
   const body=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.55,4.5,3,2,4),bm);
   body.position.y=0.78; body.name='body'; g.add(body);
 
@@ -1030,7 +1030,7 @@ function buildTrackhawk(col){
   addTaillights(g, -2.23, 0.82, {x:0.78,y:0,z:0});
   const grl=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.22,0.12),carbonMat());
   grl.position.set(0,0.52,2.28); g.add(grl);
-  // SUV wheels — bigger, taller
+  // SUV wheels - bigger, taller
   addWheels(g, {rb:1.85, rf:1.72, h:0.46, wr:0.42, yoffset:0.16});
   addExhaustTips(g, -2.28, 0.52);
   addInternalParts(g);
@@ -1040,7 +1040,7 @@ function buildC300(col){
   const g=carGroup;
   const bm=carBodyMat(col,false);
 
-  // Chrysler 300 — long, formal, low proportions
+  // Chrysler 300 - long, formal, low proportions
   const body=new THREE.Mesh(new THREE.BoxGeometry(1.95,0.42,5.6,3,2,4),bm);
   body.position.y=0.58; body.name='body'; g.add(body);
 
@@ -1307,10 +1307,10 @@ function updateFitmentWarning(){
   const rules=isWidebody?FITMENT_RULES.widebody:FITMENT_RULES.standard;
   const warnings=[];
   if(heightDrop===3 && activeParts.wheels==='stock_wheels'){
-    warnings.push({type:'ok',msg:'⚡ Air ride at maximum drop — slammed stance'});
+    warnings.push({type:'ok',msg:'⚡ Air ride at maximum drop - slammed stance'});
   }
   if(activeParts.wheels==='demon_skinny'){
-    warnings.push({type:'ok',msg:'✓ Demon Crate skinny fronts — Track Config active'});
+    warnings.push({type:'ok',msg:'✓ Demon Crate skinny fronts - Track Config active'});
   }
   const wPart=PARTS_DATA.wheels.find(w=>w.id===activeParts.wheels);
   if(wPart && !wPart.demonOnly){
@@ -1549,7 +1549,7 @@ function animate(){
   requestAnimationFrame(animate);
   // Rotate car group slowly when not dragging
   if(!isDragging && !isoActive){
-    // No auto-rotate — user controls orbit
+    // No auto-rotate - user controls orbit
   }
   renderer.render(scene,camera);
   if(isoActive) isoRenderer.render(isoScene,isoCamera);
@@ -1825,7 +1825,7 @@ function toggleDemon(){
   updateVehicleInfo();
   const fam=FAMILIES[currentFamily];
   const yr=fam.years[currentYearIdx];
-  showToast(isDemonMode?`🔥 DEMON MODE ACTIVE — ${yr.hp}hp unlocked`:`Demon Mode off — 808hp street mode`);
+  showToast(isDemonMode?`🔥 DEMON MODE ACTIVE - ${yr.hp}hp unlocked`:`Demon Mode off - 808hp street mode`);
 }
 
 function openDrag(){
@@ -1966,7 +1966,7 @@ function runRace(){
           const margin = Math.abs(myET - oppET);
           const marginLabel = margin < 0.1 ? 'BY A BUMPER' : margin < 0.3 ? 'CLOSE' : margin < 0.8 ? 'SOLID WIN' : 'DOMINANT';
           document.getElementById('raceResult').innerHTML = `
-<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:${win?'#4ade80':'#f87171'};margin-bottom:8px;text-shadow:${win?'0 0 20px rgba(74,222,128,.5)':'0 0 20px rgba(248,113,113,.5)'}">${win ? '🏆 WIN' : '❌ LOSS'} ${win && margin >= 0.1 ? '— ' + marginLabel : ''}</div>
+<div style="font-family:var(--fh);font-size:1.6rem;font-weight:700;color:${win?'#4ade80':'#f87171'};margin-bottom:8px;text-shadow:${win?'0 0 20px rgba(74,222,128,.5)':'0 0 20px rgba(248,113,113,.5)'}">${win ? '🏆 WIN' : '❌ LOSS'} ${win && margin >= 0.1 ? '- ' + marginLabel : ''}</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--fm);font-size:.72rem">
   <div style="background:var(--bg3);padding:10px;border-radius:4px;border:1px solid ${win?'rgba(74,222,128,.35)':'var(--border)'}">
     <div style="color:var(--dim2);margin-bottom:4px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase">MY BUILD</div>
@@ -2075,7 +2075,7 @@ window.addEventListener('load',()=>{
 // Projects 3D part positions to 2D canvas coordinates and draws interactive dots
 
 const HOTSPOT_POSITIONS = {
-  // Positions in normalized viewport space (0-1) — calibrated for 3/4 front view
+  // Positions in normalized viewport space (0-1) - calibrated for 3/4 front view
   supercharger:  {x:0.5,  y:0.36, label:'Supercharger'},
   headers:       {x:0.41, y:0.40, label:'Headers'},
   front_coilover:{x:0.33, y:0.52, label:'Front Coilover'},
@@ -2297,7 +2297,7 @@ function updateVehicleInfo(){
   _origUpdateVehicleInfo();
   const fam = FAMILIES[currentFamily];
   const yr = fam.years[currentYearIdx] || fam.years[0];
-  // Always set primary viewer — Sketchfab if model exists, spec card if not
+  // Always set primary viewer - Sketchfab if model exists, spec card if not
   setSketchfabPrimaryViewer(null, `${yr.y} ${fam.name}`);
   // Also keep the secondary button for explicit launch
   if(yr.has3d && yr.sf){
@@ -2333,7 +2333,7 @@ function showSpecCard(){
         {k:'ENGINE',v:'6.2L HEMI V8 Supercharged'},
         {k:'HORSEPOWER',v:`${yr.hp} hp`},
         {k:'TORQUE',v:`${yr.tq} lb-ft`},
-        {k:'0–60 MPH',v:`${yr.zero60||fam.zero60}s`},
+        {k:'0-60 MPH',v:`${yr.zero60||fam.zero60}s`},
         {k:'WEIGHT',v:`${yr.w||fam.weight} lbs`},
         {k:'BOLT PATTERN',v:fam.boltPattern},
         {k:'HUB BORE',v:fam.hubBore},
@@ -2364,7 +2364,7 @@ function buildLeftPanel(){
 
 // Demon crate tooltip
 function showDemonCrateTooltip(){
-  alert('🔥 DEMON CRATE — $1 Factory Option\n\nIncludes:\n• Skinny P185/70R17 front drag tires on 17" steel wheels\n• Mickey Thompson drag radials rear\n• Second key fob (unlocks Demon Mode: 840hp)\n• High-flow air filter (SoCalSuperchargers)\n• Harness bar bracket (bolts into trunk)\n• Floor jack puck\n\nOnly 3,300 built. The $1 option that changed drag racing forever.');
+  alert('🔥 DEMON CRATE - $1 Factory Option\n\nIncludes:\n• Skinny P185/70R17 front drag tires on 17" steel wheels\n• Mickey Thompson drag radials rear\n• Second key fob (unlocks Demon Mode: 840hp)\n• High-flow air filter (SoCalSuperchargers)\n• Harness bar bracket (bolts into trunk)\n• Floor jack puck\n\nOnly 3,300 built. The $1 option that changed drag racing forever.');
 }
 
 // ========= FINAL INIT PATCHES =========
@@ -3297,14 +3297,14 @@ function R_extras(B){
     const maxF=window.WHEEL_MAXFIT();
     const req=window.wheelWidth;
     if(req>maxF){
-      warnings.push({type:'warn',msg:`✕ ${req}" rear will not clear this body. Max is ${maxF}"${(R_CUR&&(R_CUR.kind==='coupe'||R_CUR.kind==='sedan')&&!isWidebody)?' — add widebody for up to 12"':''}. Running ${maxF}".`});
+      warnings.push({type:'warn',msg:`✕ ${req}" rear will not clear this body. Max is ${maxF}"${(R_CUR&&(R_CUR.kind==='coupe'||R_CUR.kind==='sedan')&&!isWidebody)?' - add widebody for up to 12"':''}. Running ${maxF}".`});
     } else {
       warnings.push({type:'ok',msg:`✓ ${req}" rear · 5×115 · ${isWidebody?'Widebody':'Standard'} fitment confirmed`});
     }
     if(window.wheelDeepDish)warnings.push({type:'ok',msg:'✓ Deep dish barrel'});
     if(window.tireLetters==='white')warnings.push({type:'ok',msg:'✓ Raised white-letter sidewall'});
-    if(heightDrop===3&&activeParts.wheels==='stock_wheels')warnings.push({type:'ok',msg:'⚡ Air ride at maximum drop — slammed stance'});
-    if(activeParts.wheels==='demon_skinny')warnings.push({type:'ok',msg:'✓ Demon Crate skinny fronts — Track Config active'});
+    if(heightDrop===3&&activeParts.wheels==='stock_wheels')warnings.push({type:'ok',msg:'⚡ Air ride at maximum drop - slammed stance'});
+    if(activeParts.wheels==='demon_skinny')warnings.push({type:'ok',msg:'✓ Demon Crate skinny fronts - Track Config active'});
     strip.innerHTML=warnings.map(w=>`<div class="fw ${w.type}">${w.msg}</div>`).join('');
   };
 })();
@@ -3450,6 +3450,503 @@ function R_extras(B){
     demon.parentNode.insertBefore(b,demon.nextSibling);
   })();
 
+})();
+
+/* ================= v9: panel controls for width / deep dish / tire letters ================= */
+(function(){
+  if(typeof buildRpBody!=='function') return;
+  const _origBody=buildRpBody;
+  buildRpBody=function(){
+    _origBody();
+    const body=document.getElementById('rpBody');if(!body)return;
+    const cat=(typeof activeRpCat!=='undefined')?activeRpCat:null;
+    if(cat==='wheels'){
+      const box=document.createElement('div');
+      box.style.cssText='margin:4px 0 12px;padding:10px;border:1px solid var(--border);border-radius:5px;background:var(--bg2)';
+      const maxF=window.WHEEL_MAXFIT?window.WHEEL_MAXFIT():12;
+      let html='<div class="sh" style="margin-bottom:8px">WHEEL WIDTH (REAR)</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+      (window.WHEEL_WIDTHS||[9.5,10,10.5,11,11.5,12]).forEach(w=>{
+        const sel=(Math.abs(window.wheelWidth-w)<1e-6);
+        const fits=w<=maxF+1e-6;
+        html+=`<button onclick="setWheelWidth(${w})" class="wwb${sel?' on':''}" style="font-family:var(--fm);font-size:.68rem;padding:6px 9px;border-radius:4px;cursor:pointer;border:1px solid ${sel?'var(--acc)':'var(--border)'};background:${sel?'var(--acc)':'transparent'};color:${sel?'#111':(fits?'var(--dim)':'#8a5a52')}">${w}"${fits?'':' ⚠'}</button>`;
+      });
+      html+='</div>';
+      html+=`<div style="margin-top:10px"><label style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.72rem;color:var(--dim);cursor:pointer"><input type="checkbox" ${window.wheelDeepDish?'checked':''} onchange="toggleDeepDish()"> Deep dish barrel</label></div>`;
+      html+=`<div style="margin-top:6px;font-family:var(--fm);font-size:.58rem;color:var(--dim2)">Front runs 1.5" narrower. Widths past the body's limit are flagged and held at the max that clears.</div>`;
+      box.innerHTML=html;
+      // place the control at the top of the wheels panel
+      body.insertBefore(box,body.firstChild);
+    }
+    if(cat==='tires'){
+      const box=document.createElement('div');
+      box.style.cssText='margin:4px 0 12px;padding:10px;border:1px solid var(--border);border-radius:5px;background:var(--bg2)';
+      const w=(window.tireLetters==='white');
+      box.innerHTML=`<div class="sh" style="margin-bottom:8px">SIDEWALL LETTERING</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="setTireLetters('black')" style="flex:1;font-family:var(--fm);font-size:.7rem;padding:7px;border-radius:4px;cursor:pointer;border:1px solid ${!w?'var(--acc)':'var(--border)'};background:${!w?'var(--acc)':'transparent'};color:${!w?'#111':'var(--dim)'}">BLACKWALL</button>
+        <button onclick="setTireLetters('white')" style="flex:1;font-family:var(--fm);font-size:.7rem;padding:7px;border-radius:4px;cursor:pointer;border:1px solid ${w?'var(--acc)':'var(--border)'};background:${w?'var(--acc)':'transparent'};color:${w?'#111':'var(--dim)'}">RAISED WHITE LETTER</button>
+      </div>`;
+      body.insertBefore(box,body.firstChild);
+    }
+    if(cat==='exterior'){
+      const box=document.createElement('div');
+      box.style.cssText='margin:4px 0 12px;padding:10px;border:1px solid var(--border);border-radius:5px;background:var(--bg2)';
+      const sp=window.kitSpoiler||'none';
+      box.innerHTML=`<div class="sh" style="margin-bottom:8px">BODY KIT (PREVIEW ON CAR)</div>
+      <label style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.72rem;color:var(--dim);cursor:pointer;margin-bottom:6px"><input type="checkbox" ${window.kitLip?'checked':''} onchange="toggleKitLip()"> Front lip splitter</label>
+      <label style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.72rem;color:var(--dim);cursor:pointer;margin-bottom:8px"><input type="checkbox" ${window.kitDiffuser?'checked':''} onchange="toggleKitDiffuser()"> Rear diffuser</label>
+      <div class="sh" style="margin:6px 0 6px">SPOILER</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="setKitSpoiler('none')" style="flex:1;font-family:var(--fm);font-size:.66rem;padding:6px;border-radius:4px;cursor:pointer;border:1px solid ${sp==='none'?'var(--acc)':'var(--border)'};background:${sp==='none'?'var(--acc)':'transparent'};color:${sp==='none'?'#111':'var(--dim)'}">NONE</button>
+        <button onclick="setKitSpoiler('lip')" style="flex:1;font-family:var(--fm);font-size:.66rem;padding:6px;border-radius:4px;cursor:pointer;border:1px solid ${sp==='lip'?'var(--acc)':'var(--border)'};background:${sp==='lip'?'var(--acc)':'transparent'};color:${sp==='lip'?'#111':'var(--dim)'}">LIP</button>
+        <button onclick="setKitSpoiler('wing')" style="flex:1;font-family:var(--fm);font-size:.66rem;padding:6px;border-radius:4px;cursor:pointer;border:1px solid ${sp==='wing'?'var(--acc)':'var(--border)'};background:${sp==='wing'?'var(--acc)':'transparent'};color:${sp==='wing'?'#111':'var(--dim)'}">WING</button>
+      </div>`;
+      body.insertBefore(box,body.firstChild);
+    }
+  };
+})();
+
+
+/* ================= v9: distinct bodies (sedan/SUV rooflines) ================= */
+/* Patches R_VARS cabin tables + roof/pillar ranges in place so Charger/300 read
+   as 4-door sedans and Trackhawk reads as a tall SUV. Engine unchanged. */
+(function(){
+  if(typeof R_VARS==='undefined') return;
+  // SEDAN (Charger): longer flatter roof, upright backlight, 4-door greenhouse.
+  // cabin rows [z, yb, wb, yt, wt]; higher yt held further back = long roof, then quick drop = upright C-pillar.
+  R_VARS.sedan.cb=[
+    [1.00,1.00,.78,1.085,.74],[0.84,1.00,.79,1.165,.73],[0.60,1.00,.80,1.275,.715],
+    [0.34,1.00,.805,1.365,.70],[0.05,1.00,.81,1.432,.69],[-0.35,1.00,.82,1.470,.685],
+    [-0.85,1.00,.83,1.482,.682],[-1.25,1.00,.84,1.480,.682],[-1.60,1.00,.85,1.465,.684],
+    [-1.90,1.00,.855,1.40,.692],[-2.08,1.00,.86,1.285,.72],[-2.20,1.00,.865,1.17,.76],[-2.26,1.00,.868,1.10,.80]
+  ];
+  R_VARS.sedan.roof=[-1.78,0.38];        // flat roof held well back
+  R_VARS.sedan.pA=[0.52,1.0];
+  R_VARS.sedan.pB=[-0.10,0.10];          // B-pillar at mid-cabin (between front+rear doors)
+  R_VARS.sedan.pC=[-1.95,-1.55];         // upright C-pillar near tail
+  R_VARS.sedan.doors=[0.70,-0.05,-1.25]; // 4-door: front, mid, rear cut lines
+  R_VARS.sedan.cz=[-2.26,1.0];
+
+  // C300: formal sedan, slightly more upright than Charger, chrome grille (already set)
+  R_VARS.c300.cb=[
+    [0.95,1.05,.80,1.14,.76],[0.75,1.05,.81,1.25,.745],[0.50,1.05,.82,1.355,.725],
+    [0.20,1.05,.825,1.43,.71],[-0.20,1.05,.83,1.475,.70],[-0.70,1.05,.835,1.49,.695],
+    [-1.15,1.05,.845,1.49,.695],[-1.55,1.05,.85,1.475,.70],[-1.85,1.05,.86,1.40,.715],
+    [-2.00,1.05,.865,1.285,.745],[-2.08,1.05,.87,1.17,.785],[-2.12,1.05,.872,1.11,.80]
+  ];
+  R_VARS.c300.roof=[-1.70,0.32];
+  R_VARS.c300.pA=[0.45,0.95];
+  R_VARS.c300.pB=[-0.12,0.08];
+  R_VARS.c300.pC=[-1.88,-1.50];
+  R_VARS.c300.doors=[0.60,-0.1,-1.25];
+  R_VARS.c300.cz=[-2.12,0.95];
+
+  // SUV (Trackhawk): tall roof held flat all the way to a near-vertical tailgate.
+  R_VARS.suv.cb=[
+    [1.10,1.15,.80,1.26,.78],[0.95,1.15,.82,1.42,.77],[0.70,1.15,.83,1.60,.765],
+    [0.40,1.15,.84,1.74,.76],[0.05,1.15,.85,1.84,.758],[-0.45,1.15,.86,1.885,.757],
+    [-1.00,1.15,.865,1.90,.757],[-1.55,1.15,.87,1.90,.758],[-2.00,1.15,.875,1.885,.762],
+    [-2.30,1.15,.878,1.83,.775],[-2.46,1.15,.88,1.72,.80]
+  ];
+  R_VARS.suv.roof=[-2.30,0.42];          // roof runs nearly to the tail
+  R_VARS.suv.pA=[0.42,1.10];
+  R_VARS.suv.pB=[-0.05,0.15];
+  R_VARS.suv.pC=[-2.42,-2.05];           // vertical D-pillar at the tailgate
+  R_VARS.suv.doors=[0.72,0.0,-1.0];
+  R_VARS.suv.cz=[-2.46,1.10];
+})();
+
+/* ================= v9: wheel width + deep dish + white-letter tires ================= */
+(function(){
+  if(typeof R_buildWheel!=='function'||typeof addWheels!=='function') return;
+
+  // ---- state ----
+  window.WHEEL_WIDTHS=[9.5,10,10.5,11,11.5,12];
+  if(typeof window.wheelWidth!=='number') window.wheelWidth=10.5;   // inches, rear
+  if(typeof window.wheelDeepDish==='undefined') window.wheelDeepDish=false;
+  if(typeof window.tireLetters==='undefined') window.tireLetters='black'; // 'black' | 'white'
+
+  // Honest fitment: widest rear wheel each body can take.
+  // Narrow (standard) vs widebody. Front is always ~1.5" narrower than rear.
+  window.WHEEL_MAXFIT=function(){
+    const wide=isWidebody;
+    const byKind={coupe:wide?12:10.5, sedan:wide?12:10.5, suv:11.5, c300:10.5};
+    const k=(typeof R_CUR!=='undefined'&&R_CUR)?R_CUR.kind:'coupe';
+    // c300 has no widebody kit; suv fender is fixed
+    return byKind[k]||(wide?12:10.5);
+  };
+  window.WHEEL_FITS=function(w){return w<=window.WHEEL_MAXFIT()+1e-6;};
+
+  // inches -> scene barrel width. OEM rear 10.5" ~ 0.325 widebody / 0.30 standard baseline.
+  function widthScene(inches,rear,wide,dragR){
+    // map 9.5..12 inch to a clearly visible barrel-width spread
+    const base=rear?0.30:0.275;          // width at 10.5"
+    const perInch=0.055;                 // scene units per inch of change (visible)
+    let w=base+(inches-10.5)*perInch;
+    if(dragR&&rear) w*=1.06;
+    return Math.max(0.16,w);
+  }
+
+  // ---- deep-dish aware wheel (overrides R_buildWheel) ----
+  const _origBuildWheel=R_buildWheel;
+  R_buildWheel=function(o){
+    const g=new THREE.Group();
+    const rimR=o.rim||0.254;
+    const dish=!!o.deepDish;
+    const tire=new THREE.Mesh(R_tireGeo(o.wid,rimR-0.004,o.r),R_tireMaterial());tire.name='tire';g.add(tire);
+    const wm=wheelMat(o.hex||'#9a9da3');
+    // barrel: deep dish pushes the inner lip much deeper (more negative z) and keeps the face outboard
+    const inset=dish?o.wid*0.62:o.wid*0.46;
+    const bp=[new THREE.Vector2(rimR-0.012,-inset),new THREE.Vector2(rimR-0.014,-o.wid*0.1),new THREE.Vector2(rimR-0.028,o.wid*0.2),new THREE.Vector2(rimR-0.03,o.wid*0.42)];
+    const barrel=new THREE.Mesh(new THREE.LatheGeometry(bp,48),new THREE.MeshStandardMaterial({color:0x2a2c30,metalness:0.9,roughness:0.5,side:THREE.DoubleSide}));
+    barrel.rotateX(R_PI/2);barrel.name='rimbarrel';g.add(barrel);
+    // outer lip: deep dish = a tall polished stepped lip set outboard
+    const lipZ=o.wid*0.44;
+    const lip=new THREE.Mesh(new THREE.TorusGeometry(rimR-0.002,dish?0.02:0.011,12,64),wm);lip.position.z=lipZ;lip.name='rim';g.add(lip);
+    if(dish){ // second step lip for the stepped-dish look
+      const lip2=new THREE.Mesh(new THREE.TorusGeometry(rimR-0.028,0.015,10,64),chromeMat());lip2.position.z=lipZ-0.028;lip2.name='rim';g.add(lip2);
+    }
+    const lipB=new THREE.Mesh(new THREE.TorusGeometry(rimR-0.002,0.011,10,64),wm);lipB.position.z=-inset;lipB.name='rim';g.add(lipB);
+    // spokes: deep dish = spokes recessed inboard (concave), standard = near face
+    const nSp=o.skinny?5:(dish?8:10);
+    const faceZ=dish?o.wid*0.02:o.wid*0.18;
+    const sp=R_spokeGeo(0.05,rimR-0.012,o.skinny?0.05:0.042,o.skinny?0.06:(dish?0.03:0.026),0.024,o.skinny?0.01:(dish?0.11:0.075));
+    for(let i=0;i<nSp;i++){const m=new THREE.Mesh(sp,wm);m.rotation.z=i/nSp*R_PI*2;m.position.z=faceZ;m.name='rim';g.add(m);}
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.085,0.04,32),wm);hub.rotation.x=R_PI/2;hub.position.z=faceZ+0.012;hub.name='rim';g.add(hub);
+    const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.042,0.012,32),R_black());cap.rotation.x=R_PI/2;cap.position.z=faceZ+0.036;cap.name='center_cap';g.add(cap);
+    const capR=new THREE.Mesh(new THREE.TorusGeometry(0.04,0.004,8,32),chromeMat());capR.position.z=faceZ+0.042;g.add(capR);
+    for(let i=0;i<5;i++){const a=i/5*R_PI*2;const n=new THREE.Mesh(new THREE.CylinderGeometry(0.0115,0.0115,0.022,6),chromeMat());n.rotation.x=R_PI/2;n.position.set(Math.cos(a)*0.0575,Math.sin(a)*0.0575,faceZ+0.036);g.add(n);}
+    // brake
+    const rr=o.rear?0.172:0.196;
+    const rotor=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,0.032,64),R_rotorMat());rotor.rotation.x=R_PI/2;rotor.position.z=-o.wid*0.05;rotor.name='rotor';g.add(rotor);
+    const hat=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.05,32),new THREE.MeshStandardMaterial({color:0x1b1c1f,metalness:0.8,roughness:0.5}));hat.rotation.x=R_PI/2;hat.position.z=-o.wid*0.05+0.015;g.add(hat);
+    const sh=new THREE.Shape(),a0=0.55,a1=1.55,ri=rr-0.075,ro=rr+0.012;
+    sh.absarc(0,0,ro,a0,a1,false);sh.absarc(0,0,ri,a1,a0,true);
+    const cal=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:o.rear?0.07:0.088,bevelEnabled:true,bevelThickness:0.006,bevelSize:0.006,bevelSegments:2}),redMat());
+    cal.position.z=-o.wid*0.05-(o.rear?0.035:0.044);cal.name='caliper';g.add(cal);
+    const piston=new THREE.CylinderGeometry(0.014,0.014,0.01,16);
+    for(let i=0;i<(o.rear?2:3);i++){const a=a0+0.14+i*(a1-a0-0.28)/Math.max(1,(o.rear?1:2));const pp=new THREE.Mesh(piston,new THREE.MeshStandardMaterial({color:0x8d9096,metalness:1,roughness:0.3}));pp.rotation.x=R_PI/2;pp.position.set(Math.cos(a)*(rr-0.04),Math.sin(a)*(rr-0.04),-o.wid*0.05+0.046);g.add(pp);}
+    return g;
+  };
+
+  // ---- addWheels with width + deep dish (overrides) ----
+  addWheels=function(g,opts){
+    const wr=opts.wr||0.364,yoff=opts.yoffset||0;
+    const wide=isWidebody;
+    const hex=(PARTS_DATA.wheels.find(w=>w.id===activeParts.wheels)||{}).hexColor||'#8f9298';
+    const skinny=(activeParts.wheels==='demon_skinny')||isDemonMode&&currentFamily==='demon';
+    const dragR=activeParts.tires==='drag_radials';
+    const dish=!!window.wheelDeepDish;
+    // clamp requested rear width to what fits; front is rear-1.5"
+    let rearIn=window.wheelWidth; const maxF=window.WHEEL_MAXFIT(); if(rearIn>maxF)rearIn=maxF;
+    const frontIn=Math.max(8,rearIn-1.5);
+    const defs=[[1,opts.rf,0],[-1,opts.rf,0],[1,-opts.rb,1],[-1,-opts.rb,1]];
+    const nm={'1_0':'wheel_fl','-1_0':'wheel_fr','1_1':'wheel_rl','-1_1':'wheel_rr'};
+    defs.forEach(([sx,z,rear])=>{
+      const front=!rear;const sk=skinny&&front;
+      const r=sk?0.322:wr;
+      const inches=sk?4.5:(rear?rearIn:frontIn);
+      const wid=sk?0.115:widthScene(inches,rear,wide,dragR);
+      const wg=new THREE.Group();wg.name=nm[sx+'_'+rear];
+      const w=R_buildWheel({r:r,wid:wid,rear:rear,skinny:sk,hex:sk?'#5a5c61':hex,rim:sk?0.215:wr*0.698,deepDish:sk?false:dish});
+      w.rotation.y=sx>0?R_PI/2:-R_PI/2; wg.add(w);
+      // track: push the wheel out as it gets wider so the tire sits at the fender, not inside the body
+      const trackBase=opts.tw||(wr>0.4?0.84:0.80);
+      const widthPush=(wid-0.30)*0.85;
+      const x=(sk?0.84:trackBase+(wide?0.035:0)+Math.max(0,widthPush))*sx;
+      wg.position.set(x,r+yoff,z);
+      if(sk)wg.userData.skinny=true;
+      g.add(wg);
+    });
+  };
+
+  // ---- white-letter tire sidewall (overrides R_tireTex) ----
+  const _origTireTex=R_tireTex;
+  R_tireTex=function(label){
+    const white=(window.tireLetters==='white');
+    const c=R_canvas(1024,512),g=c.getContext('2d');
+    g.fillStyle='#171718';g.fillRect(0,0,1024,512);
+    for(let k=0;k<2;k++){const y0=k?512*0.72:512*0.04,y1=k?512*0.96:512*0.28;
+      for(let i=0;i<260;i++){g.strokeStyle='rgba(255,255,255,'+(0.012+Math.random()*0.03)+')';const yy=y0+Math.random()*(y1-y0);g.beginPath();g.moveTo(0,yy);g.lineTo(1024,yy);g.stroke();}
+      const y=(y0+y1)/2;
+      // big brand name: white raised letters when selected, else subtle grey
+      if(white){
+        g.fillStyle='#f4f4f2';g.font='900 46px Arial';g.textBaseline='middle';
+        g.shadowColor='rgba(0,0,0,0.6)';g.shadowBlur=3;g.shadowOffsetY=2;
+        g.fillText(label,46,y);
+        g.shadowColor='transparent';g.shadowBlur=0;g.shadowOffsetY=0;
+      } else {
+        g.fillStyle='rgba(200,200,200,0.78)';g.font='bold 34px Arial';g.textBaseline='middle';
+        g.fillText(label,50,y);
+      }
+      g.fillStyle=white?'rgba(245,245,242,0.9)':'rgba(200,200,200,0.78)';g.font='bold 20px Arial';
+      g.fillText('TREADWEAR 300  TRACTION AA  TEMPERATURE A  M+S',540,y-8);
+      g.fillText('MADE IN USA   RADIAL TUBELESS  DOT',540,y+16);
+    }
+    g.fillStyle='#0b0b0c';g.fillRect(0,512*0.3,1024,512*0.4);
+    for(let i=1;i<5;i++){g.fillStyle='#000';g.fillRect(0,512*(0.3+i*0.08)-3,1024,6);}
+    for(let x=0;x<1024;x+=18){g.fillStyle='#000';g.fillRect(x,512*0.3,5,512*0.4);}
+    g.fillStyle='rgba(255,255,255,0.03)';for(let i=0;i<3000;i++)g.fillRect(Math.random()*1024,Math.random()*512,1,1);
+    return R_tex(c,true);
+  };
+  // make the tire material recache when letter style changes: fold style into the cache key
+  const _origTireMaterial=R_tireMaterial;
+  R_tireMaterial=function(){
+    const l=R_tireLabel()+'|'+window.tireLetters;
+    if(!R_TIRE_TEX||R_TIRE_LBL!==l){R_TIRE_TEX=R_tireTex(R_tireLabel());R_TIRE_LBL=l;}
+    return new THREE.MeshStandardMaterial({map:R_TIRE_TEX,roughness:0.88,metalness:0,envMapIntensity:0.35});
+  };
+
+  // ---- apply helpers ----
+  window.setWheelWidth=function(inches){window.wheelWidth=inches;buildCar(currentFamily);updateFitmentWarning();if(typeof updateRightPanel==='function')updateRightPanel();};
+  window.toggleDeepDish=function(){window.wheelDeepDish=!window.wheelDeepDish;buildCar(currentFamily);updateFitmentWarning();if(typeof updateRightPanel==='function')updateRightPanel();};
+  window.setTireLetters=function(mode){window.tireLetters=mode;R_TIRE_TEX=null;buildCar(currentFamily);if(typeof updateRightPanel==='function')updateRightPanel();};
+
+  // ---- honest fitment warning (overrides) ----
+  const _origFit=updateFitmentWarning;
+  updateFitmentWarning=function(){
+    const strip=document.getElementById('fstrip');if(!strip)return;
+    const warnings=[];
+    const maxF=window.WHEEL_MAXFIT();
+    const req=window.wheelWidth;
+    if(req>maxF){
+      warnings.push({type:'warn',msg:`✕ ${req}" rear will not clear this body. Max is ${maxF}"${(R_CUR&&(R_CUR.kind==='coupe'||R_CUR.kind==='sedan')&&!isWidebody)?'. Add widebody for up to 12"':''}. Running ${maxF}".`});
+    } else {
+      warnings.push({type:'ok',msg:`✓ ${req}" rear · 5×115 · ${isWidebody?'Widebody':'Standard'} fitment confirmed`});
+    }
+    if(window.wheelDeepDish)warnings.push({type:'ok',msg:'✓ Deep dish barrel'});
+    if(window.tireLetters==='white')warnings.push({type:'ok',msg:'✓ Raised white-letter sidewall'});
+    if(heightDrop===3&&activeParts.wheels==='stock_wheels')warnings.push({type:'ok',msg:'⚡ Air ride at maximum drop. Slammed stance'});
+    if(activeParts.wheels==='demon_skinny')warnings.push({type:'ok',msg:'✓ Demon Crate skinny fronts. Track Config active'});
+    strip.innerHTML=warnings.map(w=>`<div class="fw ${w.type}">${w.msg}</div>`).join('');
+  };
+})();
+
+/* ================= v9: pop sunroof + body-kit visuals ================= */
+(function(){
+  if(typeof R_build!=='function') return;
+
+  // ---- state ----
+  if(typeof window.sunroofOpen==='undefined') window.sunroofOpen=false; // target state
+  window.SUNROOF_FAMS={challenger:1,charger:1,c300:1,trackhawk:1,demon:1};
+  // body-kit toggles (independent of the Amazon exterior single-select)
+  if(typeof window.kitLip==='undefined') window.kitLip=false;
+  if(typeof window.kitDiffuser==='undefined') window.kitDiffuser=false;
+  window.kitSpoiler=window.kitSpoiler||'none'; // 'none' | 'lip' | 'wing'
+
+  let R_SUNROOF=null;      // {glass, recess, slide:0..1, group}
+  let R_sunAnim=0;         // current animated 0..1
+
+  // Build the sunroof assembly onto the current body. Called at end of R_build.
+  function addSunroof(){
+    R_SUNROOF=null;
+    const V=R_CUR; if(!V) return;
+    const fam=currentFamily;
+    if(!window.SUNROOF_FAMS[fam]) return;
+    const B=carGroup.userData.bodyG; if(!B) return;
+    // sunroof sits over the front seats: pick a z near the front of the roof
+    const zc=(fam==='trackhawk')?0.15:0.12;          // center of panel
+    const halfLen=(fam==='trackhawk')?0.52:0.46;      // along z
+    const halfW=0.40;                                 // across x
+    const z0=zc+halfLen, z1=zc-halfLen;
+    const roofY=z=>R_cbP(z,3);                        // roof top at z
+    const grp=new THREE.Group();grp.name='sunroof';grp.userData.xr=0; // glass should respond to xray via material
+    // recessed opening frame + dark headliner (so the pop is believable: a real cutout)
+    const frameMat=new THREE.MeshStandardMaterial({color:0x111214,metalness:0.6,roughness:0.5});
+    const wellMat=new THREE.MeshStandardMaterial({color:0x08080a,roughness:0.95,metalness:0,side:THREE.DoubleSide});
+    // the well (hole lining) dropped a little below the roof skin
+    const wy=roofY(zc);
+    const well=new THREE.Mesh(new THREE.BoxGeometry(halfW*2,0.11,halfLen*2),wellMat);
+    well.position.set(0,wy-0.055,zc);well.name='sunroof_well';grp.add(well);
+    // frame lip around the opening
+    [[0,halfLen],[0,-halfLen]].forEach(([x,z])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(halfW*2+0.05,0.015,0.05),frameMat);b.position.set(x,wy+0.004,zc+z);grp.add(b);});
+    [[halfW,0],[-halfW,0]].forEach(([x,z])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.015,halfLen*2+0.05),frameMat);b.position.set(x,wy+0.004,zc+z);grp.add(b);});
+    // the sliding/popping glass panel
+    const glassMatSun=new THREE.MeshPhysicalMaterial({color:0x020304,metalness:0,roughness:0.04,transparent:true,opacity:0.55,side:THREE.DoubleSide,envMapIntensity:0.8,clearcoat:1,clearcoatRoughness:0.03});
+    const panel=new THREE.Mesh(new THREE.BoxGeometry(halfW*2-0.02,0.012,halfLen*2-0.02),glassMatSun);
+    panel.name='sunroof_glass';
+    // pivot group so we can tilt the rear edge up (pop) then slide back
+    const pivot=new THREE.Group();pivot.name='sunroof_pivot';
+    pivot.position.set(0,wy+0.01,zc);
+    panel.position.set(0,0,0);
+    pivot.add(panel);
+    grp.add(pivot);
+    B.add(grp);
+    R_SUNROOF={pivot:pivot,panel:panel,wy:wy,zc:zc,halfLen:halfLen,glassMat:glassMatSun,well:well};
+    applySunroof(R_sunAnim);
+  }
+
+  // Apply a 0..1 open amount: 0..0.4 tilts the rear edge up (pop), 0.4..1 slides the panel back.
+  function applySunroof(a){
+    if(!R_SUNROOF)return;
+    const {pivot,panel,halfLen}=R_SUNROOF;
+    const tilt=Math.min(a/0.4,1);                 // 0..1 over first 40%
+    const slide=Math.max(0,(a-0.4)/0.6);          // 0..1 over last 60%
+    // tilt: raise the REAR edge of the panel (pop position). Rear is -z.
+    pivot.rotation.x=-tilt*0.28;                   // rear edge lifts
+    panel.position.y=tilt*0.03;
+    // slide: move the panel rearward over the roof, lifting slightly to clear
+    panel.position.z=-slide*(halfLen*1.7);
+    panel.position.y=tilt*0.03+slide*0.05;
+    // once sliding, drop the tilt back toward flat (real sunroofs lay flat to slide)
+    if(slide>0)pivot.rotation.x=-0.28*(1-slide)-0.0;
+  }
+
+  // smooth animation hooked into the render loop
+  (function hookAnim(){
+    const _origAnimate=window.animate;
+    if(typeof _origAnimate!=='function'){setTimeout(hookAnim,50);return;}
+    window.animate=function(){
+      // ease current toward target
+      const target=window.sunroofOpen?1:0;
+      if(Math.abs(R_sunAnim-target)>0.001){R_sunAnim+=(target-R_sunAnim)*0.14;applySunroof(R_sunAnim);}
+      _origAnimate();
+    };
+  })();
+
+  window.toggleSunroof=function(){
+    if(!window.SUNROOF_FAMS[currentFamily]){if(typeof showToast==='function')showToast('No sunroof offered on this model');return;}
+    window.sunroofOpen=!window.sunroofOpen;
+    const btn=document.getElementById('sunroofBtn');if(btn)btn.classList.toggle('on',window.sunroofOpen);
+    if(typeof showToast==='function')showToast(window.sunroofOpen?'Sunroof: popped and sliding open':'Sunroof: closing');
+    if(typeof updateRightPanel==='function')updateRightPanel();
+  };
+
+  // ---- body-kit visuals (toggleable, preview the catalog parts on the car) ----
+  function addBodyKit(){
+    const V=R_CUR;if(!V)return;const B=carGroup.userData.bodyG;if(!B)return;
+    const old=B.getObjectByName('bodykit');if(old)B.remove(old);
+    const kit=new THREE.Group();kit.name='bodykit';
+    const cf=carbonMat();
+    // front lip splitter
+    if(window.kitLip){
+      const lip=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.022,0.34),cf);
+      lip.position.set(0,0.185,V.nose-0.02);lip.name='kit_lip';lip.userData.xr=1;kit.add(lip);
+      [-1,1].forEach(sx=>{const can=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.08,0.18),cf);can.position.set(sx*0.8,0.235,V.nose-0.1);kit.add(can);});
+    }
+    // rear diffuser
+    if(window.kitDiffuser){
+      const base=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.14,0.34),cf);base.position.set(0,0.30,V.tail+0.12);base.name='kit_diffuser';base.userData.xr=1;kit.add(base);
+      for(let i=-2;i<=2;i++){const fin=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.16,0.30),cf);fin.position.set(i*0.3,0.30,V.tail+0.14);kit.add(fin);}
+    }
+    // spoiler styles
+    if(window.kitSpoiler==='lip'){
+      const wy=R_lbP(V.tail+0.14,2)+0.02;
+      const s=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.03,0.18),carBodyMat());s.position.set(0,wy,V.tail+0.14);s.rotation.x=-0.18;s.name='kit_spoiler';s.userData.xr=1;kit.add(s);
+    } else if(window.kitSpoiler==='wing'){
+      const wy=R_lbP(V.tail+0.12,2)+0.11;
+      const w=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.024,0.22),carBodyMat());w.position.set(0,wy,V.tail+0.08);w.rotation.x=-0.06;w.name='kit_spoiler';w.userData.xr=1;kit.add(w);
+      [-1,1].forEach(sx=>{const p=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.09,0.17),carBodyMat());p.position.set(sx*0.72,wy-0.055,V.tail+0.1);kit.add(p);});
+    }
+    kit.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+    B.add(kit);
+  }
+
+  window.toggleKitLip=function(){window.kitLip=!window.kitLip;addBodyKit();if(isXray)applyXray(true);if(typeof updateRightPanel==='function')updateRightPanel();};
+  window.toggleKitDiffuser=function(){window.kitDiffuser=!window.kitDiffuser;addBodyKit();if(isXray)applyXray(true);if(typeof updateRightPanel==='function')updateRightPanel();};
+  window.setKitSpoiler=function(v){window.kitSpoiler=(window.kitSpoiler===v)?'none':v;addBodyKit();if(isXray)applyXray(true);if(typeof updateRightPanel==='function')updateRightPanel();};
+
+  // ---- hook sunroof + bodykit into every body build ----
+  const _origBuild=R_build;
+  R_build=function(col,key){
+    _origBuild(col,key);
+    try{addSunroof();}catch(e){console.error('sunroof '+e.message);}
+    try{addBodyKit();}catch(e){console.error('bodykit '+e.message);}
+  };
+
+  // inject a SUNROOF header button next to the other tb controls
+  (function addBtn(){
+    const demon=document.getElementById('demonBtn');
+    if(!demon){setTimeout(addBtn,60);return;}
+    if(document.getElementById('sunroofBtn'))return;
+    const b=document.createElement('button');b.className='tb';b.id='sunroofBtn';b.textContent='SUNROOF';b.setAttribute('onclick','toggleSunroof()');
+    demon.parentNode.insertBefore(b,demon.nextSibling);
+  })();
+
+})();
+
+/* ================= v9b: distinct front ends per model ================= */
+(function(){
+  if(typeof R_VARS==='undefined'||typeof R_build!=='function') return;
+
+  // give each body its own grille identity
+  R_VARS.sedan.grille='charger';   // Charger: full-width blacked crosshair bar
+  R_VARS.suv.grille='jeep';        // Trackhawk: Jeep seven-slot chrome grille
+  // coupe/demon stay 'srt' (Dodge Challenger), c300 stays 'chrome'
+
+  // ---- distinct grille textures ----
+  function R_frontFaceCharger(){
+    const c=R_canvas(1024,320),g=c.getContext('2d');
+    g.fillStyle='#050506';g.fillRect(0,0,1024,320);
+    // Charger: one wide gloss-black mesh bar spanning the nose, thin body-color brow
+    g.fillStyle='#0a0b0d';g.fillRect(70,70,884,86);
+    // horizontal slats (Charger reads horizontal, not the Challenger's vertical crosshatch)
+    g.strokeStyle='#23262b';g.lineWidth=3;
+    for(let y=80;y<152;y+=9){g.beginPath();g.moveTo(80,y);g.lineTo(944,y);g.stroke();}
+    // center split + SRT badge offset left (Charger)
+    g.fillStyle='#050506';g.fillRect(506,70,14,86);
+    g.fillStyle='#d4281c';g.fillRect(150,104,46,20);g.fillStyle='#111';g.font='bold 13px Arial';g.fillText('SRT',157,119);
+    // lower intake, wider and flatter than the coupe
+    g.fillStyle='#08090a';g.beginPath();g.moveTo(60,188);g.lineTo(964,188);g.lineTo(1000,300);g.lineTo(24,300);g.closePath();g.fill();
+    g.strokeStyle='#1d1f23';for(let x=50;x<1000;x+=8){g.beginPath();g.moveTo(x,192);g.lineTo(x,298);g.stroke();}
+    return R_tex(c,true);
+  }
+  function R_frontFaceJeep(){
+    const c=R_canvas(1024,320),g=c.getContext('2d');
+    g.fillStyle='#050506';g.fillRect(0,0,1024,320);
+    // Jeep seven-slot: seven tall chrome-edged slots across the center
+    const n=7, slotW=70, gap=26, total=n*slotW+(n-1)*gap, x0=(1024-total)/2;
+    for(let i=0;i<n;i++){
+      const x=x0+i*(slotW+gap);
+      g.fillStyle='#0b0c0e';g.fillRect(x,64,slotW,120);
+      g.strokeStyle='#c9ccd2';g.lineWidth=4;g.strokeRect(x,64,slotW,120);
+      g.fillStyle='#17181b';for(let y=74;y<180;y+=12){g.fillRect(x+4,y,slotW-8,4);}
+    }
+    // body-color surround top brow
+    g.fillStyle='#08090a';g.fillRect(0,40,1024,18);
+    // lower bumper intake with tow hooks
+    g.fillStyle='#08090a';g.beginPath();g.moveTo(80,200);g.lineTo(944,200);g.lineTo(980,300);g.lineTo(44,300);g.closePath();g.fill();
+    g.fillStyle='#d4281c';g.fillRect(470,150,84,22);g.fillStyle='#fff';g.font='bold 12px Arial';g.fillText('TRACKHAWK',476,165);
+    return R_tex(c,true);
+  }
+
+  const _origFrontTex=(typeof R_frontFaceTex==='function')?R_frontFaceTex:null;
+  // override the fascia selection inside R_build by wrapping it: R_build reads
+  // ftex=V.grille==='chrome'?R_frontFaceChrome():R_frontFaceTex(); we cannot
+  // intercept that ternary, so we swap R_frontFaceTex to branch on R_CUR.grille.
+  R_frontFaceTex=function(){
+    const gk=(R_CUR&&R_CUR.grille)||'srt';
+    if(gk==='charger')return R_frontFaceCharger();
+    if(gk==='jeep')return R_frontFaceJeep();
+    return _origFrontTex?_origFrontTex():R_frontFaceCharger();
+  };
+
+  // ---- distinct lamp treatment per model ----
+  // Challenger/Demon: round projector rings (original R_headlamp). Charger: horizontal
+  // slim LED bar. Trackhawk: tall stacked LED. 300: wide chrome-trimmed lamp.
+  const _origHeadlamp=R_headlamp;
+  R_headlamp=function(side){
+    const gk=(R_CUR&&R_CUR.grille)||'srt';
+    const kind=(R_CUR&&R_CUR.kind)||'coupe';
+    if(gk==='charger'){
+      const g=new THREE.Group();
+      const hous=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.085,0.05),new THREE.MeshStandardMaterial({color:0x0b0c0e,metalness:0.6,roughness:0.3}));g.add(hous);
+      const led=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xdfe9ff,emissiveIntensity:1.5});
+      const bar=new THREE.Mesh(new THREE.BoxGeometry(0.40,0.016,0.012),led);bar.position.set(0,0.018,0.03);g.add(bar);
+      const bar2=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.03,0.012),new THREE.MeshStandardMaterial({color:0x111,metalness:1,roughness:0.2}));bar2.position.set(0,-0.02,0.028);g.add(bar2);
+      g.userData.xr=1;return g;
+    }
+    if(gk==='jeep'){
+      const g=new THREE.Group();
+      const hous=new THREE.Mesh(new THREE.BoxGeometry(0.26,0.16,0.05),new THREE.MeshStandardMaterial({color:0x0b0c0e,metalness:0.6,roughness:0.3}));g.add(hous);
+      const chrome=new THREE.Mesh(new THREE.TorusGeometry(0.07,0.01,10,32),chromeMat());chrome.position.z=0.028;g.add(chrome);
+      const led=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xe8f0ff,emissiveIntensity:1.4});
+      const proj=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.012,24),led);proj.rotation.x=R_PI/2;proj.position.z=0.03;g.add(proj);
+      g.userData.xr=1;return g;
+    }
+    // default: original
+    return _origHeadlamp(side);
+  };
 })();
 
 /* ================= v9: panel controls for width / deep dish / tire letters ================= */
