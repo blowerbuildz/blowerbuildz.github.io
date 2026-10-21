@@ -541,7 +541,7 @@ const PARTS_DATA = {
     {id:'weathertech',name:'WeatherTech FloorLiners',brand:'WeatherTech',spec:'Laser-measured · all-weather · black',delta:'Best interior protection',price:'$145',url:'https://www.amazon.com/s?k=weathertech+challenger+floorliner&tag=blowerbuildz-20',category:'interior'}
   ],
   badging: [
-    {id:'badge_hellcat_3d',name:'Hellcat 3D Emblem Badge',brand:'Mopar OEM',spec:'OEM replacement · red outline · direct swap',delta:'Factory correct',price:'$75',url:'https://www.amazon.com/s?k=hellcat+emblem+badge+mopar&tag=blowerbuildz-20',category:'badging'},
+    {id:'badge_hellcat_3d',name:'Hellcat Emblem Badge (3D Raised)',brand:'Mopar OEM',spec:'OEM replacement · red outline · direct swap',delta:'Factory correct',price:'$75',url:'https://www.amazon.com/s?k=hellcat+emblem+badge+mopar&tag=blowerbuildz-20',category:'badging'},
     {id:'badge_srt_billet',name:'SRT Billet Badge',brand:'American Car Craft',spec:'Brushed aluminum · CNC machined · direct bolt-on',delta:'Premium OEM+ look',price:'$65',url:'https://www.amazon.com/s?k=srt+billet+badge+challenger&tag=blowerbuildz-20',category:'badging'},
     {id:'badge_delete',name:'Badge Delete Kit',brand:'Various',spec:'Complete blackout · all OEM badges removed',delta:'Sleeper/clean look',price:'$40',url:'https://www.amazon.com/s?k=challenger+badge+delete+kit&tag=blowerbuildz-20',category:'badging'},
     {id:'badge_demon_gold',name:'Demon Gold Badge Set',brand:'Custom',spec:'Gold chrome finish · Demon logo · fender + trunk',delta:'Demon 170 inspired',price:'$90',url:'https://www.amazon.com/s?k=demon+gold+badge+challenger&tag=blowerbuildz-20',category:'badging'}
@@ -2133,7 +2133,7 @@ function buildHotspotOverlay(){
       dot.querySelector('.hs-dot').style.boxShadow='0 0 8px rgba(242,169,0,0.8)';
     });
     dot.querySelector('.hs-dot').addEventListener('click', ()=>openIso(part.id));
-    overlay.appendChild(dot);
+    dot.dataset.part=part.id;overlay.appendChild(dot);
   });
 }
 
@@ -2323,7 +2323,7 @@ function showSpecCard(){
   const vw = document.getElementById('vw');
   const card = document.createElement('div');
   card.id = 'spec-card';
-  card.style.cssText = 'position:absolute;bottom:64px;left:14px;z-index:8;background:rgba(10,10,12,0.86);border:1px solid rgba(242,169,0,0.2);border-radius:6px;padding:12px 14px;min-width:240px;max-width:300px;transform:scale(.82);transform-origin:bottom left;text-align:center';
+  card.style.cssText = 'position:absolute;bottom:64px;left:14px;z-index:8;background:rgba(10,10,12,0.86);border:1px solid rgba(242,169,0,0.2);border-radius:6px;padding:12px 14px;min-width:240px;max-width:300px;transform:scale(.6);transform-origin:bottom left;opacity:.9;pointer-events:none;text-align:center';
   card.innerHTML = `
     <div style="font-family:var(--fm);font-size:0.62rem;letter-spacing:0.25em;color:var(--dim2);text-transform:uppercase;margin-bottom:8px">FULL SPEC CARD</div>
     <div style="font-family:var(--fh);font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:4px">${yr.y} ${fam.label}</div>
@@ -2522,8 +2522,8 @@ function R_line(L,iList,jfn,rad,mat){
 function R_closestJ(L,i,x,jmin,jmax){let best=jmin,bd=1e9;for(let j=jmin;j<=jmax;j++){const d=Math.abs(L.P[i][j].x-x);if(d<bd){bd=d;best=j;}}return best;}
 
 /* ---------- Challenger geometry parameters ---------- */
-const R_AX={zf:1.50,zr:-1.45,rf:0.364,rr:0.364};
-const R_LB=[ // z, ybot, ytop, w, wt
+let R_AX={zf:1.50,zr:-1.45,rf:0.364,rr:0.364};
+let R_LB=[ // z, ybot, ytop, w, wt
  [-2.52,.34,1.040,.80,.54],[-2.46,.26,1.085,.90,.62],[-2.30,.215,1.115,.955,.72],[-2.00,.19,1.115,.975,.79],
  [-1.60,.17,1.090,.985,.84],[-1.10,.15,1.060,.975,.855],[-0.40,.15,1.050,.972,.86],[0.30,.15,1.055,.970,.84],
  [0.80,.16,1.075,.975,.80],[1.30,.18,1.055,.975,.78],[1.90,.20,1.000,.970,.74],[2.30,.235,0.935,.950,.70],[2.45,.28,0.820,.910,.63],[2.52,.37,0.640,.790,.52]];
@@ -2531,7 +2531,7 @@ function R_lbP(z,k){const t=R_LB.map(r=>[r[0],r[k]]);return R_cr(t,z);}
 function R_flare(z){ if(!isWidebody) return 0; return 0.065*Math.max(Math.exp(-Math.pow((z-R_AX.zf)/0.62,2)),Math.exp(-Math.pow((z-R_AX.zr)/0.78,2)))*0.85;}
 function R_archTop(z){ // lowest y the underside may have
   let y=0;
-  [[R_AX.zf,0.405],[R_AX.zr,0.415]].forEach(([za,ra])=>{const d=Math.abs(z-za);if(d<ra){const rr=ra+(isWidebody?0.012:0);y=Math.max(y,0.364+Math.sqrt(Math.max(rr*rr-d*d,0)));}});
+  [[R_AX.zf,R_AX.r+0.041],[R_AX.zr,R_AX.r+0.051]].forEach(([za,ra])=>{const d=Math.abs(z-za);if(d<ra){const rr=ra+(isWidebody?0.012:0);y=Math.max(y,R_AX.r+Math.sqrt(Math.max(rr*rr-d*d,0)));}});
   return y;
 }
 function R_lowerSec(z){
@@ -2545,12 +2545,12 @@ function R_half(c,k){
   const loop=Rr.slice();for(let j=Rr.length-2;j>=1;j--)loop.push(new THREE.Vector2(-Rr[j].x,Rr[j].y));
   loop.M=Rr.length;loop.k=k;return loop;
 }
-const R_CB=[ // z, yb, wb, yt, wt
+let R_CB=[ // z, yb, wb, yt, wt
  [0.96,1.00,.775,1.082,.74],[0.80,1.00,.785,1.150,.725],[0.58,1.00,.795,1.245,.705],[0.34,1.00,.800,1.335,.690],[0.08,1.00,.805,1.402,.672],[-0.22,1.00,.815,1.440,.660],
  [-0.50,1.00,.825,1.449,.652],[-0.80,1.00,.835,1.432,.650],[-1.05,1.00,.845,1.375,.660],[-1.30,1.00,.855,1.275,.690],[-1.50,1.00,.862,1.178,.730],[-1.64,1.00,.866,1.108,.775],[-1.72,1.00,.868,1.080,.800]];
 function R_cbP(z,k){return R_cr(R_CB.map(r=>[r[0],r[k]]).reverse(),z);}
 function R_cabinSec(z){
-  const yb=1.0,wb=R_cbP(z,2),yt=R_cbP(z,3),wt=R_cbP(z,4),h=yt-yb;
+  const yb=R_CBY,wb=R_cbP(z,2),yt=R_cbP(z,3),wt=R_cbP(z,4),h=yt-yb;
   const c=[[0,yb],[wb*0.9,yb],[wb,yb+0.02],[wb+(wt-wb)*0.62,yb+0.62*h],[wt+0.042,yt-0.085],[wt,yt-0.03],[wt*0.55,yt-0.005],[0,yt]];
   return R_half(c,4);
 }
@@ -2913,6 +2913,184 @@ function applyXrayBase(on){
 function R_applyTint(){
   const t={tint_5:0.97,tint_20:0.88}[activeParts.exterior];
   if(R_GLASS){R_GLASS.userData.base=t||0.88;R_GLASS.opacity=isXray?0.06:(t||0.88);R_GLASS.color.set(t?0x000000:0x020304);}
+}
+
+
+/* ================= v8: per-vehicle bodies, 3D hotspots ================= */
+let R_CBY=1.0, R_CUR=null;
+const R_LB_COUPE=R_LB, R_CB_COUPE=R_CB;
+function R_scaleZ(t,f,rearBump){return t.map(r=>{const c=r.slice();c[0]=+(r[0]*f).toFixed(4);if(rearBump&&r[0]<-1.6)c[2]+=rearBump;return c;});}
+const R_VARS={
+ coupe:{kind:'coupe',lb:R_LB_COUPE,cb:R_CB_COUPE,cby:1.0,ax:{zf:1.5,zr:-1.45,r:0.364},nose:2.52,tail:-2.52,
+  seams:[2.28,0.88,-2.02,-2.36],gaps:[0.88,-2.02,2.28,-2.36],doors:[0.55,-0.5],cz:[-1.72,0.96],roof:[-1.36,0.40],pA:[0.50,0.96],pB:[-0.34,-0.18],pC:[-1.60,-0.95],
+  hoodZ:1.55,bulgeZ:1.93,vents:true,lampY:0.715,lampX:0.70,mirror:[0.52,1.1],handles:[0.1,-0.9],track:0.80,fy:0.5,fh:0.3,ry:0.5,tipY:0.38,underY:0.36,underH:0.36,wing:true,grille:'srt'},
+ sedan:{kind:'sedan',lb:R_scaleZ(R_LB_COUPE,1.025,0.03),
+  cb:[[1.0,1.0,.78,1.085,.74],[0.84,1.0,.79,1.155,.725],[0.62,1.0,.80,1.25,.705],[0.36,1.0,.805,1.345,.69],[0.05,1.0,.81,1.42,.672],[-0.4,1.0,.82,1.465,.66],[-0.9,1.0,.83,1.47,.652],[-1.3,1.0,.84,1.45,.655],[-1.6,1.0,.85,1.385,.665],[-1.82,1.0,.86,1.28,.695],[-1.97,1.0,.865,1.17,.74],[-2.07,1.0,.868,1.12,.78],[-2.12,1.0,.87,1.10,.80]],
+  cby:1.0,ax:{zf:1.54,zr:-1.50,r:0.364},nose:2.583,tail:-2.583,
+  seams:[2.35,0.95,-2.2,-2.42],gaps:[0.95,-2.17,2.35,-2.42],doors:[0.62,-0.2,-1.15],cz:[-2.12,1.0],roof:[-1.62,0.40],pA:[0.52,1.0],pB:[-0.30,-0.10],pC:[-2.0,-1.35],
+  hoodZ:1.62,bulgeZ:2.0,vents:true,lampY:0.715,lampX:0.70,mirror:[0.60,1.12],handles:[0.0,-0.95],track:0.80,fy:0.5,fh:0.3,ry:0.5,tipY:0.38,underY:0.36,underH:0.36,wing:false,grille:'srt'},
+ suv:{kind:'suv',
+  lb:[[-2.46,.50,1.10,.82,.62],[-2.40,.40,1.45,.93,.82],[-2.25,.34,1.52,.96,.88],[-1.9,.31,1.45,.975,.90],[-1.2,.28,1.20,.98,.90],[-0.4,.27,1.15,.98,.90],[0.4,.27,1.15,.98,.88],[0.95,.28,1.19,.98,.84],[1.4,.30,1.17,.98,.80],[1.95,.33,1.10,.975,.76],[2.30,.36,1.00,.95,.70],[2.40,.38,.93,.90,.64],[2.46,.42,.86,.82,.56]],
+  cb:[[1.10,1.15,.80,1.20,.76],[0.95,1.15,.82,1.32,.74],[0.75,1.15,.83,1.48,.72],[0.50,1.15,.84,1.62,.71],[0.2,1.15,.85,1.74,.70],[-0.3,1.15,.86,1.80,.69],[-1.0,1.15,.87,1.805,.685],[-1.6,1.15,.875,1.79,.69],[-2.0,1.15,.88,1.76,.70],[-2.25,1.15,.88,1.70,.71],[-2.38,1.15,.88,1.60,.73]],
+  cby:1.15,ax:{zf:1.45,zr:-1.45,r:0.40},nose:2.46,tail:-2.46,
+  seams:[2.2,1.0,-2.3],gaps:[1.0,2.2],doors:[0.7,-0.05,-1.0],cz:[-2.38,1.10],roof:[-2.1,0.40],pA:[0.45,1.10],pB:[-0.30,-0.10],pC:[-2.3,-1.7],
+  hoodZ:1.72,bulgeZ:2.05,vents:true,lampY:0.82,lampX:0.72,mirror:[0.78,1.45],handles:[0.15,-0.82],track:0.84,fy:0.64,fh:0.42,ry:0.9,tipY:0.56,underY:0.46,underH:0.36,wing:false,grille:'srt'},
+ c300:{kind:'sedan',
+  lb:[[-2.50,.38,1.08,.82,.62],[-2.44,.28,1.14,.92,.72],[-2.2,.24,1.16,.97,.82],[-1.7,.2,1.14,.985,.87],[-1.0,.17,1.10,.98,.88],[-0.2,.15,1.09,.975,.88],[0.6,.15,1.095,.975,.86],[1.1,.16,1.10,.975,.83],[1.6,.19,1.09,.975,.80],[2.1,.22,1.05,.97,.77],[2.4,.26,.98,.95,.72],[2.48,.30,.92,.93,.68],[2.53,.36,.80,.84,.60]],
+  cb:[[0.95,1.05,.80,1.14,.76],[0.75,1.05,.81,1.24,.74],[0.5,1.05,.82,1.34,.72],[0.2,1.05,.825,1.42,.70],[-0.3,1.05,.83,1.47,.685],[-0.9,1.05,.835,1.48,.68],[-1.4,1.05,.845,1.45,.685],[-1.75,1.05,.855,1.36,.70],[-1.95,1.05,.865,1.26,.73],[-2.05,1.05,.87,1.18,.77],[-2.1,1.05,.87,1.15,.80]],
+  cby:1.05,ax:{zf:1.52,zr:-1.52,r:0.364},nose:2.53,tail:-2.50,
+  seams:[2.3,0.95,-2.12,-2.45],gaps:[0.95,-2.12,2.3,-2.45],doors:[0.55,-0.2,-1.2],cz:[-2.1,0.95],roof:[-1.5,0.35],pA:[0.45,0.95],pB:[-0.30,-0.10],pC:[-2.0,-1.4],
+  hoodZ:1.6,bulgeZ:2.0,vents:false,lampY:0.76,lampX:0.70,mirror:[0.58,1.12],handles:[0.0,-0.95],track:0.80,fy:0.58,fh:0.42,ry:0.5,tipY:0.38,underY:0.36,underH:0.36,wing:false,grille:'chrome'}
+};
+function R_frontFaceChrome(){
+  const c=R_canvas(1024,320),g=c.getContext('2d');
+  g.fillStyle='#050506';g.fillRect(0,0,1024,320);
+  const gr=g.createLinearGradient(0,0,0,200);gr.addColorStop(0,'#f2f4f7');gr.addColorStop(0.5,'#9aa0a8');gr.addColorStop(1,'#d9dce1');
+  g.fillStyle=gr;g.beginPath();g.moveTo(190,30);g.lineTo(834,30);g.lineTo(880,200);g.lineTo(144,200);g.closePath();g.fill();
+  g.fillStyle='#08090b';g.beginPath();g.moveTo(215,54);g.lineTo(809,54);g.lineTo(846,180);g.lineTo(178,180);g.closePath();g.fill();
+  g.strokeStyle='#cfd3d9';g.lineWidth=5;for(let x=200;x<830;x+=26){g.beginPath();g.moveTo(x,56);g.lineTo(x+(x-512)*0.06,178);g.stroke();}
+  g.fillStyle='#e8eaee';g.beginPath();g.ellipse(512,120,56,26,0,0,Math.PI*2);g.fill();g.fillStyle='#16181c';g.font='bold 18px Arial';g.fillText('SRT',492,127);
+  g.fillStyle='#08090a';g.beginPath();g.moveTo(90,222);g.lineTo(934,222);g.lineTo(980,305);g.lineTo(44,305);g.closePath();g.fill();
+  g.strokeStyle='#202226';for(let x=60;x<980;x+=10){g.beginPath();g.moveTo(x,226);g.lineTo(x,303);g.stroke();}
+  return R_tex(c,true);
+}
+function R_roofHW(i,cz,V){const z=cz[i];return Math.max(4,Math.round(10+(z>0.2?(0.4-z)*18:0)-(z<V.roof[0]+0.26?(V.roof[0]+0.26-z)*10:0)));}
+function R_buildLoftBody(){
+  const V=R_CUR;
+  const zs=R_zList(V.tail,V.nose,0.1,[[V.ax.zf,0.58,0.05],[V.ax.zr,0.58,0.05]]);
+  V.seams.concat(V.doors).forEach(z=>zs.push(z));zs.sort((a,b)=>a-b);
+  const uz=[];zs.forEach(z=>{if(!uz.length||z-uz[uz.length-1]>0.012)uz.push(z);});
+  return {L:R_loftBuild(R_lowerSec,uz),zs:uz};
+}
+function R_build(col,key){
+  const V=R_VARS[key];R_CUR=V;R_LB=V.lb;R_CB=V.cb;R_CBY=V.cby;R_AX=V.ax;
+  const g=carGroup,B=new THREE.Group();B.name='bodyG';g.add(B);
+  const paint=carBodyMat(col,false),glass=glassMat(false);
+  const {L,zs}=R_buildLoftBody();
+  const body=new THREE.Mesh(L.geo,paint);body.name='body';B.add(body);
+  const M=((L.nL)>>1)+1;
+  const gap=R_mat('gap',()=>new THREE.MeshBasicMaterial({color:0x050505}));
+  V.gaps.forEach(z=>{const i=R_rowOf(zs,z);const lo=Math.floor(M*0.45),hi=L.nL-lo;B.add(R_ring(L,i,lo,hi,0.0032,gap));});
+  V.doors.forEach(z=>{const i=R_rowOf(zs,z);
+    B.add(R_ring(L,i,Math.floor(M*0.12),Math.floor(M*0.62),0.003,gap));
+    B.add(R_ring(L,i,L.nL-Math.floor(M*0.62),L.nL-Math.floor(M*0.12),0.003,gap));});
+  const czs=R_zList(V.cz[0],V.cz[1],0.07,[]);V.doors.forEach(z=>czs.push(z));czs.sort((a,b)=>a-b);
+  const cz=[];czs.forEach(z=>{if(!cz.length||z-cz[cz.length-1]>0.012)cz.push(z);});
+  const C=R_loftBuild(R_cabinSec,cz);
+  const cabin=new THREE.Mesh(C.geo,glass);cabin.name='windshield';B.add(cabin);
+  const top=((C.nL)>>1);
+  const rowRange=(a,b)=>{let i0=0,i1=0;cz.forEach((z,i)=>{if(z<=a+1e-6)i0=i;if(z<=b+1e-6)i1=i;});return [i0,i1];};
+  let [r0,r1]=rowRange(V.roof[0],V.roof[1]);
+  B.add(R_patch(C,r0,r1,i=>{const w=R_roofHW(i,cz,V);return [top-w,top+w];},0.003,paint,'roof'));
+  [-1,1].forEach(sx=>{
+    const sj=(a,b)=>sx>0?[a,b]:[C.nL-b,C.nL-a];
+    let [a0,a1]=rowRange(V.pC[0],V.pC[1]);B.add(R_patch(C,a0,a1,i=>sj(6,top-6),0.003,paint,'pillarC'));
+    let [b0,b1]=rowRange(V.pB[0],V.pB[1]);B.add(R_patch(C,b0,b1,i=>sj(4,top-5),0.003,R_black(),'pillarB'));
+    let [p0,p1]=rowRange(V.pA[0],V.pA[1]);B.add(R_patch(C,p0,p1,i=>sj(Math.round(top-9+(cz[i]-V.pA[0])*4),top-6),0.003,paint,'pillarA'));
+    const pts=[];for(let i=0;i<cz.length;i++){const j=sx>0?3:C.nL-3,k=i*C.nL+j,p=C.P[i][j];pts.push(new THREE.Vector3(p.x+C.nrm.getX(k)*0.004,p.y+C.nrm.getY(k)*0.004,p.z+C.nrm.getZ(k)*0.004));}
+    const tr=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,0.011,6,false),chromeMat());tr.userData.xr=1;B.add(tr);
+  });
+  const hy=z=>R_lbP(z,2)+0.004;
+  if(V.vents){[-1,1].forEach(sx=>{
+    const v=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.004,0.38),R_black());v.position.set(sx*0.31,hy(V.hoodZ)+0.002,V.hoodZ);v.userData.xr=1;B.add(v);
+    for(let k=0;k<6;k++){const s=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.007,0.014),new THREE.MeshStandardMaterial({color:0x2a2c31,metalness:0.8,roughness:0.4}));s.position.set(sx*0.31,hy(V.hoodZ)+0.005,V.hoodZ-0.15+k*0.065);s.userData.xr=1;B.add(s);}
+  });
+  const bulge=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.004,0.34),R_black());bulge.position.set(0,hy(V.bulgeZ)+0.002,V.bulgeZ);bulge.userData.xr=1;B.add(bulge);}
+  if(currentFamily==='demon'){
+    const sc=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.07,0.52),paint);sc.position.set(0,hy(V.hoodZ)+0.035,V.hoodZ);sc.name='hood';B.add(sc);
+    const mouth=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.05,0.01),R_black());mouth.position.set(0,hy(V.hoodZ)+0.03,V.hoodZ+0.262);B.add(mouth);
+  }
+  const fz=V.nose+0.0025;
+  const ftex=V.grille==='chrome'?R_frontFaceChrome():R_frontFaceTex();
+  const ff=R_decal(1.62,V.fh,0,V.fy,fz,0,ftex,'front_fascia');B.add(ff);
+  const rf=R_decal(1.62,V.kind==='suv'?0.36:0.3,0,V.ry,V.tail-0.0025,R_PI,R_rearFaceTex(),'rear_fascia',true);B.add(rf);
+  [-1,1].forEach(sx=>{const h=R_headlamp(sx);h.position.set(sx*V.lampX,V.lampY,V.nose-0.02);h.rotation.y=sx*-0.12;B.add(h);
+    const sm=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.04,0.03),new THREE.MeshStandardMaterial({color:0xff7a00,emissive:0x552200}));sm.position.set(sx*0.935,V.lampY-0.09,V.nose-0.17);B.add(sm);});
+  [-1,1].forEach(sx=>{const m=R_mirror(sx);m.position.set(sx*0.915,V.mirror[1],V.mirror[0]);B.add(m);});
+  [-1,1].forEach(sx=>{V.handles.forEach(z=>{const h=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.022,0.14),R_black());h.position.set(sx*(V.kind==='suv'?0.99:0.985),V.cby-0.07+(V.kind==='suv'?0.08:0),z);B.add(h);});});
+  const under=new THREE.Mesh(new THREE.BoxGeometry(1.5,V.underH,V.nose-V.tail-0.1),R_black());under.position.set(0,V.underY,(V.nose+V.tail)/2);under.name='underbody';B.add(under);
+  const iM=interiorMat(),iy=V.cby-1.0,dz=V.cz[1]-0.96;
+  const dash=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.2,0.4),iM);dash.position.set(0,1.07+iy,0.62+dz);B.add(dash);
+  [-0.38,0.38].forEach(x=>{const s=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.5,0.22),iM);s.position.set(x,1.2+iy,-0.15+dz);s.rotation.x=-0.18;B.add(s);const sb=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.1,0.5),iM);sb.position.set(x,1.02+iy,0.15+dz);B.add(sb);});
+  const rb=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.4,0.25),iM);rb.position.set(0,1.15+iy,V.cz[0]+0.62);B.add(rb);
+  const sw=new THREE.Mesh(new THREE.TorusGeometry(0.13,0.016,8,28),R_black());sw.position.set(0.38,1.2+iy,0.42+dz);sw.rotation.x=-0.9;B.add(sw);
+  addWheels(g,{rf:V.ax.zf,rb:-V.ax.zr,wr:V.ax.r,tw:V.track});
+  addExhaustTips(g);
+  addInternalParts(B);
+  R_extras(B);
+  g.userData.bodyG=B;
+}
+function buildChallenger(col){R_build(col,'coupe');}
+function buildDemon(col){R_build(col,'coupe');}
+function buildCharger(col){R_build(col,'sedan');}
+function buildTrackhawk(col){R_build(col,'suv');}
+function buildC300(col){R_build(col,'c300');}
+function addExhaustTips(g){
+  const V=R_CUR||R_VARS.coupe;
+  [-0.60,0.60].forEach(x=>{const t=R_exhaustTip(x,V.tail-0.075,activeParts.exhaust);t.position.y=V.tipY;t.rotation.y=R_PI;g.add(t);});
+}
+function addInternalParts(g){
+  const V=R_CUR,ax=V.ax,iy=V.cby-1.0,dz=V.cz[1]-0.96;
+  const mk=(geo,col,m,r)=>new THREE.Mesh(geo,getPBR({color:col,metalness:m,roughness:r,transparent:true,opacity:0}));
+  const ez=ax.zf-0.12, ey=0.74+(V.kind==='suv'?0.14:0);
+  let o=mk(new THREE.BoxGeometry(0.72,0.52,0.88),0x1a1a1a,0.5,0.4);o.position.set(0,ey,ez);o.name='engine';g.add(o);
+  o=mk(new THREE.BoxGeometry(0.6,0.24,0.6),0x0d2a1a,0.6,0.3);o.position.set(0,ey+0.28,ez);o.name='supercharger';g.add(o);
+  o=mk(new THREE.BoxGeometry(0.08,0.08,0.6),0x2a1a0a,0.7,0.25);o.position.set(-0.42,ey-0.04,ez);o.name='headers';g.add(o);
+  let o2=o.clone();o2.position.set(0.42,ey-0.04,ez);o2.name='headers_r';g.add(o2);
+  const cy=ax.r+0.26;
+  o=mk(cyl(0.04,0.04,0.48,8),0xffaa00,0.7,0.2);o.position.set(-0.64,cy,ax.zf);o.name='front_coilover';g.add(o);
+  o2=o.clone();o2.position.set(0.64,cy,ax.zf);o2.name='front_coilover_r';g.add(o2);
+  o=mk(cyl(0.04,0.04,0.46,8),0xffaa00,0.7,0.2);o.position.set(-0.64,cy,ax.zr);o.name='rear_coilover';g.add(o);
+  o2=o.clone();o2.position.set(0.64,cy,ax.zr);o2.name='rear_coilover_r';g.add(o2);
+  o=mk(cyl(0.025,0.025,1.6,8),0x1a1a2a,0.6,0.3);o.rotation.z=R_PI/2;o.position.set(0,ax.r*0.95,ax.zr-0.3);o.name='sway_bar';g.add(o);
+  [-1,1].forEach(sx=>{o=mk(cyl(0.2,0.2,0.04,20),0x303030,0.5,0.5);o.rotation.z=R_PI/2;o.position.set(sx*0.7,ax.r,ax.zf);o.name='brakes';g.add(o);});
+  o=mk(new THREE.BoxGeometry(0.36,0.36,0.36),0x0a0a12,0.2,0.7);o.position.set(0,0.62+(V.kind==='suv'?0.3:0),V.tail+0.45);o.name='subwoofer';g.add(o);
+  o=mk(new THREE.BoxGeometry(0.22,0.2,0.28),0x112200,0.4,0.5);o.position.set(0.5,0.62+(V.kind==='suv'?0.3:0),V.tail+0.45);o.name='dual_battery';g.add(o);
+  o=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.44,0.38),getPBR({color:0x1a0505,metalness:0,roughness:0.8,transparent:true,opacity:0}));o.position.set(-0.38,0.78+iy,-0.1+dz);o.name='driver_seat';g.add(o);
+  o=mk(new THREE.BoxGeometry(0.06,0.04,0.04),0x222222,0.3,0.6);o.position.set(-0.35,0.8+iy,0.78+dz);o.name='obd_port';g.add(o);
+}
+/* hotspots track real 3D parts */
+const R_HSNAME={supercharger:'supercharger',headers:'headers',front_coilover:'front_coilover',rear_coilover:'rear_coilover',brakes:'brakes',sway_bar:'sway_bar',exhaust_tips:'exhaust_tip',driver_seat:'driver_seat',obd_port:'obd_port',subwoofer:'subwoofer',dual_battery:'dual_battery'};
+const R_V3=new THREE.Vector3();
+function R_updateHotspots(){
+  const layer=document.getElementById('hotspot-layer');if(!layer||!carGroup)return;
+  camera.updateMatrixWorld();
+  for(const d of layer.children){const id=d.dataset&&d.dataset.part;if(!id)continue;
+    let o=null;carGroup.traverse(n=>{if(!o&&n.name===R_HSNAME[id])o=n;});
+    if(!o)continue;o.getWorldPosition(R_V3);R_V3.project(camera);
+    d.style.left=((R_V3.x*0.5+0.5)*100)+'%';d.style.top=((-R_V3.y*0.5+0.5)*100)+'%';d.style.display=(R_V3.z<1)?'':'none';}
+}
+function animate(){
+  requestAnimationFrame(animate);
+  renderer.render(scene,camera);
+  if(isoActive)isoRenderer.render(isoScene,isoCamera);
+  R_updateHotspots();
+}
+/* extras follow the current body */
+function R_extras(B){
+  const V=R_CUR,ex=activeParts.exterior,paint=carBodyMat(),cf=carbonMat();
+  const e=new THREE.Group();e.name='extras';
+  const hy=z=>R_lbP(z,2)+0.006;
+  const hs=V.seams[1],hn=V.nose-0.3,hc=(hs+hn)/2,hl=hn-hs;
+  if(ex==='cf_hood'||ex==='cowl_hood'){
+    const hood=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.012,hl),cf);hood.position.set(0,hy(hc)+0.004,hc);hood.rotation.x=0.04;e.add(hood);
+    [-1,1].forEach(sx=>{const v=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.016,0.5),R_black());v.position.set(sx*0.34,hy(hc)+0.012,hc);e.add(v);});
+    if(ex==='cowl_hood'){const c=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.09,0.55),cf);c.position.set(0,hy(hs+0.4)+0.045,hs+0.4);e.add(c);}
+  }
+  if(ex==='srt_wing'){
+    const wy=R_lbP(V.tail+0.12,2)+0.075;
+    const w=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.022,0.2),paint);w.position.set(0,wy,V.tail+0.1);w.rotation.x=-0.05;e.add(w);
+    [-1,1].forEach(sx=>{const p=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.07,0.16),paint);p.position.set(sx*0.7,wy-0.045,V.tail+0.12);e.add(p);});
+  }
+  if(ex==='cf_splitter'){const s=new THREE.Mesh(new THREE.BoxGeometry(1.86,0.02,0.34),cf);s.position.set(0,0.19,V.nose);e.add(s);}
+  if(ex==='racing_stripes'){
+    const sm=new THREE.MeshStandardMaterial({color:0xf2f2f2,roughness:0.4,metalness:0.1,polygonOffset:true,polygonOffsetFactor:-2});
+    [-0.12,0.12].forEach(x=>{for(let z=V.tail+0.12;z<V.nose-0.5;z+=0.1){const b=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.004,0.105),sm);const y=R_lbP(z+0.05,2)+0.004;b.position.set(x,y,z+0.05);b.rotation.x=-Math.atan2(R_lbP(z+0.1,2)-R_lbP(z,2),0.1);e.add(b);}});
+    for(let z=V.roof[0];z<V.roof[1];z+=0.1){const b=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.004,0.105),sm);b.position.set(0,R_cbP(z+0.05,3)+0.005,z+0.05);b.rotation.x=-Math.atan2(R_cbP(z+0.1,3)-R_cbP(z,3),0.1);e.add(b);}
+  }
+  if(ex==='morimoto_lights'){[-1,1].forEach(sx=>{const bar=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.01,0.01),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0x88ccff,emissiveIntensity:2.2}));bar.position.set(sx*V.lampX,V.lampY+0.065,V.nose+0.015);e.add(bar);});}
+  e.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  B.add(e);
 }
 
 </script>
