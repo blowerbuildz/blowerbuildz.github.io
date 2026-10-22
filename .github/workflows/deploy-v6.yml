@@ -16,7 +16,7 @@ jobs:
 
       - name: Download updated HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_f921062baefa4174aaaf3b71e4b47198.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_f39e60dd5abe40e8a2e657bcc7124ccf.txt"
           echo "Downloaded $(wc -c < index.html) bytes of index.html"
 
       - name: Download car models
@@ -25,15 +25,17 @@ jobs:
           curl -L -o models/challenger_opt.glb "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_d80b37431e8c488aa9bbfaea9bb263a1.txt"
           curl -L -o models/charger_opt.glb "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_5cc8b223d88e4ce690b6687c176a18c5.txt"
           curl -L -o models/c300_opt.glb "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_935aa0a7c8b245968804b3085dab8a91.txt"
+          curl -L -o models/trackhawk_opt.glb "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_81e49e1462f842b09632b37720e0cde5.txt"
           echo "challenger $(wc -c < models/challenger_opt.glb)"
           echo "charger $(wc -c < models/charger_opt.glb)"
           echo "c300 $(wc -c < models/c300_opt.glb)"
+          echo "trackhawk $(wc -c < models/trackhawk_opt.glb)"
 
       - name: Commit and push
         run: |
           git config user.email "blowerbuildz@gmail.com"
           git config user.name "BlowerBuildz Deploy"
-          git add index.html models/challenger_opt.glb models/charger_opt.glb models/c300_opt.glb
+          git add index.html models/challenger_opt.glb models/charger_opt.glb models/c300_opt.glb models/trackhawk_opt.glb
           git diff --staged --stat
-          git commit -m "BlowerBuildz v10 Stage 1: real photoreal Challenger/Charger/300 GLB models, CC-BY credits, Jameson dedication, affiliate disclosure" || echo "Nothing to commit"
+          git commit -m "BlowerBuildz v10 Stage 2: GTA Drive Test with 7 camera views and cockpit, real Trackhawk model, tuned handling" || echo "Nothing to commit"
           git push
