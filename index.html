@@ -4524,18 +4524,33 @@ function R_extras(B){
       (document.getElementById('vw')||document.body).appendChild(t); }
     t.textContent='CAM: '+txt; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){t.style.opacity='0';},1400);
   }
-  var steerWheel=null;
-  function buildSteerWheel(){ if(steerWheel||typeof carGroup==='undefined'||!carGroup) return;
-    steerWheel=new THREE.Group(); steerWheel.name='cockpitWheel';
-    var rimMat=new THREE.MeshStandardMaterial({color:0x111214,roughness:0.5,metalness:0.3});
-    var rim=new THREE.Mesh(new THREE.TorusGeometry(0.19,0.025,10,32),rimMat); steerWheel.add(rim);
-    var hub=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16),new THREE.MeshStandardMaterial({color:0x1a1a1d,roughness:0.6}));hub.rotation.x=Math.PI/2;steerWheel.add(hub);
-    [[0,-1],[-0.85,0.5],[0.85,0.5]].forEach(function(s){var sp=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.17,0.02),rimMat);sp.position.set(s[0]*0.12,s[1]*0.09,0);sp.rotation.z=Math.atan2(s[1],s[0])+Math.PI/2;steerWheel.add(sp);});
-    var badge=new THREE.Mesh(new THREE.CircleGeometry(0.035,16),new THREE.MeshBasicMaterial({color:0xE8472A}));badge.position.z=0.021;steerWheel.add(badge);
-    steerWheel.visible=false; carGroup.add(steerWheel);
+  // Cockpit foreground: a fixed HTML/SVG steering wheel + dash overlay in the lower part of the frame.
+  // A screen overlay can never be occluded by the car's opaque shell, so the wheel is always visible.
+  var cockpitHud=null, cockpitWheelG=null;
+  function buildCockpitHud(){ if(cockpitHud) return;
+    var host=document.getElementById('vw')||document.body;
+    cockpitHud=document.createElement('div'); cockpitHud.id='cockpit-hud';
+    cockpitHud.style.cssText='position:absolute;left:0;right:0;bottom:0;height:52%;z-index:28;pointer-events:none;display:none;';
+    // dash shadow gradient along the bottom to sell the "inside the car" framing
+    cockpitHud.innerHTML='<div style="position:absolute;left:0;right:0;bottom:0;height:100%;background:linear-gradient(to top,rgba(8,8,10,0.96) 0%,rgba(8,8,10,0.82) 28%,rgba(8,8,10,0.30) 56%,rgba(8,8,10,0) 100%);"></div>'+
+      '<svg id="cockpit-wheel-svg" viewBox="0 0 400 400" style="position:absolute;left:50%;bottom:-34%;width:min(78vh,88%);transform:translateX(-50%);overflow:visible;">'+
+        '<g id="cockpit-wheel-g">'+
+          '<circle cx="200" cy="200" r="150" fill="none" stroke="#0c0c0e" stroke-width="40"/>'+
+          '<circle cx="200" cy="200" r="150" fill="none" stroke="#1b1b1f" stroke-width="22"/>'+
+          '<circle cx="200" cy="200" r="46" fill="#161618" stroke="#2a2a2e" stroke-width="3"/>'+
+          '<rect x="190" y="200" width="20" height="150" rx="9" fill="#161618"/>'+
+          '<rect x="60" y="192" width="150" height="18" rx="9" fill="#161618" transform="rotate(32 200 200)"/>'+
+          '<rect x="190" y="192" width="150" height="18" rx="9" fill="#161618" transform="rotate(-32 200 200)"/>'+
+          '<circle cx="200" cy="200" r="18" fill="#E8472A"/>'+
+        '</g>'+
+      '</svg>';
+    host.appendChild(cockpitHud);
+    cockpitWheelG=cockpitHud.querySelector('#cockpit-wheel-g');
   }
-  function enterCockpit(){ if(cockpitOn) return; cockpitOn=true; buildSteerWheel(); if(steerWheel)steerWheel.visible=true; }
-  function exitCockpit(){ if(!cockpitOn) return; cockpitOn=false; if(steerWheel)steerWheel.visible=false; }
+  function setWheelAngle(a){ if(cockpitWheelG) cockpitWheelG.setAttribute('transform','rotate('+(a*42)+' 200 200)'); }
+  function buildSteerWheel(){ buildCockpitHud(); }
+  function enterCockpit(){ if(cockpitOn) return; cockpitOn=true; buildCockpitHud(); if(cockpitHud)cockpitHud.style.display='block'; }
+  function exitCockpit(){ if(!cockpitOn) return; cockpitOn=false; if(cockpitHud)cockpitHud.style.display='none'; }
   function setMode(i){ modeIdx=(i+MODES.length)%MODES.length; var m=MODES[modeIdx];
     if(m==='cockpit') enterCockpit(); else exitCockpit();
     if(m==='trackside'){ trackAnchor=null; } if(m==='flyby'){ flyT=0; }
@@ -4571,24 +4586,24 @@ function R_extras(B){
       camera.position.set(trackAnchor.x,4.2,trackAnchor.z); look(p.x,0.7,p.z); return; }
     if(m==='flyby'){ smoothFov(34); flyT+=0.016; var r=20, ang=flyT*0.7;
       camera.position.set(p.x+Math.cos(ang)*r, 3+Math.sin(flyT*0.5)*2.2, p.z+Math.sin(ang)*r); look(p.x,0.8,p.z); return; }
-    if(m==='cockpit'){ smoothFov(68);
-      // Car's forward unit vector in world space (model faces +local-z; carGroup.rotation.y = heading).
+    if(m==='cockpit'){ smoothFov(72);
+      // Hood-forward first-person view. The GLB body is one opaque merged shell with no interior cavity,
+      // so an eyepoint sunk inside the cabin lands behind bodywork and fills the lens with paint. Instead
+      // we sit just above the dash/beltline and forward of the windscreen base, looking out over the hood:
+      // hood at the bottom of the frame, road/horizon ahead. The steering wheel is a fixed HTML overlay.
       // fwd = (sin h, 0, cos h); right = (cos h, 0, -sin h).
       var fwdx=Math.sin(p.h), fwdz=Math.cos(p.h), rgtx=Math.cos(p.h), rgtz=-Math.sin(p.h);
-      var eyeY=1.12;
-      // seat eyepoint: a bit left of centre, set back toward the seat so the wheel + dash sit ahead of us
-      var seatBack=-0.55, seatSide=-0.33;
-      var ex=p.x + fwdx*seatBack + rgtx*seatSide;
-      var ez=p.z + fwdz*seatBack + rgtz*seatSide;
+      var eyeY=1.46;           // raised above the shell so bodywork does not fill the lens
+      var eyeFwd=1.25;         // forward of centre, past the windscreen base, over the hood line
+      var eyeSide=-0.32;       // slightly to the driver side
+      var ex=p.x + fwdx*eyeFwd + rgtx*eyeSide;
+      var ez=p.z + fwdz*eyeFwd + rgtz*eyeSide;
       camera.position.set(ex,eyeY,ez);
-      // look forward over the hood, slightly down, plus mouse/touch head-look
+      // look forward and slightly DOWN over the hood, plus clamped mouse/touch head-look
       var fh=p.h+head.yaw, fc=Math.cos(fh), fsn=Math.sin(fh);
-      look(ex+fsn*20, eyeY-0.22+head.pitch, ez+fc*20);
-      // steer wheel is a CHILD of carGroup -> use LOCAL coords (parent already applies heading). Local +z is forward.
-      if(steerWheel){ steerWheel.position.set(-0.33,0.80,0.25);
-        steerWheel.rotation.x=-1.15; // tilt toward the driver
-        steerWheel.rotation.y=0;
-        steerWheel.rotation.z=(typeof window.__driveSteer==='number'?window.__driveSteer:0)*1.4; }
+      look(ex+fsn*22, eyeY-1.9+head.pitch, ez+fc*22);
+      // turn the overlay wheel with steering input if available
+      setWheelAngle(typeof window.__driveSteer==='number'?window.__driveSteer:0);
       return; }
   }
   var baseUpdate=window.DRIVE_update;
