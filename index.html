@@ -98,7 +98,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--white);fo
 .ab.red:hover{color:var(--red);border-color:var(--red)}
 
 /* FITMENT STRIP */
-#fstrip{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:10;display:flex;flex-direction:column;gap:3px}
+#fstrip{position:absolute;top:92px;left:14px;transform:none;pointer-events:none;z-index:9;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .fw{font-family:var(--fm);font-size:.68rem;padding:5px 14px;border-radius:3px;text-align:center;white-space:nowrap}
 .fw.ok{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80}
 .fw.warn{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:#f87171}
@@ -240,11 +240,11 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
         <button class="ab" onclick="saveBuild()">⬇ SAVE BUILD</button>
       </div>
       <div id="vpc">
-        <button class="vpb on" onclick="setView('front')">FRONT</button>
+        <button class="vpb" onclick="setView('front')">FRONT</button>
         <button class="vpb" onclick="setView('rear')">REAR</button>
         <button class="vpb" onclick="setView('driver')">DRIVER</button>
         <button class="vpb" onclick="setView('pass')">PASS</button>
-        <button class="vpb" onclick="setView('3qfront')">3/4 F</button>
+        <button class="vpb on" onclick="setView('3qfront')">3/4 F</button>
         <button class="vpb" onclick="setView('3qrear')">3/4 R</button>
         <button class="vpb" onclick="setView('top')">TOP</button>
       </div>
@@ -672,7 +672,7 @@ function init() {
 // CAMERA orbit state
 let isDragging=false, lastMouse={x:0,y:0};
 let camTheta=0, camPhi=0.25, camDist=7;
-let camTarget={x:0,y:0.5,z:0};
+let camTarget={x:0,y:0.72,z:0};
 let touchDist=0;
 
 function setView(v){
@@ -681,11 +681,12 @@ function setView(v){
     'rear':   {theta:Math.PI, phi:0.18, dist:7},
     'driver': {theta:Math.PI*1.5, phi:0.22, dist:6},
     'pass':   {theta:Math.PI*0.5, phi:0.22, dist:6},
-    '3qfront':{theta:-0.6, phi:0.28, dist:7.5},
+    '3qfront':{theta:-0.62, phi:0.20, dist:6.4},
     '3qrear': {theta:Math.PI+0.6, phi:0.28, dist:7.5},
     'top':    {theta:0, phi:1.15, dist:9}
   };
   const p=presets[v]||presets['front'];
+  window.BB_CAM=null; window.__bbUserCam=true;
   // Animate smoothly
   const t0=performance.now();
   const t0Theta=camTheta, t0Phi=camPhi, t0Dist=camDist;
@@ -704,7 +705,30 @@ function setView(v){
   document.querySelectorAll('.vpb').forEach(b=>b.classList.toggle('on',b.getAttribute('onclick')?.includes("'"+v+"'")));
 }
 
+function setDefaultHeroView(){
+  var theta=-0.62, phi=0.13, ty=0.62, dist=8.6;
+  try{
+    if(typeof carGroup!=='undefined' && carGroup && window.THREE){
+      var box=new THREE.Box3().setFromObject(carGroup);
+      var sz=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
+      ty=ctr.y;
+      var radius=0.5*Math.sqrt(sz.x*sz.x+sz.y*sz.y+sz.z*sz.z);
+      var vFov=(camera&&camera.fov?camera.fov:45)*Math.PI/180;
+      var asp=(camera&&camera.aspect?camera.aspect:1.4);
+      var hFov=2*Math.atan(Math.tan(vFov/2)*Math.min(1,asp));
+      var fit=radius/Math.sin(Math.min(vFov,hFov)/2);
+      dist=fit*1.95; // generous margin so wheels + whole body stay in frame with breathing room
+      ty=ctr.y*0.80; // aim slightly below center
+    }
+  }catch(e){}
+  window.BB_CAM={theta:theta,phi:phi,dist:dist,ty:ty};
+  camTheta=theta;camPhi=phi;camDist=dist;camTarget.y=ty;
+  if(typeof updateCamera==='function')updateCamera();
+  document.querySelectorAll('.vpb').forEach(b=>b.classList.toggle('on',(b.getAttribute('onclick')||'').includes("'3qfront'")));
+}
+window.setDefaultHeroView=setDefaultHeroView;
 function updateCamera(){
+  if(window.BB_CAM){camTheta=window.BB_CAM.theta;camPhi=window.BB_CAM.phi;camDist=window.BB_CAM.dist;camTarget.y=window.BB_CAM.ty;}
   const r=camDist;
   const x=r*Math.cos(camPhi)*Math.sin(camTheta)+camTarget.x;
   const y=r*Math.sin(camPhi)+camTarget.y;
@@ -713,7 +737,7 @@ function updateCamera(){
   camera.lookAt(camTarget.x,camTarget.y,camTarget.z);
 }
 
-function onMouseDown(e){if(e.target.closest('#iso')) return; isDragging=true;lastMouse={x:e.clientX,y:e.clientY}}
+function onMouseDown(e){if(e.target.closest('#iso')) return; isDragging=true;window.__bbUserCam=true;window.BB_CAM=null;lastMouse={x:e.clientX,y:e.clientY}}
 function onMouseUp(){isDragging=false}
 function onMouseMove(e){
   if(!isDragging) return;
@@ -1600,6 +1624,7 @@ function buildLeftPanelBase(){
 function selectFamily(fk){
   currentFamily=fk;
   currentYearIdx=0;
+  window.__bbUserCam=false;
   currentVariantIdx=0;
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent===FAMILIES[fk].name.toUpperCase()) b.classList.add('on');});
@@ -1610,6 +1635,7 @@ function selectFamily(fk){
   // Show/hide Demon Mode button
   const yr=FAMILIES[fk].years[currentYearIdx];
   document.getElementById('demonBtn').style.display=(fk==='demon'||yr?.demon)?'':'none';
+  if(typeof setDefaultHeroView==='function' && !window.__bbUserCam) setDefaultHeroView();
 }
 
 function updateVehicleInfoBase(){
@@ -2044,7 +2070,7 @@ function enterApp(){
     buildLeftPanel();
     updateVehicleInfo();
     updateRightPanel();
-    updateCamera();
+    setDefaultHeroView();
   },300);
 }
 
@@ -2195,6 +2221,7 @@ function addSketchfabButton(sfId, yearLabel){
   const abx = document.getElementById('abx');
   const ex = document.getElementById('sf-launch-btn');
   if(ex) ex.remove();
+  return; // v11: the real GLB IS the default and only view; no separate 'REAL MODEL VIEW' button
   if(!sfId) return;
   const btn = document.createElement('button');
   btn.id = 'sf-launch-btn';
@@ -2322,7 +2349,7 @@ function showSpecCard(){
   if(ex) ex.remove();
   
   if(yr.has3d) return; // 3D model available, use that
-  
+  return; // v11: real GLB renders for every vehicle, the spec card must never cover it
   const vw = document.getElementById('vw');
   const card = document.createElement('div');
   card.id = 'spec-card';
@@ -2358,7 +2385,7 @@ function buildLeftPanel(){
   _origBuildLeftPanel();
   const fam = FAMILIES[currentFamily];
   const yr = fam.years[currentYearIdx] || fam.years[0];
-  if(!yr.has3d){ setTimeout(showSpecCard, 100); }
+  if(!yr.has3d){ /* v11: spec data lives in the right panel; no overlay card */ }
   else {
     const ex = document.getElementById('spec-card');
     if(ex) ex.remove();
@@ -2395,7 +2422,7 @@ function R_makeEnv(rend){
   const es=new THREE.Scene();
   const gc=R_canvas(16,256),g=gc.getContext('2d');
   const gr=g.createLinearGradient(0,0,0,256);
-  gr.addColorStop(0,'#59616d');gr.addColorStop(0.42,'#2b3038');gr.addColorStop(0.5,'#14161a');gr.addColorStop(0.52,'#07080a');gr.addColorStop(1,'#030304');
+  gr.addColorStop(0,'#aeb9c9');gr.addColorStop(0.40,'#6b7482');gr.addColorStop(0.5,'#3a3f47');gr.addColorStop(0.52,'#1a1c20');gr.addColorStop(1,'#08090b');
   g.fillStyle=gr;g.fillRect(0,0,16,256);
   const gt=new THREE.CanvasTexture(gc);gt.encoding=THREE.sRGBEncoding;
   es.add(new THREE.Mesh(new THREE.SphereGeometry(60,32,24),new THREE.MeshBasicMaterial({map:gt,side:THREE.BackSide})));
@@ -2403,13 +2430,13 @@ function R_makeEnv(rend){
     const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));
     m.material.color.setRGB(I*(tint?tint[0]:1),I*(tint?tint[1]:1),I*(tint?tint[2]:1));
     m.position.set(x,y,z);m.lookAt(0,1,0);es.add(m);return m;}
-  box(16,24,0,22,0,6.5);            // big overhead softbox
-  box(5,26,-20,9,0,4.2);            // side strip L
-  box(5,26,20,9,0,4.2);             // side strip R
-  box(18,4,0,5,-26,3.0,[1,0.9,0.8]);// warm rear strip
-  box(14,3,0,3,28,2.2);             // front low fill
-  box(3,10,-12,14,16,2.4,[0.85,0.92,1]);
-  box(3,10,12,14,-16,2.4);
+  box(18,26,0,22,0,9.5);            // big overhead softbox
+  box(6,28,-20,9,0,6.5);            // side strip L (long highlight down the flank)
+  box(6,28,20,9,0,6.5);             // side strip R
+  box(20,5,0,5,-26,4.2,[1,0.92,0.82]);// warm rear strip
+  box(16,4,0,3,28,3.2);             // front low fill
+  box(4,12,-12,14,16,3.6,[0.85,0.92,1]);
+  box(4,12,12,14,-16,3.6);
   const rt=pm.fromScene(es,0.025);pm.dispose();
   return rt.texture;
 }
@@ -2426,7 +2453,7 @@ function R_flakeMap(){
 function R_applyFinish(){
   if(!R_PAINT) return;
   const f=R_FINISH,m=R_PAINT;
-  if(f==='gloss'){m.metalness=0.5;m.roughness=0.34;m.clearcoat=1;m.clearcoatRoughness=0.025;m.envMapIntensity=1.15;m.normalScale.set(0.22,0.22);}
+  if(f==='gloss'){m.metalness=0.55;m.roughness=0.30;m.clearcoat=1;m.clearcoatRoughness=0.03;m.envMapIntensity=1.7;m.normalScale.set(0.18,0.18);}
   if(f==='satin'){m.metalness=0.45;m.roughness=0.5;m.clearcoat=0.35;m.clearcoatRoughness=0.35;m.envMapIntensity=0.9;m.normalScale.set(0.1,0.1);}
   if(f==='matte'){m.metalness=0.2;m.roughness=0.88;m.clearcoat=0;m.clearcoatRoughness=0.6;m.envMapIntensity=0.55;m.normalScale.set(0.04,0.04);}
   if(f==='chrome'){m.metalness=1;m.roughness=0.06;m.clearcoat=0;m.envMapIntensity=1.5;m.normalScale.set(0,0);}
@@ -2653,9 +2680,9 @@ function setupLighting(s){
   const isMain=(s===scene), rend=isMain?renderer:isoRenderer;
   const env=R_makeEnv(rend); if(isMain)R_ENV=env;else R_ENV_ISO=env;
   s.environment=env;
-  rend.outputEncoding=THREE.sRGBEncoding;rend.toneMapping=THREE.ACESFilmicToneMapping;rend.toneMappingExposure=isMain?1.0:1.15;
-  s.add(new THREE.HemisphereLight(0xaab4c4,0x101012,0.25));
-  const key=new THREE.DirectionalLight(0xfff3e4,isMain?2.1:1.4);
+  rend.outputEncoding=THREE.sRGBEncoding;rend.toneMapping=THREE.ACESFilmicToneMapping;rend.toneMappingExposure=isMain?1.08:1.2;
+  s.add(new THREE.HemisphereLight(0xbfc8d6,0x15171b,0.45));
+  const key=new THREE.DirectionalLight(0xfff3e4,isMain?2.6:1.6);
   key.position.set(4.5,9,5.5);
   if(isMain){key.castShadow=true;key.shadow.mapSize.set(2048,2048);const c=key.shadow.camera;c.near=2;c.far=30;c.left=-4.2;c.right=4.2;c.top=4.2;c.bottom=-4.2;key.shadow.bias=-0.0004;key.shadow.normalBias=0.03;key.shadow.radius=5;}
   s.add(key);
@@ -3468,18 +3495,18 @@ function R_extras(B){
       const box=document.createElement('div');
       box.style.cssText='margin:4px 0 12px;padding:10px;border:1px solid var(--border);border-radius:5px;background:var(--bg2)';
       const maxF=window.WHEEL_MAXFIT?window.WHEEL_MAXFIT():12;
-      let html='<div class="sh" style="margin-bottom:8px">WHEEL WIDTH (REAR)</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+      let html='<div class="sh" style="margin-bottom:8px">REAR WHEEL WIDTH</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
       (window.WHEEL_WIDTHS||[9.5,10,10.5,11,11.5,12]).forEach(w=>{
         const sel=(Math.abs(window.wheelWidth-w)<1e-6);
         const fits=w<=maxF+1e-6;
-        html+=`<button onclick="setWheelWidth(${w})" class="wwb${sel?' on':''}" style="font-family:var(--fm);font-size:.68rem;padding:6px 9px;border-radius:4px;cursor:pointer;border:1px solid ${sel?'var(--acc)':'var(--border)'};background:${sel?'var(--acc)':'transparent'};color:${sel?'#111':(fits?'var(--dim)':'#8a5a52')}">${w}"${fits?'':' ⚠'}</button>`;
+        html+=`<button onclick="setWheelWidth(${w})" class="wwb${sel?' on':''}" style="font-family:var(--fm);font-size:.68rem;padding:6px 9px;border-radius:4px;cursor:pointer;border:1px solid ${sel?'var(--acc)':'var(--border)'};background:${sel?'var(--acc)':'transparent'};color:${sel?'#111':(fits?'var(--dim)':'#8a5a52')}">${w}"${fits?'':' *'}</button>`;
       });
       html+='</div>';
       html+=`<div style="margin-top:10px"><label style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.72rem;color:var(--dim);cursor:pointer"><input type="checkbox" ${window.wheelDeepDish?'checked':''} onchange="toggleDeepDish()"> Deep dish barrel</label></div>`;
-      html+=`<div style="margin-top:6px;font-family:var(--fm);font-size:.58rem;color:var(--dim2)">Front runs 1.5" narrower. Widths past the body's limit are flagged and held at the max that clears.</div>`;
+      html+=`<div style="margin-top:6px;font-family:var(--fm);font-size:.58rem;color:var(--dim2)">Front runs 1.5" narrower. A * marks a width past the body's limit; it is held at the max that clears.</div>`;
       box.innerHTML=html;
-      // place the control at the top of the wheels panel
-      body.insertBefore(box,body.firstChild);
+      // place the control at the top of the wheels panel (guard against a second insert)
+      if(!body.querySelector('#wwbox')){ box.id='wwbox'; body.insertBefore(box,body.firstChild); }
     }
     if(cat==='tires'){
       const box=document.createElement('div');
@@ -3965,18 +3992,18 @@ function R_extras(B){
       const box=document.createElement('div');
       box.style.cssText='margin:4px 0 12px;padding:10px;border:1px solid var(--border);border-radius:5px;background:var(--bg2)';
       const maxF=window.WHEEL_MAXFIT?window.WHEEL_MAXFIT():12;
-      let html='<div class="sh" style="margin-bottom:8px">WHEEL WIDTH (REAR)</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+      let html='<div class="sh" style="margin-bottom:8px">REAR WHEEL WIDTH</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
       (window.WHEEL_WIDTHS||[9.5,10,10.5,11,11.5,12]).forEach(w=>{
         const sel=(Math.abs(window.wheelWidth-w)<1e-6);
         const fits=w<=maxF+1e-6;
-        html+=`<button onclick="setWheelWidth(${w})" class="wwb${sel?' on':''}" style="font-family:var(--fm);font-size:.68rem;padding:6px 9px;border-radius:4px;cursor:pointer;border:1px solid ${sel?'var(--acc)':'var(--border)'};background:${sel?'var(--acc)':'transparent'};color:${sel?'#111':(fits?'var(--dim)':'#8a5a52')}">${w}"${fits?'':' ⚠'}</button>`;
+        html+=`<button onclick="setWheelWidth(${w})" class="wwb${sel?' on':''}" style="font-family:var(--fm);font-size:.68rem;padding:6px 9px;border-radius:4px;cursor:pointer;border:1px solid ${sel?'var(--acc)':'var(--border)'};background:${sel?'var(--acc)':'transparent'};color:${sel?'#111':(fits?'var(--dim)':'#8a5a52')}">${w}"${fits?'':' *'}</button>`;
       });
       html+='</div>';
       html+=`<div style="margin-top:10px"><label style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.72rem;color:var(--dim);cursor:pointer"><input type="checkbox" ${window.wheelDeepDish?'checked':''} onchange="toggleDeepDish()"> Deep dish barrel</label></div>`;
-      html+=`<div style="margin-top:6px;font-family:var(--fm);font-size:.58rem;color:var(--dim2)">Front runs 1.5" narrower. Widths past the body's limit are flagged and held at the max that clears.</div>`;
+      html+=`<div style="margin-top:6px;font-family:var(--fm);font-size:.58rem;color:var(--dim2)">Front runs 1.5" narrower. A * marks a width past the body's limit; it is held at the max that clears.</div>`;
       box.innerHTML=html;
-      // place the control at the top of the wheels panel
-      body.insertBefore(box,body.firstChild);
+      // place the control at the top of the wheels panel (guard against a second insert)
+      if(!body.querySelector('#wwbox')){ box.id='wwbox'; body.insertBefore(box,body.firstChild); }
     }
     if(cat==='tires'){
       const box=document.createElement('div');
@@ -4022,20 +4049,20 @@ function R_extras(B){
   var MODELS = {
     coupe: { file:'challenger_opt.glb', len:5.02,
       bodyMats:['dMAT_Dodge_Challenger_Base','dMAT_Details_MAT'], glassMats:['dMAT_Glass'],
-      credit:'2019 Dodge Challenger SRT Hellcat by 007 (tangwang920)',
+      modelLabel:'3D BODY: 2019 CHALLENGER SRT HELLCAT', credit:'2019 Dodge Challenger SRT Hellcat by 007 (tangwang920)',
       url:'https://sketchfab.com/3d-models/2019-dodge-challenger-srt-hellcat-ceb34bd03d314dbe95146622c555f80a' },
     sedan: { file:'charger_opt.glb', len:5.10,
       bodyMats:['White_Knuckle_Clearcoat','_Base'], glassMats:['Window','GlassClear','GlassRed'],
-      credit:'2020 Dodge Charger SRT Hellcat by Drifter-Models (Golden-Models)',
+      modelLabel:'3D BODY: 2020 CHARGER SRT HELLCAT', credit:'2020 Dodge Charger SRT Hellcat by Drifter-Models (Golden-Models)',
       url:'https://sketchfab.com/3d-models/2020-dodge-charger-srt-hellcat-dedcfdf9c7784882ba85858a88cbdb9f' },
     c300: { file:'c300_opt.glb', len:5.20,
       bodyMats:['Meshessrthellcatbadge1Mtl','Meshpart7Mtl','Meshpart4Mtl','MbdesignKv11Mtl','Sides1Mtl','Left2Mtl','Right1Mtl','Right2Mtl'],
       glassMats:['Windshield'],
-      credit:'Chrysler 300 SRT Hellcat by fvrenbld (sketchfab.com/890244234)',
+      modelLabel:'3D BODY: CHRYSLER 300 SRT HELLCAT', credit:'Chrysler 300 SRT Hellcat by fvrenbld (sketchfab.com/890244234)',
       url:'https://sketchfab.com/3d-models/chrysler-300-srt-hellcat-82b9b3f14c1e48febfd567be2c2c26c7' },
     suv: { file:'trackhawk_opt.glb', len:4.95,
       bodyMats:['Body'], glassMats:['Vitre','Vitre_ar','Vitre_noir'],
-      credit:'Jeep Grand Cherokee Trackhawk by Emmanuel Robinson Jr.',
+      modelLabel:'3D BODY: JEEP GRAND CHEROKEE TRACKHAWK', credit:'Jeep Grand Cherokee Trackhawk by Emmanuel Robinson Jr.',
       url:'https://sketchfab.com/3d-models/unmarked-police-jeep-track-hawk-a443ddaec3ad4fddbef2e343341c5931' },
   };
   window.GLB_MODELS = MODELS;
@@ -4126,9 +4153,19 @@ function R_extras(B){
   // Wheel geometry so the configurator wheel features (width/dish/white-letter/skinny) still apply
   // on top of a real body: the GLB ships its own wheels, so we DON'T double them. We record wheel
   // anchor positions from the GLB for X-Ray brake hotspots.
+  function setModelBadge(key){
+    var vw=document.getElementById('vw'); if(!vw) return;
+    var b=document.getElementById('model-badge');
+    if(!b){ b=document.createElement('div'); b.id='model-badge';
+      b.style.cssText='position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:9;font-family:var(--fm),monospace;font-size:0.56rem;letter-spacing:0.12em;color:rgba(242,169,0,0.85);background:rgba(10,10,12,0.78);border:1px solid rgba(242,169,0,0.3);padding:4px 10px;border-radius:3px;pointer-events:none;white-space:nowrap';
+      vw.appendChild(b); }
+    var m=MODELS[key]; b.textContent=(m&&m.modelLabel)?m.modelLabel:'';
+    b.style.display=(m&&m.modelLabel)?'block':'none';
+  }
   function buildGLB(col, key){
     // clear carGroup
     while(carGroup.children.length) carGroup.remove(carGroup.children[0]);
+    setModelBadge(key);
     if(typeof MAT_CACHE!=='undefined') MAT_CACHE['_body']=null;
     R_CUR = (typeof R_VARS!=='undefined' && R_VARS[key]) ? R_VARS[key] : (R_VARS?R_VARS.coupe:null);
     R_ensurePaint(col||currentColor.hex);
@@ -4158,6 +4195,7 @@ function R_extras(B){
     preload(key).then(function(s){
       if(s && currentFamily && (FAMILIES[currentFamily]) && famKey(currentFamily)===key){
         buildGLB(currentColor.hex, key);
+        if(typeof setDefaultHeroView==='function' && !window.__bbUserCam) setDefaultHeroView();
         if(typeof buildRpBody==='function'){ try{ buildRpBody(); }catch(e){} }
         if(typeof updateFitmentWarning==='function'){ try{ updateFitmentWarning(); }catch(e){} }
       }
@@ -4176,20 +4214,18 @@ function R_extras(B){
 
   // ---- credits footer line (CC-BY Attribution is a legal requirement) ----
   function addCredits(){
-    if(document.getElementById('glb-credits')) return;
+    if(document.getElementById('bb-info-btn')) return;
     var vw=document.getElementById('vw'); if(!vw) return;
-    var el=document.createElement('div'); el.id='glb-credits';
-    el.style.cssText='position:absolute;bottom:4px;right:8px;z-index:7;font-family:var(--fm),monospace;font-size:0.5rem;line-height:1.5;color:rgba(255,255,255,0.4);text-align:right;pointer-events:auto;max-width:360px';
+    // small info button, bottom-right, clear of the view buttons
+    var btn=document.createElement('button'); btn.id='bb-info-btn'; btn.innerHTML='&#9432; CREDITS';
+    btn.style.cssText='position:absolute;bottom:8px;right:10px;z-index:11;font-family:var(--fm),monospace;font-size:0.52rem;letter-spacing:0.08em;color:rgba(255,255,255,0.55);background:rgba(10,10,12,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:3px;padding:4px 8px;cursor:pointer';
+    var drawer=document.createElement('div'); drawer.id='bb-info-drawer';
+    drawer.style.cssText='position:absolute;bottom:34px;right:10px;z-index:11;display:none;max-width:320px;font-family:var(--fm),monospace;font-size:0.54rem;line-height:1.6;color:rgba(255,255,255,0.72);background:rgba(10,10,12,0.94);border:1px solid rgba(255,255,255,0.14);border-radius:5px;padding:12px 14px;text-align:left';
     var lines=[];
-    for(var k in MODELS){ lines.push('<a href="'+MODELS[k].url+'" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.45);text-decoration:none">'+MODELS[k].credit+'</a>'); }
-    el.innerHTML='3D models (CC BY 4.0): '+lines.join(' &middot; ');
-    vw.appendChild(el);
-    if(!document.getElementById('bb-ded')){
-      var ded=document.createElement('div'); ded.id='bb-ded';
-      ded.style.cssText='position:absolute;bottom:4px;left:8px;z-index:7;font-family:var(--fm),monospace;font-size:0.5rem;line-height:1.5;color:rgba(255,255,255,0.4);text-align:left;pointer-events:none;max-width:48%';
-      ded.innerHTML='BlowerBuildz is dedicated to my son Jameson. Happy birthday, buddy. Everything I build, I build with you in mind. Love, Dad.<br>As an Amazon Associate, BlowerBuildz earns from qualifying purchases.';
-      vw.appendChild(ded);
-    }
+    for(var k in MODELS){ lines.push('<a href="'+MODELS[k].url+'" target="_blank" rel="noopener" style="color:rgba(242,169,0,0.8);text-decoration:none">'+MODELS[k].credit+'</a>'); }
+    drawer.innerHTML='<div style="color:rgba(255,255,255,0.5);margin-bottom:6px;letter-spacing:0.12em">3D MODELS (CC BY 4.0)</div>'+lines.join('<br>')+'<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);font-style:italic">BlowerBuildz is dedicated to my son Jameson. Happy birthday, buddy. Everything I build, I build with you in mind. Love, Dad.</div><div style="margin-top:6px;color:rgba(255,255,255,0.4)">As an Amazon Associate, BlowerBuildz earns from qualifying purchases.</div>';
+    btn.onclick=function(){ drawer.style.display=(drawer.style.display==='none'?'block':'none'); };
+    vw.appendChild(btn); vw.appendChild(drawer);
   }
   if(document.readyState!=='loading') setTimeout(addCredits,300); else document.addEventListener('DOMContentLoaded',function(){setTimeout(addCredits,300);});
 })();
