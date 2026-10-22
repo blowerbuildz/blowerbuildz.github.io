@@ -6,6 +6,8 @@
 <meta name='impact-site-verification' value='cc214b1f-31f1-433f-94a0-ec193a25801b'>
 <title>BlowerBuildz - 3D Configurator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/DRACOLoader.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -197,6 +199,7 @@ input[type=range].hslide::-webkit-slider-thumb{-webkit-appearance:none;width:16p
   <div class="hc">
     <div class="hlogo">BLOWER<b>BUILDZ</b></div>
     <div class="htag">Build it. Know it. Own it.</div>
+    <div class="hded" style="font-family:var(--fm);font-size:.62rem;letter-spacing:.14em;color:rgba(242,169,0,.85);text-transform:uppercase;margin-bottom:26px;margin-top:-22px">Dedicated to my son Jameson</div>
     <div class="hchips">
       <div class="hchip">6 MODELS</div>
       <div class="hchip">50+ VARIANTS</div>
@@ -4001,6 +4004,189 @@ function R_extras(B){
       body.insertBefore(box,body.firstChild);
     }
   };
+})();
+
+
+/* ================= v10: real photoreal GLB bodies (Challenger, Charger, 300 SRT) ================= */
+/* Swaps the procedural coupe/sedan/c300 bodies for CC-BY Sketchfab GLB models.
+   Demon reuses the Challenger model (labelled honestly). Trackhawk stays procedural.
+   Paint/finish/X-Ray flow through the app's shared R_PAINT; glass through R_GLASS.
+   Draco-compressed; decoder served from jsdelivr CDN (three r134). */
+(function(){
+  if(typeof THREE==='undefined') return;
+  if(typeof THREE.GLTFLoader!=='function'||typeof THREE.DRACOLoader!=='function'){ console.warn('GLB loaders missing'); return; }
+
+  // ---- model registry: key -> {url, target length (m), body material name-fragments, author, page} ----
+  var GLB_BASE = (window.GLB_BASE || 'models/');
+  var MODELS = {
+    coupe: { file:'challenger_opt.glb', len:5.02,
+      bodyMats:['dMAT_Dodge_Challenger_Base','dMAT_Details_MAT'], glassMats:['dMAT_Glass'],
+      credit:'2019 Dodge Challenger SRT Hellcat by 007 (tangwang920)',
+      url:'https://sketchfab.com/3d-models/2019-dodge-challenger-srt-hellcat-ceb34bd03d314dbe95146622c555f80a' },
+    sedan: { file:'charger_opt.glb', len:5.10,
+      bodyMats:['White_Knuckle_Clearcoat','_Base'], glassMats:['Window','GlassClear','GlassRed'],
+      credit:'2020 Dodge Charger SRT Hellcat by Drifter-Models (Golden-Models)',
+      url:'https://sketchfab.com/3d-models/2020-dodge-charger-srt-hellcat-dedcfdf9c7784882ba85858a88cbdb9f' },
+    c300: { file:'c300_opt.glb', len:5.20,
+      bodyMats:['Meshessrthellcatbadge1Mtl','Meshpart7Mtl','Meshpart4Mtl','MbdesignKv11Mtl','Sides1Mtl','Left2Mtl','Right1Mtl','Right2Mtl'],
+      glassMats:['Windshield'],
+      credit:'Chrysler 300 SRT Hellcat by fvrenbld (sketchfab.com/890244234)',
+      url:'https://sketchfab.com/3d-models/chrysler-300-srt-hellcat-82b9b3f14c1e48febfd567be2c2c26c7' },
+  };
+  window.GLB_MODELS = MODELS;
+
+  // ---- loader with shared Draco decoder ----
+  var _loader=null, _draco=null;
+  function loader(){
+    if(_loader) return _loader;
+    _loader=new THREE.GLTFLoader();
+    _draco=new THREE.DRACOLoader();
+    _draco.setDecoderPath(window.DRACO_PATH || 'https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/libs/draco/');
+    _loader.setDRACOLoader(_draco);
+    return _loader;
+  }
+
+  // ---- cache of loaded gltf.scene per key ----
+  var CACHE={}; // key -> scene (template, never added to scene directly)
+  var LOADING={};
+  function preload(key){
+    if(CACHE[key]||LOADING[key]) return LOADING[key]||Promise.resolve(CACHE[key]);
+    LOADING[key]=new Promise(function(res){
+      loader().load(GLB_BASE+MODELS[key].file, function(gltf){
+        var s=gltf.scene;
+        // bake normalization into the template once
+        normalize(s, MODELS[key].len);
+        CACHE[key]=s; res(s);
+      }, undefined, function(err){ console.warn('GLB load failed',key,err); LOADING[key]=null; res(null); });
+    });
+    return LOADING[key];
+  }
+  window.GLB_preload = preload;
+  window.GLB_ready = function(key){ return !!CACHE[key]; };
+
+  function normalize(s, targetLen){
+    s.updateMatrixWorld(true);
+    var box=new THREE.Box3().setFromObject(s);
+    var sz=box.getSize(new THREE.Vector3());
+    var f=targetLen/Math.max(sz.x, sz.z);
+    s.scale.setScalar(f); s.updateMatrixWorld(true);
+    box=new THREE.Box3().setFromObject(s);
+    var ctr=box.getCenter(new THREE.Vector3());
+    s.position.x-=ctr.x; s.position.z-=ctr.z; s.position.y-=box.min.y;
+    s.updateMatrixWorld(true);
+    // orient length along Z (configurator convention: nose +Z). If width axis is longer than depth, rotate.
+    box=new THREE.Box3().setFromObject(s); sz=box.getSize(new THREE.Vector3());
+    if(sz.x > sz.z){ s.rotation.y += Math.PI/2; s.updateMatrixWorld(true);
+      box=new THREE.Box3().setFromObject(s); ctr=box.getCenter(new THREE.Vector3());
+      s.position.x-=ctr.x; s.position.z-=ctr.z; s.updateMatrixWorld(true); }
+  }
+
+  function matchAny(name, frags){ name=name||''; for(var i=0;i<frags.length;i++){ if(name.indexOf(frags[i])>=0) return true; } return false; }
+
+  // Attach a clone of the template into carGroup as the body, wiring paint + glass to shared mats.
+  function placeModel(key){
+    var tmpl=CACHE[key]; if(!tmpl) return false;
+    var cfg=MODELS[key];
+    var model=tmpl.clone(true);
+    // shared paint/glass materials (update their color from current selection)
+    var paint = R_ensurePaint(currentColor.hex);
+    var glass = glassMat(false);
+    model.traverse(function(o){
+      if(!o.isMesh) return;
+      o.castShadow=true; o.receiveShadow=true;
+      var mArr = Array.isArray(o.material)? o.material : [o.material];
+      var mname = mArr.map(function(m){return m&&m.name||'';}).join(',');
+      if(matchAny(mname, cfg.bodyMats)){
+        o.material = paint;            // body paint -> shared R_PAINT (color, finish, X-Ray)
+        o.name='body';
+      } else if(matchAny(mname, cfg.glassMats)){
+        o.material = glass;            // glass -> shared R_GLASS (X-Ray transparency)
+        o.name='windshield'; o.castShadow=false;
+      } else {
+        // keep native material (chrome, rubber, caliper, lights, interior) but ensure env + encoding
+        mArr.forEach(function(m){ if(!m) return;
+          if('envMapIntensity' in m) m.envMapIntensity=Math.max(m.envMapIntensity||0,0.8);
+          // neutralize unnatural lime-green caliper/badge materials to a realistic dark caliper grey
+          if(m.color){ var c=m.color; if(c.g>0.45 && c.g>c.r*1.4 && c.g>c.b*1.4){ m.color.setHex(0x1c1c1e); if(m.metalness!==undefined)m.metalness=0.3; if(m.roughness!==undefined)m.roughness=0.5; } }
+          m.needsUpdate=true; });
+      }
+    });
+    var B=new THREE.Group(); B.name='bodyG'; B.userData.glb=key; B.add(model);
+    carGroup.add(B);
+    carGroup.userData.bodyG=B;
+    carGroup.userData.glbKey=key;
+    return true;
+  }
+
+  // Wheel geometry so the configurator wheel features (width/dish/white-letter/skinny) still apply
+  // on top of a real body: the GLB ships its own wheels, so we DON'T double them. We record wheel
+  // anchor positions from the GLB for X-Ray brake hotspots.
+  function buildGLB(col, key){
+    // clear carGroup
+    while(carGroup.children.length) carGroup.remove(carGroup.children[0]);
+    if(typeof MAT_CACHE!=='undefined') MAT_CACHE['_body']=null;
+    R_CUR = (typeof R_VARS!=='undefined' && R_VARS[key]) ? R_VARS[key] : (R_VARS?R_VARS.coupe:null);
+    R_ensurePaint(col||currentColor.hex);
+    if(CACHE[key]){
+      placeModel(key);
+      // add the internal/X-Ray parts (engine, supercharger, etc) so X-Ray reveals them under the real shell
+      if(typeof addInternalParts==='function' && carGroup.userData.bodyG){ addInternalParts(carGroup.userData.bodyG); }
+      // real GLB models ship their own exhaust; no procedural tips
+      // extras (stripes/wing/splitter/hood) follow the shared paint and R_CUR table
+      if(typeof R_extras==='function' && carGroup.userData.bodyG){ try{ R_extras(carGroup.userData.bodyG); }catch(e){} }
+      carGroup.traverse(function(o){ if(o.material&&typeof R_GLASS!=='undefined'&&o.material===R_GLASS)o.castShadow=false; });
+      if(typeof R_applyTint==='function') R_applyTint();
+      if(isXray && typeof applyXray==='function') applyXray(true);
+      if(typeof applyHeight==='function') applyHeight(heightDrop);
+      return true;
+    }
+    return false;
+  }
+  window.GLB_build = buildGLB;
+
+  // ---- override the body builders ----
+  var _bChallenger = buildChallenger, _bCharger = buildCharger, _bDemon = buildDemon, _bC300 = buildC300;
+  function withFallback(key, origFn, col){
+    if(CACHE[key]){ buildGLB(col, key); return; }
+    // not loaded yet: draw procedural now, then swap in the GLB when ready
+    origFn(col);
+    preload(key).then(function(s){
+      if(s && currentFamily && (FAMILIES[currentFamily]) && famKey(currentFamily)===key){
+        buildGLB(currentColor.hex, key);
+        if(typeof buildRpBody==='function'){ try{ buildRpBody(); }catch(e){} }
+        if(typeof updateFitmentWarning==='function'){ try{ updateFitmentWarning(); }catch(e){} }
+      }
+    });
+  }
+  function famKey(fam){ return fam==='challenger'?'coupe':fam==='demon'?'coupe':fam==='charger'?'sedan':fam==='c300'?'c300':null; }
+
+  buildChallenger=function(col){ withFallback('coupe', _bChallenger, col); };
+  buildDemon     =function(col){ withFallback('coupe', _bDemon, col); };
+  buildCharger   =function(col){ withFallback('sedan', _bCharger, col); };
+  buildC300      =function(col){ withFallback('c300', _bC300, col); };
+  // Trackhawk unchanged (stays procedural)
+
+  // preload all three up front so the first view is real
+  preload('coupe'); preload('sedan'); preload('c300');
+
+  // ---- credits footer line (CC-BY Attribution is a legal requirement) ----
+  function addCredits(){
+    if(document.getElementById('glb-credits')) return;
+    var vw=document.getElementById('vw'); if(!vw) return;
+    var el=document.createElement('div'); el.id='glb-credits';
+    el.style.cssText='position:absolute;bottom:4px;right:8px;z-index:7;font-family:var(--fm),monospace;font-size:0.5rem;line-height:1.5;color:rgba(255,255,255,0.4);text-align:right;pointer-events:auto;max-width:360px';
+    var lines=[];
+    for(var k in MODELS){ lines.push('<a href="'+MODELS[k].url+'" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.45);text-decoration:none">'+MODELS[k].credit+'</a>'); }
+    el.innerHTML='3D models (CC BY 4.0): '+lines.join(' &middot; ');
+    vw.appendChild(el);
+    if(!document.getElementById('bb-ded')){
+      var ded=document.createElement('div'); ded.id='bb-ded';
+      ded.style.cssText='position:absolute;bottom:4px;left:8px;z-index:7;font-family:var(--fm),monospace;font-size:0.5rem;line-height:1.5;color:rgba(255,255,255,0.4);text-align:left;pointer-events:none;max-width:48%';
+      ded.innerHTML='BlowerBuildz is dedicated to my son Jameson. Happy birthday, buddy. Everything I build, I build with you in mind. Love, Dad.<br>As an Amazon Associate, BlowerBuildz earns from qualifying purchases.';
+      vw.appendChild(ded);
+    }
+  }
+  if(document.readyState!=='loading') setTimeout(addCredits,300); else document.addEventListener('DOMContentLoaded',function(){setTimeout(addCredits,300);});
 })();
 
 </script>
