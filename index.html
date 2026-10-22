@@ -4571,18 +4571,24 @@ function R_extras(B){
       camera.position.set(trackAnchor.x,4.2,trackAnchor.z); look(p.x,0.7,p.z); return; }
     if(m==='flyby'){ smoothFov(34); flyT+=0.016; var r=20, ang=flyT*0.7;
       camera.position.set(p.x+Math.cos(ang)*r, 3+Math.sin(flyT*0.5)*2.2, p.z+Math.sin(ang)*r); look(p.x,0.8,p.z); return; }
-    if(m==='cockpit'){ smoothFov(70);
-      // driver eyepoint: slightly left of centre, seat height, behind the dash plane. Shell stays visible; we look out through the windshield.
-      var ex=p.x + c*(-0.38) + s*(0.0), ez=p.z - s*(-0.38) + c*(0.0);
-      var eyeY=1.28;
+    if(m==='cockpit'){ smoothFov(68);
+      // Car's forward unit vector in world space (model faces +local-z; carGroup.rotation.y = heading).
+      // fwd = (sin h, 0, cos h); right = (cos h, 0, -sin h).
+      var fwdx=Math.sin(p.h), fwdz=Math.cos(p.h), rgtx=Math.cos(p.h), rgtz=-Math.sin(p.h);
+      var eyeY=1.12;
+      // seat eyepoint: a bit left of centre, set back toward the seat so the wheel + dash sit ahead of us
+      var seatBack=-0.55, seatSide=-0.33;
+      var ex=p.x + fwdx*seatBack + rgtx*seatSide;
+      var ez=p.z + fwdz*seatBack + rgtz*seatSide;
       camera.position.set(ex,eyeY,ez);
-      var fh=p.h+head.yaw, fc=Math.cos(fh), fsn=Math.sin(fh), ty=eyeY-0.18+head.pitch;
-      look(ex+fsn*12, ty, ez+fc*12);
-      // place + turn the steering wheel in front of the eyepoint
-      if(steerWheel){ var wx=p.x + s*0.42 + c*(-0.30), wz=p.z + c*0.42 - s*(-0.30);
-        steerWheel.position.set(s*0.42 + c*(-0.30), 0.92-carBaseY_cp(), c*0.42 - s*(-0.30));
-        steerWheel.rotation.set(-1.08, 0, (typeof window.__driveSteer==='number'?window.__driveSteer:0)*1.4);
-        steerWheel.rotation.y = p.h; }
+      // look forward over the hood, slightly down, plus mouse/touch head-look
+      var fh=p.h+head.yaw, fc=Math.cos(fh), fsn=Math.sin(fh);
+      look(ex+fsn*20, eyeY-0.22+head.pitch, ez+fc*20);
+      // steer wheel is a CHILD of carGroup -> use LOCAL coords (parent already applies heading). Local +z is forward.
+      if(steerWheel){ steerWheel.position.set(-0.33,0.80,0.25);
+        steerWheel.rotation.x=-1.15; // tilt toward the driver
+        steerWheel.rotation.y=0;
+        steerWheel.rotation.z=(typeof window.__driveSteer==='number'?window.__driveSteer:0)*1.4; }
       return; }
   }
   var baseUpdate=window.DRIVE_update;
@@ -4618,7 +4624,7 @@ function R_extras(B){
   var strip=null, tree=null, oppCar=null;
   var phase='idle';
   var tLights=[];
-  var greenAt=0, reaction=0;
+  var greenAt=0, reaction=0, redLight=false;
   var P={z:0,v:0,gear:1,rpm:0,launched:false,t60:0,t18:0,t14:0,trap:0,done:false,wheelspin:0};
   var O={z:0,v:0,et:0,trap:0,done:false,react:0};
   var hud=null, hctx=null, carBaseY=0, oppMat=null, replaying=false;
@@ -4705,7 +4711,13 @@ function R_extras(B){
     setTimeout(function(){ if(!active)return; litTree('a1',false);litTree('a2',false);litTree('a3',false);
       litTree('green',true); greenAt=performance.now(); phase='launched';
       if(window.DRIVE_setCam)window.DRIVE_setCam('chase'); },1600); }
-  function launch(){ if(phase!=='launched'||P.launched)return; P.launched=true; reaction=(performance.now()-greenAt)/1000; if(reaction<0)litTree('red',true); }
+  function launch(){ if(phase!=='launched'||P.launched)return; P.launched=true;
+    var rt=(performance.now()-greenAt)/1000;
+    if(rt<0){ reaction=rt; redLight=true; litTree('red',true); }       // jumped before green
+    else { reaction=rt; redLight=false; }
+    // guard against a stalled frame / test pump producing an absurd value: a real human RT is < ~2.5s
+    if(reaction>2.5) reaction=null;  // unknown / not a clean launch
+  }
   window.DRIVE_dragLaunch=launch;
 
   function step(dt){
@@ -4730,7 +4742,7 @@ function R_extras(B){
         P.rpm=Math.max(0.25,Math.min(1,0.45+within/Math.max(1,span)*0.55));
         if(!P.t60&&P.z>=18.3)P.t60=tGreen-reaction;
         if(!P.t18&&P.z>=201)P.t18=tGreen-reaction;
-        if(P.z>=402){ P.done=true; P.t14=tGreen-reaction; P.trap=Math.round(mph); }
+        if(P.z>=402){ P.done=true; P.t14=tGreen-(typeof reaction==='number'?reaction:0); P.trap=Math.round(mph); }
         if(typeof carGroup!=='undefined'&&carGroup){ carGroup.position.set(-LANE,carBaseY,P.z); carGroup.rotation.x=-P.wheelspin*0.04; }
       }
       if(!O.done){ if(tGreen>=O.react){ var ovmax=O.trap*0.44704; var oacc=(ovmax*ovmax)/(2*402)*1.9; O.v+=oacc*dt; if(O.v>ovmax)O.v=ovmax; O.z+=O.v*dt; if(O.z>=402)O.done=true; } }
@@ -4752,7 +4764,7 @@ function R_extras(B){
       g.fillStyle='#F2A900';g.font='bold 22px monospace';g.fillText('G'+P.gear,0,-34);g.restore();
       if(P.rpm>0.9){ g.fillStyle='#e8472a';g.font='bold 22px monospace';g.textAlign='center';g.fillText('SHIFT',W/2,120); }
       g.fillStyle='rgba(255,255,255,0.85)';g.font='15px monospace';g.textAlign='left';
-      g.fillText('RT '+(reaction>0?reaction.toFixed(3):(P.launched?'0.000':'--')),20,H-70);
+      g.fillText('RT '+(redLight?'RED':(typeof reaction!=='number'?(P.launched?'--':'--'):reaction.toFixed(3))),20,H-70);
       g.fillText('60ft '+(P.t60?P.t60.toFixed(2):'--'),20,H-50);
       g.fillText('1/8 '+(P.t18?P.t18.toFixed(2):'--'),20,H-30);
       g.fillStyle='rgba(242,169,0,0.9)';g.font='13px monospace';g.fillText(Math.round(P.z*3.281)+' ft',20,H-90);
@@ -4769,7 +4781,7 @@ function R_extras(B){
     el.innerHTML='<div style="font-family:var(--fh,sans-serif);font-size:1.5rem;font-weight:700;color:'+(result==='WIN'?'#4ade80':'#f87171')+';letter-spacing:.1em;margin-bottom:12px">'+result+'</div>'+
       '<div style="font-size:.7rem;letter-spacing:.2em;color:#888;margin-bottom:8px">TIME SLIP</div>'+
       '<table style="width:100%;font-size:.8rem;border-collapse:collapse">'+
-      row('Reaction',reaction>0?reaction.toFixed(3):'0.000 (foul)')+row('60 ft',(P.t60||0).toFixed(2))+row('1/8 mile',(P.t18||0).toFixed(2))+row('1/4 mile ET',(P.t14||0).toFixed(2))+row('Trap speed',P.trap+' mph')+'</table>'+
+      row('Reaction', redLight?('RED LIGHT '+reaction.toFixed(3)):(typeof reaction!=='number'?'N/A':reaction.toFixed(3)))+row('60 ft',(P.t60||0).toFixed(2))+row('1/8 mile',(P.t18||0).toFixed(2))+row('1/4 mile ET',(P.t14||0).toFixed(2))+row('Trap speed',P.trap+' mph')+'</table>'+
       '<div style="font-size:.68rem;color:#aaa;margin-top:10px">vs '+oppPick().name+': '+oppET.toFixed(2)+'s</div>'+
       '<div style="display:flex;gap:8px;margin-top:14px;justify-content:center">'+
       '<button onclick="DRIVE_dragAgain()" style="font-family:var(--fm);font-size:.65rem;background:var(--amber,#F2A900);color:#111;border:none;padding:8px 14px;border-radius:4px;cursor:pointer">RUN AGAIN</button>'+
@@ -4780,7 +4792,7 @@ function R_extras(B){
   window.DRIVE_dragAgain=function(){ clearSlip(); phase='staging';
     P={z:0,v:0,gear:1,rpm:0,launched:false,t60:0,t18:0,t14:0,trap:0,done:false,wheelspin:0};
     var opp=oppPick(); O={z:0,v:0,et:opp.qtm,trap:opp.trap,done:false,react:0.15+Math.random()*0.25};
-    reaction=0; placePlayer(); if(oppCar)oppCar.position.set(LANE,0,0); allTreeOff();
+    reaction=0; redLight=false; placePlayer(); if(oppCar)oppCar.position.set(LANE,0,0); allTreeOff();
     if(window.DRIVE_setCam)window.DRIVE_setCam('far');
     litTree('prestage',true); setTimeout(function(){litTree('stage',true);},500); phase='tree'; setTimeout(runTree,1200); };
   window.DRIVE_dragReplay=function(){ clearSlip(); if(replaying)return; replaying=true;
