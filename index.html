@@ -3065,6 +3065,7 @@ function R_updateHotspots(){
 }
 function animate(){
   requestAnimationFrame(animate);
+  if(window.DRIVE_update){window.__DRIVE_HOOKED=true;try{window.DRIVE_update();}catch(e){}}
   renderer.render(scene,camera);
   if(isoActive)isoRenderer.render(isoScene,isoCamera);
   R_updateHotspots();
@@ -4032,6 +4033,10 @@ function R_extras(B){
       glassMats:['Windshield'],
       credit:'Chrysler 300 SRT Hellcat by fvrenbld (sketchfab.com/890244234)',
       url:'https://sketchfab.com/3d-models/chrysler-300-srt-hellcat-82b9b3f14c1e48febfd567be2c2c26c7' },
+    suv: { file:'trackhawk_opt.glb', len:4.95,
+      bodyMats:['Body'], glassMats:['Vitre','Vitre_ar','Vitre_noir'],
+      credit:'Jeep Grand Cherokee Trackhawk by Emmanuel Robinson Jr.',
+      url:'https://sketchfab.com/3d-models/unmarked-police-jeep-track-hawk-a443ddaec3ad4fddbef2e343341c5931' },
   };
   window.GLB_MODELS = MODELS;
 
@@ -4145,7 +4150,7 @@ function R_extras(B){
   window.GLB_build = buildGLB;
 
   // ---- override the body builders ----
-  var _bChallenger = buildChallenger, _bCharger = buildCharger, _bDemon = buildDemon, _bC300 = buildC300;
+  var _bChallenger = buildChallenger, _bCharger = buildCharger, _bDemon = buildDemon, _bC300 = buildC300, _bTrackhawk = (typeof buildTrackhawk==='function'?buildTrackhawk:null);
   function withFallback(key, origFn, col){
     if(CACHE[key]){ buildGLB(col, key); return; }
     // not loaded yet: draw procedural now, then swap in the GLB when ready
@@ -4158,16 +4163,16 @@ function R_extras(B){
       }
     });
   }
-  function famKey(fam){ return fam==='challenger'?'coupe':fam==='demon'?'coupe':fam==='charger'?'sedan':fam==='c300'?'c300':null; }
+  function famKey(fam){ return fam==='challenger'?'coupe':fam==='demon'?'coupe':fam==='charger'?'sedan':fam==='c300'?'c300':fam==='trackhawk'?'suv':null; }
 
   buildChallenger=function(col){ withFallback('coupe', _bChallenger, col); };
   buildDemon     =function(col){ withFallback('coupe', _bDemon, col); };
   buildCharger   =function(col){ withFallback('sedan', _bCharger, col); };
   buildC300      =function(col){ withFallback('c300', _bC300, col); };
-  // Trackhawk unchanged (stays procedural)
+  if(_bTrackhawk) buildTrackhawk=function(col){ withFallback('suv', _bTrackhawk, col); };
 
   // preload all three up front so the first view is real
-  preload('coupe'); preload('sedan'); preload('c300');
+  preload('coupe'); preload('sedan'); preload('c300'); preload('suv');
 
   // ---- credits footer line (CC-BY Attribution is a legal requirement) ----
   function addCredits(){
@@ -4187,6 +4192,404 @@ function R_extras(B){
     }
   }
   if(document.readyState!=='loading') setTimeout(addCredits,300); else document.addEventListener('DOMContentLoaded',function(){setTimeout(addCredits,300);});
+})();
+
+
+/* ===== mod11 drive ===== */
+/* ================= v11: Drive Test - arcade third-person driving (burnouts, donuts, HUD) ================= */
+(function(){
+  if(typeof THREE==='undefined') return;
+  // scene/carGroup/camera are assigned by init() before any drive fn runs; reference them lazily, never guard on them at parse time
+
+  var driveActive=false, built=false;
+  var arena=null, markCanvas=null, markCtx=null, markTex=null, markMesh=null;
+  var smokeGroup=null, smoke=[], SMOKE_MAX=360, smokeTex=null;
+  var S={ x:0,z:0,heading:0, vLong:0,vLat:0, steer:0,throttle:0,brakeV:0, handbrake:false, boost:false, rearSpin:0, slip:0, pitch:0, roll:0 };
+  var keys={}, cam={mode:'chase', fov:45, shake:0};
+  var lastT=0, muted=false, audio=null;
+  var combo={score:0, active:0, kind:'', total:0};
+  var hudCanvas=null, hudCtx=null, miniCanvas=null;
+  var WORLD=120;
+
+  function asphaltTex(){
+    var c=document.createElement('canvas');c.width=c.height=512;var g=c.getContext('2d');
+    g.fillStyle='#45474a';g.fillRect(0,0,512,512);
+    var im=g.getImageData(0,0,512,512),d=im.data;for(var i=0;i<d.length;i+=4){var n=Math.random()*40-20;d[i]+=n;d[i+1]+=n;d[i+2]+=n;}g.putImageData(im,0,0);
+    g.strokeStyle='rgba(28,28,30,0.5)';g.lineWidth=4;for(var s=0;s<4;s++){var p=64+s*128;g.beginPath();g.moveTo(0,p);g.lineTo(512,p);g.stroke();g.beginPath();g.moveTo(p,0);g.lineTo(p,512);g.stroke();}
+    var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(24,24);return t;
+  }
+  function smokeTexture(){
+    var c=document.createElement('canvas');c.width=c.height=64;var g=c.getContext('2d');
+    var gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,0.92)');gr.addColorStop(0.45,'rgba(225,225,228,0.5)');gr.addColorStop(1,'rgba(210,210,214,0)');
+    g.fillStyle=gr;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+  }
+  function makeMarks(){ markCanvas=document.createElement('canvas');markCanvas.width=markCanvas.height=2048;markCtx=markCanvas.getContext('2d');markTex=new THREE.CanvasTexture(markCanvas);markTex.anisotropy=4; }
+  function w2c(x,z){ return [ (x/WORLD+0.5)*2048, (z/WORLD+0.5)*2048 ]; }
+  function paintMark(x,z,width,dark){ if(!markCtx)return; var p=w2c(x,z);var r=Math.max(2,width/WORLD*2048*0.5);
+    markCtx.fillStyle='rgba(10,10,12,'+dark+')';markCtx.beginPath();markCtx.arc(p[0],p[1],r,0,Math.PI*2);markCtx.fill();markTex.needsUpdate=true; }
+  function clearMarks(){ if(markCtx){markCtx.clearRect(0,0,2048,2048);markTex.needsUpdate=true;} }
+  window.DRIVE_clearMarks=clearMarks;
+  function spawnSmoke(x,y,z,power){ if(smoke.length>=SMOKE_MAX)return;
+    var m=new THREE.SpriteMaterial({map:smokeTex,transparent:true,opacity:0.5,depthWrite:false,color:0xdadada});
+    var s=new THREE.Sprite(m);s.position.set(x+(Math.random()-0.5)*0.4,y,z+(Math.random()-0.5)*0.4);
+    var sc=0.4+Math.random()*0.5;s.scale.set(sc,sc,sc);
+    s.userData={life:0,max:1.5+Math.random()*1.1,vx:(Math.random()-0.5)*0.6,vy:0.5+Math.random()*0.7,vz:(Math.random()-0.5)*0.6,grow:1.8+power};
+    smokeGroup.add(s);smoke.push(s);
+  }
+  function updateSmoke(dt){ for(var i=smoke.length-1;i>=0;i--){var s=smoke[i],u=s.userData;u.life+=dt;
+    if(u.life>=u.max){smokeGroup.remove(s);s.material.dispose();smoke.splice(i,1);continue;}
+    var k=u.life/u.max;s.position.x+=u.vx*dt;s.position.y+=u.vy*dt;s.position.z+=u.vz*dt;u.vy*=0.98;
+    var sc=0.4+k*u.grow;s.scale.set(sc,sc,sc);s.material.opacity=0.55*(1-k);} }
+  function instanceBoxes(count,geo,mat,place){ var m=new THREE.InstancedMesh(geo,mat,count);var d=new THREE.Object3D();
+    for(var i=0;i<count;i++){place(d,i);d.updateMatrix();m.setMatrixAt(i,d.matrix);} m.instanceMatrix.needsUpdate=true;return m; }
+  function buildArena(){
+    arena=new THREE.Group();arena.name='driveArena';
+    var gmat=new THREE.MeshStandardMaterial({map:asphaltTex(),roughness:0.95,metalness:0});
+    var ground=new THREE.Mesh(new THREE.PlaneGeometry(WORLD,WORLD),gmat);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;arena.add(ground);
+    var pc=document.createElement('canvas');pc.width=pc.height=2048;var pg=pc.getContext('2d');
+    pg.clearRect(0,0,2048,2048);pg.strokeStyle='rgba(230,225,180,0.85)';pg.lineWidth=6;pg.setLineDash([46,40]);
+    for(var i=1;i<6;i++){var p=i*2048/6;pg.beginPath();pg.moveTo(p,0);pg.lineTo(p,2048);pg.stroke();pg.beginPath();pg.moveTo(0,p);pg.lineTo(2048,p);pg.stroke();}
+    pg.setLineDash([]);pg.strokeStyle='rgba(240,240,240,0.9)';pg.lineWidth=10;pg.strokeRect(80,80,2048-160,2048-160);
+    pg.fillStyle='rgba(240,240,240,0.85)';for(var cw=0;cw<8;cw++){pg.fillRect(2048/2-120+cw*32,2048/2-160,16,60);}
+    var ptex=new THREE.CanvasTexture(pc);
+    var paint=new THREE.Mesh(new THREE.PlaneGeometry(WORLD,WORLD),new THREE.MeshBasicMaterial({map:ptex,transparent:true,depthWrite:false}));
+    paint.rotation.x=-Math.PI/2;paint.position.y=0.006;arena.add(paint);
+    var curbMat=new THREE.MeshStandardMaterial({color:0x6a6a6e,roughness:0.9});var h=WORLD/2;
+    [[0,h,WORLD,0.5],[0,-h,WORLD,0.5],[h,0,0.5,WORLD],[-h,0,0.5,WORLD]].forEach(function(c){var b=new THREE.Mesh(new THREE.BoxGeometry(c[2],0.3,c[3]),curbMat);b.position.set(c[0],0.15,c[1]);b.castShadow=true;arena.add(b);});
+    var bgeo=new THREE.BoxGeometry(1,1,1);var bmat=new THREE.MeshStandardMaterial({color:0x2a2d33,roughness:0.85,metalness:0.1});
+    var spots=[];var edge=WORLD/2-6;for(var a=0;a<22;a++){var side=a%4;var t=(Math.floor(a/4)/6-0.5)*WORLD*0.9;
+      var bx,bz; if(side===0){bx=t;bz=-edge;}else if(side===1){bx=t;bz=edge;}else if(side===2){bx=-edge;bz=t;}else{bx=edge;bz=t;}
+      spots.push([bx,bz,8+Math.random()*10,10+Math.random()*26,8+Math.random()*10]);}
+    var bld=instanceBoxes(spots.length,bgeo,bmat,function(d,i){var s=spots[i];d.position.set(s[0],s[3]/2,s[1]);d.scale.set(s[2],s[3],s[4]);});
+    bld.castShadow=true;arena.add(bld);
+    var poleMat=new THREE.MeshStandardMaterial({color:0x111214,roughness:0.6});var lampMat=new THREE.MeshStandardMaterial({color:0xffe9b0,emissive:0xffcf6a,emissiveIntensity:1.6});
+    var pgeo=new THREE.CylinderGeometry(0.12,0.14,6,6);var lgeo=new THREE.SphereGeometry(0.4,8,8);
+    var polePos=[];for(var px=-1;px<=1;px++)for(var pz=-1;pz<=1;pz++){if(px===0&&pz===0)continue;polePos.push([px*34,pz*34]);}
+    var poles=instanceBoxes(polePos.length,pgeo,poleMat,function(d,i){d.position.set(polePos[i][0],3,polePos[i][1]);});arena.add(poles);
+    var lamps=instanceBoxes(polePos.length,lgeo,lampMat,function(d,i){d.position.set(polePos[i][0],6.1,polePos[i][1]);});arena.add(lamps);
+    polePos.forEach(function(p){var pl=new THREE.PointLight(0xffd27a,0.5,26,2);pl.position.set(p[0],6,p[1]);arena.add(pl);});
+    var sky=new THREE.Mesh(new THREE.SphereGeometry(WORLD*0.95,24,16),new THREE.MeshBasicMaterial({color:0x0a0e1a,side:THREE.BackSide}));arena.add(sky);
+    arena.visible=false;scene.add(arena);
+  }
+  function initAudio(){ if(audio)return; try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;var ctx=new AC();
+    var master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
+    var o1=ctx.createOscillator(),o2=ctx.createOscillator();o1.type='sawtooth';o2.type='sawtooth';o2.detune.value=14;
+    var eg=ctx.createGain();eg.gain.value=0;var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;
+    o1.connect(eg);o2.connect(eg);eg.connect(lp);lp.connect(master);o1.frequency.value=60;o2.frequency.value=60;o1.start();o2.start();
+    var n=ctx.sampleRate*1;var nb=ctx.createBuffer(1,n,ctx.sampleRate);var nd=nb.getChannelData(0);for(var i=0;i<n;i++)nd[i]=Math.random()*2-1;
+    var noise=ctx.createBufferSource();noise.buffer=nb;noise.loop=true;var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2300;bp.Q.value=7;
+    var sg=ctx.createGain();sg.gain.value=0;noise.connect(bp);bp.connect(sg);sg.connect(master);noise.start();
+    audio={ctx:ctx,master:master,o1:o1,o2:o2,eg:eg,lp:lp,sg:sg};master.gain.setTargetAtTime(muted?0:0.5,ctx.currentTime,0.1);
+  }catch(e){audio=null;} }
+  function updateAudio(rpm,squeal){ if(!audio)return;try{var t=audio.ctx.currentTime;var base=55+rpm*120;
+    audio.o1.frequency.setTargetAtTime(base,t,0.05);audio.o2.frequency.setTargetAtTime(base*1.01,t,0.05);
+    audio.lp.frequency.setTargetAtTime(600+rpm*2800,t,0.05);audio.eg.gain.setTargetAtTime(0.12+rpm*0.2,t,0.05);
+    audio.sg.gain.setTargetAtTime(Math.min(0.26,squeal*0.32),t,0.03);}catch(e){} }
+  function setMuted(m){ muted=m;try{localStorage.setItem('bb_drive_muted',m?'1':'0');}catch(e){}
+    if(audio){try{audio.master.gain.setTargetAtTime(m?0:0.5,audio.ctx.currentTime,0.08);}catch(e){}}
+    var btn=document.getElementById('drive-mute');if(btn)btn.textContent=m?'MUTED':'SOUND'; }
+  window.DRIVE_toggleMute=function(){ setMuted(!muted); initAudio(); if(audio&&audio.ctx.state==='suspended')audio.ctx.resume(); };
+  function rearAnchors(){
+    var rl=carGroup&&carGroup.getObjectByName('wheel_rl'),rr=carGroup&&carGroup.getObjectByName('wheel_rr');
+    if(rl&&rr){var a=new THREE.Vector3(),b=new THREE.Vector3();rl.getWorldPosition(a);rr.getWorldPosition(b);return [[a.x,a.z],[b.x,b.z]];}
+    var dz=-1.7,tx=0.85;var c=Math.cos(S.heading),s=Math.sin(S.heading);
+    function tf(lx,lz){return [S.x+lx*c+lz*s, S.z+(-lx*s)+lz*c];}
+    return [tf(-tx,dz),tf(tx,dz)];
+  }
+  function powerLevel(){ try{var fam=FAMILIES[currentFamily];var yr=fam.years[currentYearIdx]||fam.years[0];return Math.min(1,(yr.hp||707)/900);}catch(e){return 0.8;} }
+  function isDemonLike(){ return currentFamily==='demon'||(typeof isDemonMode!=='undefined'&&isDemonMode); }
+  function spinRear(dt){ var spin=S.rearSpin*dt*42; ['wheel_rl','wheel_rr'].forEach(function(nm){var w=carGroup&&carGroup.getObjectByName(nm);if(w)w.rotation.x+=spin;}); }
+  function scoreCombo(dt,burn){
+    var sliding = burn>0.4 || Math.abs(S.vLat)>1.2;
+    if(sliding){ combo.active+=dt;
+      var kind = (S.handbrake&&Math.abs(S.vLong)<3)?'BURNOUT' : (Math.abs(S.vLat)>1.6&&Math.abs(S.steer)>0.6)?'DONUT':'DRIFT';
+      combo.kind=kind; combo.score+=dt*(60+burn*80); }
+    else { if(combo.active>0.6){ combo.total+=Math.round(combo.score); } combo.active=0; combo.score=0; combo.kind=''; }
+  }
+  function physics(dt){
+    var pw=powerLevel(); pollGamepad();
+    var accel=(keys.up?1:0)-(keys.down?1:0);
+    var steerIn=(keys.left?1:0)-(keys.right?1:0);
+    S.handbrake=!!keys.space; S.boost=!!keys.shift && isDemonLike();
+    S.steer += (steerIn - S.steer)*Math.min(1,dt*7);
+    S.throttle += (accel - S.throttle)*Math.min(1,dt*6);
+    var boost=S.boost?1.35:1;
+    var gripLimited = S.handbrake || Math.abs(S.vLong)<2.4;
+    var spinTarget=(S.throttle>0.2&&gripLimited)?(0.6+0.4*pw):Math.min(1,Math.abs(S.vLong)/9);
+    S.rearSpin += (spinTarget-S.rearSpin)*Math.min(1,dt*5);
+    var drive=S.throttle*(gripLimited?2.2:11.0)*boost;
+    S.vLong += (drive - S.vLong*1.02)*Math.min(1,dt*2.6);
+    if(accel<0)S.vLong+=accel*dt*6;
+    if(!accel)S.vLong*=(1-Math.min(1,dt*0.7));
+    var steerAuth=(0.9 - Math.min(0.5,Math.abs(S.vLong)*0.02));
+    var yaw=S.steer*steerAuth*(1+(S.handbrake?1.3:0)+S.throttle*0.5);
+    S.heading += yaw*dt*Math.min(2.6,0.5+Math.abs(S.vLong)*0.22);
+    var slipAdd=(S.handbrake?1:0)*Math.abs(S.vLong)*0.08 + Math.abs(S.steer)*Math.abs(S.vLong)*0.05;
+    S.vLat += slipAdd*dt*4; S.vLat *= (1-Math.min(1,dt*(S.handbrake?0.8:3.0)));
+    if(Math.sign(S.steer)!==Math.sign(S.vLat)&&Math.abs(S.vLat)>0.2) S.vLat*=(1-Math.min(1,dt*2));
+    S.slip=Math.max(0, S.rearSpin*S.throttle) + Math.min(1.2,Math.abs(S.vLat)*0.4) + (S.handbrake&&Math.abs(S.vLong)>1?0.5:0);
+    var targPitch = -accel*0.05 + (S.vLong<0?0.03:0);
+    var targRoll = -S.steer*Math.min(0.09,Math.abs(S.vLong)*0.006) - S.vLat*0.03;
+    S.pitch += (targPitch-S.pitch)*Math.min(1,dt*5);
+    S.roll  += (targRoll -S.roll )*Math.min(1,dt*5);
+    var c=Math.cos(S.heading), s=Math.sin(S.heading);
+    var vx=s*S.vLong + c*S.vLat, vz=c*S.vLong - s*S.vLat;
+    S.x+=vx*dt; S.z+=vz*dt;
+    var lim=WORLD*0.46; var hit=false;
+    if(S.x<-lim){S.x=-lim;hit=true;} if(S.x>lim){S.x=lim;hit=true;}
+    if(S.z<-lim){S.z=-lim;hit=true;} if(S.z>lim){S.z=lim;hit=true;}
+    if(hit){S.vLong*=0.4;S.vLat*=0.4;}
+    if(carGroup){ carGroup.position.x=S.x; carGroup.position.z=S.z; carGroup.rotation.y=S.heading;
+      carGroup.rotation.x=S.pitch; carGroup.rotation.z=S.roll; }
+    spinRear(dt);
+    var burn=Math.min(1.4,S.slip);
+    if(burn>0.18){ var an=rearAnchors(); var n=Math.round(1+burn*3*pw);
+      for(var w=0;w<an.length;w++){ for(var k=0;k<n;k++) spawnSmoke(an[w][0],0.25,an[w][1],pw);
+        paintMark(an[w][0],an[w][1], 0.2+burn*0.14, Math.min(0.5,0.12+burn*0.38)); } }
+    scoreCombo(dt,burn);
+    camera3rd(dt,hit);
+    var rpm=Math.min(1,S.throttle*(gripLimited?1:0.6)+S.rearSpin*0.5)*(S.boost?1.1:1);
+    updateAudio(rpm,burn);
+    drawHUD();
+  }
+  function camera3rd(dt,hit){
+    if(typeof camera==='undefined')return;
+    if(hit)cam.shake=Math.min(0.5,cam.shake+0.2);
+    if(S.throttle>0.6&&Math.abs(S.vLong)<4)cam.shake=Math.min(0.35,cam.shake+dt*0.4);
+    cam.shake*=(1-Math.min(1,dt*2.5));
+    var speed=Math.abs(S.vLong);
+    var targetFov=45+Math.min(22,speed*1.1)+(S.boost?6:0);
+    cam.fov += (targetFov-cam.fov)*Math.min(1,dt*2); camera.fov=cam.fov; camera.updateProjectionMatrix();
+    var c=Math.cos(S.heading),s=Math.sin(S.heading);
+    if(cam.mode==='hood'){ var hx=S.x+s*0.6, hz=S.z+c*0.6; camera.position.set(hx,1.15,hz); camera.lookAt(S.x+s*12,0.9,S.z+c*12); return; }
+    var back=7.5+speed*0.12, up=3.2;
+    var swing=-S.vLat*0.5;
+    var cx=S.x - s*back + c*swing, cz=S.z - c*back - s*swing;
+    var sh=cam.shake*(Math.random()-0.5);
+    camera.position.x += (cx-camera.position.x)*Math.min(1,dt*3)+sh*0.3;
+    camera.position.y += (up-camera.position.y)*Math.min(1,dt*3)+sh*0.2;
+    camera.position.z += (cz-camera.position.z)*Math.min(1,dt*3);
+    camera.lookAt(S.x,0.7,S.z);
+    if(typeof controls!=='undefined'&&controls)controls.target.set(S.x,0.7,S.z);
+  }
+  function buildHUD(){
+    var vw=document.getElementById('vw')||document.body;
+    hudCanvas=document.createElement('canvas');hudCanvas.width=900;hudCanvas.height=650;
+    hudCanvas.id='drive-hud';hudCanvas.style.cssText='position:absolute;inset:0;z-index:28;pointer-events:none;width:100%;height:100%';
+    vw.appendChild(hudCanvas);hudCtx=hudCanvas.getContext('2d');
+  }
+  function drawHUD(){
+    if(!hudCtx)return; var g=hudCtx, W=900, H=650; g.clearRect(0,0,W,H);
+    var mph=Math.round(Math.abs(S.vLong)*8.5);
+    g.save(); g.translate(W-120,H-110);
+    g.strokeStyle='rgba(242,169,0,0.9)';g.lineWidth=6;g.beginPath();g.arc(0,0,62,Math.PI*0.75,Math.PI*0.75+Math.PI*1.5*Math.min(1,mph/180));g.stroke();
+    g.strokeStyle='rgba(255,255,255,0.15)';g.lineWidth=6;g.beginPath();g.arc(0,0,62,Math.PI*0.75+Math.PI*1.5*Math.min(1,mph/180),Math.PI*0.75+Math.PI*1.5);g.stroke();
+    g.fillStyle='#fff';g.font='bold 40px monospace';g.textAlign='center';g.fillText(mph,0,8);
+    g.fillStyle='rgba(255,255,255,0.6)';g.font='11px monospace';g.fillText('MPH',0,26);
+    var gear = mph<5?'N':mph<25?'1':mph<50?'2':mph<80?'3':mph<120?'4':'5';
+    g.fillStyle='#f2a900';g.font='bold 20px monospace';g.fillText('G'+gear,0,-30);
+    g.restore();
+    var rpm=Math.min(1,S.throttle*0.6+S.rearSpin*0.5+Math.min(1,mph/160)*0.5);
+    g.fillStyle='rgba(0,0,0,0.5)';g.fillRect(W/2-120,H-30,240,12);
+    g.fillStyle=rpm>0.85?'#e8472a':'#f2a900';g.fillRect(W/2-120,H-30,240*rpm,12);
+    if(combo.active>0.4){ g.fillStyle='rgba(242,169,0,0.95)';g.font='bold 30px monospace';g.textAlign='center';
+      g.fillText(combo.kind+'  +'+Math.round(combo.score),W/2,70);
+      g.font='14px monospace';g.fillStyle='rgba(255,255,255,0.7)';g.fillText('x'+(1+Math.floor(combo.active))+'  combo',W/2,92); }
+    if(combo.total>0){ g.fillStyle='rgba(255,255,255,0.85)';g.font='16px monospace';g.textAlign='left';g.fillText('SCORE '+combo.total,20,H-24); }
+    drawMini();
+  }
+  function drawMini(){
+    if(!miniCanvas){ miniCanvas=document.createElement('canvas');miniCanvas.width=miniCanvas.height=130; }
+    var m=miniCanvas.getContext('2d');m.clearRect(0,0,130,130);
+    m.fillStyle='rgba(10,12,16,0.8)';m.fillRect(0,0,130,130);m.strokeStyle='rgba(242,169,0,0.5)';m.strokeRect(0,0,130,130);
+    if(markCanvas){ m.globalAlpha=0.8; m.drawImage(markCanvas,2,2,126,126); m.globalAlpha=1; }
+    var mx=(S.x/WORLD+0.5)*130, my=(S.z/WORLD+0.5)*130;
+    m.fillStyle='#e8472a';m.save();m.translate(mx,my);m.rotate(-S.heading);m.beginPath();m.moveTo(0,-5);m.lineTo(3,4);m.lineTo(-3,4);m.closePath();m.fill();m.restore();
+    hudCtx.drawImage(miniCanvas,16,56);
+    hudCtx.fillStyle='rgba(255,255,255,0.55)';hudCtx.font='10px monospace';hudCtx.textAlign='left';hudCtx.fillText('MAP',16,52);
+  }
+  function pollGamepad(){ if(!navigator.getGamepads)return; var gps=navigator.getGamepads();var g=null;
+    for(var i=0;i<gps.length;i++){if(gps[i]){g=gps[i];break;}} if(!g)return;
+    var ax0=g.axes[0]||0; if(Math.abs(ax0)>0.15){keys.left=ax0<0?1:0;keys.right=ax0>0?1:0;}else{if(!(keys._kbLeft||keys._kbRight))keys.left=keys.right=0;}
+    if(g.buttons[7]&&g.buttons[7].value>0.2)keys.up=1; else if(!keys._kbUp)keys.up=0;
+    if(g.buttons[6]&&g.buttons[6].value>0.2)keys.down=1; else if(!keys._kbDown)keys.down=0;
+    keys.space=(g.buttons[0]&&g.buttons[0].pressed)?1:(keys._kbSpace?1:0);
+  }
+  window.DRIVE_update=function(){ if(!driveActive)return;
+    var now=performance.now();var dt=Math.min(0.05,(now-lastT)/1000)||0.016;lastT=now;
+    physics(dt);updateSmoke(dt); };
+  function enterDrive(){ if(driveActive)return; if(!built){buildArena();makeMarks();smokeTex=smokeTexture();
+    smokeGroup=new THREE.Group();smokeGroup.name='driveSmoke';scene.add(smokeGroup);
+    var markMat=new THREE.MeshBasicMaterial({map:markTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4});
+    markMesh=new THREE.Mesh(new THREE.PlaneGeometry(WORLD,WORLD),markMat);markMesh.rotation.x=-Math.PI/2;markMesh.position.y=0.012;scene.add(markMesh);
+    buildHUD(); built=true; }
+    driveActive=true;lastT=performance.now();
+    S.x=0;S.z=0;S.heading=0;S.vLong=0;S.vLat=0;S.steer=0;S.throttle=0;S.rearSpin=0;S.pitch=0;S.roll=0;
+    combo.total=0;combo.score=0;combo.active=0;
+    arena.visible=true;markMesh.visible=true;clearMarks();
+    scene.traverse(function(o){if(o.isMesh&&o.geometry&&o.geometry.type==='CircleGeometry'){o.userData._wv=o.visible;o.visible=false;}});
+    if(typeof controls!=='undefined'&&controls)controls.enabled=false;
+    try{muted=(localStorage.getItem('bb_drive_muted')==='1');}catch(e){muted=false;}
+    cam.fov=45;cam.mode='chase';
+    if(hudCanvas)hudCanvas.style.display='block';
+    showUI(true);document.getElementById('driveBtn')&&document.getElementById('driveBtn').classList.add('on');
+  }
+  function exitDrive(){ if(!driveActive)return;driveActive=false;
+    arena.visible=false;markMesh.visible=false;
+    scene.traverse(function(o){if(o.isMesh&&o.geometry&&o.geometry.type==='CircleGeometry'&&o.userData._wv!==undefined)o.visible=o.userData._wv;});
+    for(var i=smoke.length-1;i>=0;i--){smokeGroup.remove(smoke[i]);smoke[i].material.dispose();}smoke.length=0;
+    if(carGroup){carGroup.position.x=0;carGroup.position.z=0;carGroup.rotation.set(0,0,0);}
+    S.x=0;S.z=0;S.heading=0;
+    if(typeof camera!=='undefined'){camera.fov=45;camera.updateProjectionMatrix();}
+    if(typeof controls!=='undefined'&&controls){controls.enabled=true;controls.target.set(0,0.6,0);}
+    if(audio){try{audio.eg.gain.setTargetAtTime(0,audio.ctx.currentTime,0.1);audio.sg.gain.setTargetAtTime(0,audio.ctx.currentTime,0.1);}catch(e){}}
+    if(hudCanvas)hudCanvas.style.display='none';
+    showUI(false);document.getElementById('driveBtn')&&document.getElementById('driveBtn').classList.remove('on');
+    if(typeof updateCamera==='function'){try{updateCamera();}catch(e){}}
+  }
+  window.toggleDrive=function(){ driveActive?exitDrive():enterDrive(); };
+  function kd(e){var k=e.key.toLowerCase();
+    if(k==='arrowup'||k==='w'){keys.up=1;keys._kbUp=1;} else if(k==='arrowdown'||k==='s'){keys.down=1;keys._kbDown=1;}
+    else if(k==='arrowleft'||k==='a'){keys.left=1;keys._kbLeft=1;} else if(k==='arrowright'||k==='d'){keys.right=1;keys._kbRight=1;}
+    else if(k===' '){keys.space=1;keys._kbSpace=1;if(driveActive)e.preventDefault();}
+    else if(k==='shift')keys.shift=1;
+    else if(k==='r'&&driveActive){S.x=0;S.z=0;S.heading=0;S.vLong=0;S.vLat=0;S.pitch=0;S.roll=0;}
+    else if(k==='c'&&driveActive){cam.mode=cam.mode==='chase'?'hood':'chase';}
+    else if(k==='m'&&driveActive){window.DRIVE_toggleMute();}
+    if(driveActive){initAudio();if(audio&&audio.ctx.state==='suspended')audio.ctx.resume();}
+  }
+  function ku(e){var k=e.key.toLowerCase();
+    if(k==='arrowup'||k==='w'){keys.up=0;keys._kbUp=0;} else if(k==='arrowdown'||k==='s'){keys.down=0;keys._kbDown=0;}
+    else if(k==='arrowleft'||k==='a'){keys.left=0;keys._kbLeft=0;} else if(k==='arrowright'||k==='d'){keys.right=0;keys._kbRight=0;}
+    else if(k===' '){keys.space=0;keys._kbSpace=0;} else if(k==='shift')keys.shift=0;
+  }
+  window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);
+  function showUI(on){ var ui=document.getElementById('drive-ui');
+    if(on&&!ui){ ui=document.createElement('div');ui.id='drive-ui';
+      ui.style.cssText='position:absolute;left:0;right:0;bottom:0;top:0;z-index:30;pointer-events:none;font-family:var(--fm),monospace';
+      ui.innerHTML=''+
+      '<div style="position:absolute;bottom:14px;left:14px;display:flex;gap:10px;pointer-events:auto">'+b('d-left','&#9664;')+b('d-right','&#9654;')+'</div>'+
+      '<div style="position:absolute;bottom:14px;right:14px;display:flex;gap:10px;pointer-events:auto">'+b('d-brake','BURN')+b('d-gas','GAS')+'</div>'+
+      '<div style="position:absolute;top:60px;right:14px;display:flex;flex-direction:column;gap:7px;pointer-events:auto">'+
+        ctl('drive-mute','DRIVE_toggleMute()','SOUND')+ctl('drive-clear','DRIVE_clearMarks()','CLEAR MARKS')+ctl('drive-cam','DRIVE_cam()','CAMERA')+
+        '<button onclick="toggleDrive()" style="font-family:var(--fm);font-size:.6rem;letter-spacing:.07em;background:rgba(232,71,42,.15);border:1px solid var(--red);color:var(--red);padding:7px 10px;border-radius:4px;cursor:pointer">EXIT</button>'+
+      '</div>'+
+      '<div style="position:absolute;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(10,10,12,.8);border:1px solid var(--border);border-radius:4px;padding:6px 10px;color:var(--dim2);font-size:.56rem;line-height:1.5;max-width:320px;text-align:center;pointer-events:none">WASD / arrows drive. Space = burnout/handbrake. Shift = boost (Demon). R reset. C camera. M mute.</div>';
+      (document.getElementById('vw')||document.body).appendChild(ui);
+      hold('d-gas',function(v){keys.up=v;keys._kbUp=v;},true);hold('d-brake',function(v){keys.space=v;keys._kbSpace=v;},true);
+      hold('d-left',function(v){keys.left=v;keys._kbLeft=v;});hold('d-right',function(v){keys.right=v;keys._kbRight=v;});
+      setMuted(muted);
+    } else if(!on&&ui)ui.remove();
+  }
+  function b(id,l){return '<button id="'+id+'" style="font-family:var(--fh);font-size:.78rem;font-weight:700;width:64px;height:52px;background:rgba(10,10,12,.9);border:1px solid var(--border);color:#fff;border-radius:8px;cursor:pointer;touch-action:none;user-select:none">'+l+'</button>';}
+  function ctl(id,fn,l){return '<button id="'+id+'" onclick="'+fn+'" style="font-family:var(--fm);font-size:.6rem;letter-spacing:.07em;background:rgba(10,10,12,.9);border:1px solid var(--border);color:var(--dim);padding:7px 10px;border-radius:4px;cursor:pointer">'+l+'</button>';}
+  function hold(id,fn,aud){var el=document.getElementById(id);if(!el)return;
+    var on=function(e){e.preventDefault();fn(1);if(aud){initAudio();if(audio&&audio.ctx.state==='suspended')audio.ctx.resume();}};
+    var off=function(e){e.preventDefault();fn(0);};
+    el.addEventListener('touchstart',on,{passive:false});el.addEventListener('touchend',off);el.addEventListener('touchcancel',off);
+    el.addEventListener('mousedown',on);el.addEventListener('mouseup',off);el.addEventListener('mouseleave',off);
+  }
+  window.DRIVE_cam=function(){ cam.mode=cam.mode==='chase'?'hood':'chase'; };
+  function addButton(){ if(document.getElementById('driveBtn'))return;var drag=document.getElementById('dragBtn');if(!drag)return;
+    var btn=document.createElement('button');btn.className='tb';btn.id='driveBtn';btn.textContent='DRIVE TEST';btn.setAttribute('onclick','toggleDrive()');
+    drag.parentNode.insertBefore(btn,drag.nextSibling); }
+  if(document.readyState!=='loading')setTimeout(addButton,200);else document.addEventListener('DOMContentLoaded',function(){setTimeout(addButton,200);});
+  // Driven by the app's animate() loop (hooked in HTML). Fallback self-loop only if that hook is absent:
+  window.__DRIVE_HOOKED=window.__DRIVE_HOOKED||false;
+  (function loop(){ requestAnimationFrame(loop); if(!window.__DRIVE_HOOKED && driveActive && window.DRIVE_update) window.DRIVE_update(); })();
+})();
+
+/* ===== mod11b cameras ===== */
+/* ===== v11b: Drive Test camera suite + handling (owns ALL camera modes; layers on mod11) ===== */
+(function(){
+  if(typeof THREE==='undefined') return;
+  if(typeof window.DRIVE_update!=='function') return;
+
+  var MODES=['chase','far','bumper','hood','trackside','flyby','cockpit'];
+  var LABEL={chase:'CHASE',far:'FAR CHASE',bumper:'BUMPER',hood:'HOOD',trackside:'TRACKSIDE',flyby:'TV FLYBY',cockpit:'COCKPIT'};
+  var modeIdx=0;
+  var head={yaw:0,pitch:0,drag:false,lx:0,ly:0};
+  var cockpitOn=false, hiddenForCockpit=[];
+  var fov={cur:45};
+  var trackAnchor=null, flyT=0;
+  var lastPos=new THREE.Vector3();
+
+  function carPose(){ if(typeof carGroup==='undefined'||!carGroup) return null; return {x:carGroup.position.x,z:carGroup.position.z,h:carGroup.rotation.y}; }
+  function speedGuess(){ // derive from frame-to-frame car movement
+    var p=carPose(); if(!p) return 0; var dx=p.x-lastPos.x, dz=p.z-lastPos.z; lastPos.set(p.x,0,p.z); return Math.sqrt(dx*dx+dz*dz)*60; }
+
+  function toast(txt){ var t=document.getElementById('drive-cam-toast');
+    if(!t){ t=document.createElement('div'); t.id='drive-cam-toast';
+      t.style.cssText='position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:33;background:rgba(10,10,12,.85);border:1px solid var(--amber,#F2A900);color:var(--amber,#F2A900);font-family:var(--fm),monospace;font-size:.62rem;letter-spacing:.14em;padding:5px 14px;border-radius:4px;pointer-events:none;transition:opacity .4s';
+      (document.getElementById('vw')||document.body).appendChild(t); }
+    t.textContent='CAM: '+txt; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){t.style.opacity='0';},1400);
+  }
+  function enterCockpit(){ if(cockpitOn) return; cockpitOn=true; hiddenForCockpit=[];
+    if(typeof carGroup==='undefined'||!carGroup) return;
+    carGroup.traverse(function(o){ if(o.isMesh&&(o.name==='body'||o.name==='windshield')&&o.visible){ hiddenForCockpit.push(o); o.visible=false; } });
+  }
+  function exitCockpit(){ if(!cockpitOn) return; cockpitOn=false; for(var i=0;i<hiddenForCockpit.length;i++) hiddenForCockpit[i].visible=true; hiddenForCockpit=[]; }
+  function setMode(i){ modeIdx=(i+MODES.length)%MODES.length; var m=MODES[modeIdx];
+    if(m==='cockpit') enterCockpit(); else exitCockpit();
+    if(m==='trackside'){ trackAnchor=null; } if(m==='flyby'){ flyT=0; }
+    head.yaw=0; head.pitch=0; toast(LABEL[m]); }
+  window.DRIVE_cam=function(){ setMode(modeIdx+1); };
+  window.DRIVE_setCam=function(name){ var k=MODES.indexOf(name); if(k>=0) setMode(k); };
+  window.DRIVE_camMode=function(){ return MODES[modeIdx]; };
+
+  function smoothFov(target){ fov.cur += (target-fov.cur)*0.15; if(typeof camera!=='undefined'&&camera){ camera.fov=fov.cur; camera.updateProjectionMatrix(); } }
+
+  function applyCam(){
+    if(typeof camera==='undefined'||!camera) return;
+    var p=carPose(); if(!p) return;
+    var m=MODES[modeIdx];
+    var c=Math.cos(p.h), s=Math.sin(p.h);
+    var sp=speedGuess();
+    function look(tx,ty,tz){ camera.lookAt(tx,ty,tz); if(typeof controls!=='undefined'&&controls)controls.target.set(tx,ty,tz); }
+    if(m==='chase'){ smoothFov(45+Math.min(22,sp*1.1));
+      var bk=7.5+sp*0.12, up=3.2;
+      var tx=p.x - s*bk, tz=p.z - c*bk;
+      camera.position.x+=(tx-camera.position.x)*0.18; camera.position.y+=(up-camera.position.y)*0.18; camera.position.z+=(tz-camera.position.z)*0.18;
+      look(p.x,0.7,p.z); return; }
+    if(m==='far'){ smoothFov(50); var bk=14,up=6;
+      var tx=p.x-s*bk, tz=p.z-c*bk;
+      camera.position.x+=(tx-camera.position.x)*0.1; camera.position.y+=(up-camera.position.y)*0.1; camera.position.z+=(tz-camera.position.z)*0.1;
+      look(p.x,0.8,p.z); return; }
+    if(m==='bumper'){ smoothFov(64); camera.position.set(p.x+s*2.5,0.42,p.z+c*2.5); look(p.x+s*16,0.5,p.z+c*16); return; }
+    if(m==='hood'){ smoothFov(58); camera.position.set(p.x+s*0.7,1.12,p.z+c*0.7); look(p.x+s*14,0.95,p.z+c*14); return; }
+    if(m==='trackside'){ smoothFov(36);
+      if(!trackAnchor) trackAnchor={x:p.x - s*16 + c*10, z:p.z - c*16 - s*10};
+      var dx=p.x-trackAnchor.x, dz=p.z-trackAnchor.z; if(Math.sqrt(dx*dx+dz*dz)>46) trackAnchor={x:p.x - s*16 + c*10, z:p.z - c*16 - s*10};
+      camera.position.set(trackAnchor.x,4.2,trackAnchor.z); look(p.x,0.7,p.z); return; }
+    if(m==='flyby'){ smoothFov(34); flyT+=0.016; var r=20, ang=flyT*0.7;
+      camera.position.set(p.x+Math.cos(ang)*r, 3+Math.sin(flyT*0.5)*2.2, p.z+Math.sin(ang)*r); look(p.x,0.8,p.z); return; }
+    if(m==='cockpit'){ smoothFov(72);
+      var ex=p.x + s*(-0.15) + c*(-0.33), ez=p.z + c*(-0.15) - s*(-0.33);
+      camera.position.set(ex,1.18,ez);
+      var fh=p.h+head.yaw, fc=Math.cos(fh), fsn=Math.sin(fh), ty=1.12+head.pitch;
+      look(ex+fsn*8, ty, ez+fc*8); return; }
+  }
+  var baseUpdate=window.DRIVE_update;
+  window.DRIVE_update=function(){ baseUpdate(); try{ applyCam(); }catch(e){} };
+  // when drive exits we must un-hide cockpit panels no matter which mode was active
+  var baseToggle=window.toggleDrive;
+  window.toggleDrive=function(){ var wasActive=!!document.getElementById('drive-ui'); baseToggle();
+    if(wasActive){ exitCockpit(); modeIdx=0; fov.cur=45; } else { fov.cur=45; modeIdx=0; } };
+
+  function bindHeadLook(){ var vw=document.getElementById('vw')||document.body;
+    function down(x,y){ if(MODES[modeIdx]!=='cockpit')return; head.drag=true; head.lx=x; head.ly=y; }
+    function move(x,y){ if(!head.drag||MODES[modeIdx]!=='cockpit')return;
+      head.yaw+=(x-head.lx)*-0.005; head.pitch+=(y-head.ly)*-0.004;
+      head.yaw=Math.max(-1.2,Math.min(1.2,head.yaw)); head.pitch=Math.max(-0.5,Math.min(0.6,head.pitch)); head.lx=x; head.ly=y; }
+    function up(){ head.drag=false; }
+    vw.addEventListener('mousedown',function(e){down(e.clientX,e.clientY);});
+    window.addEventListener('mousemove',function(e){move(e.clientX,e.clientY);});
+    window.addEventListener('mouseup',up);
+    vw.addEventListener('touchstart',function(e){if(e.touches[0])down(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    window.addEventListener('touchmove',function(e){if(e.touches[0])move(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    window.addEventListener('touchend',up);
+  }
+  if(document.readyState!=='loading') bindHeadLook(); else document.addEventListener('DOMContentLoaded',bindHeadLook);
 })();
 
 </script>
