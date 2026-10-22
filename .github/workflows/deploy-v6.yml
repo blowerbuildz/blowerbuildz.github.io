@@ -16,7 +16,7 @@ jobs:
 
       - name: Download updated HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_f39e60dd5abe40e8a2e657bcc7124ccf.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_26ecfe03b7e645ba8bc8a20a60f586fc.txt"
           echo "Downloaded $(wc -c < index.html) bytes of index.html"
 
       - name: Download car models
@@ -37,5 +37,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html models/challenger_opt.glb models/charger_opt.glb models/c300_opt.glb models/trackhawk_opt.glb
           git diff --staged --stat
-          git commit -m "BlowerBuildz v10 Stage 2: GTA Drive Test with 7 camera views and cockpit, real Trackhawk model, tuned handling" || echo "Nothing to commit"
+          git commit -m "BlowerBuildz v10 Stage 3: racing-game drag race (staging tree, 3D opponent, timeslip, replay)" || echo "Nothing to commit"
           git push
