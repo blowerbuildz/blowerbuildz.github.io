@@ -4311,7 +4311,7 @@ function R_extras(B){
     var accel=(keys.up?1:0)-(keys.down?1:0);
     var steerIn=(keys.left?1:0)-(keys.right?1:0);
     S.handbrake=!!keys.space; S.boost=!!keys.shift && isDemonLike();
-    S.steer += (steerIn - S.steer)*Math.min(1,dt*7);
+    S.steer += (steerIn - S.steer)*Math.min(1,dt*7); window.__driveSteer=S.steer;
     S.throttle += (accel - S.throttle)*Math.min(1,dt*6);
     var boost=S.boost?1.35:1;
     var gripLimited = S.handbrake || Math.abs(S.vLong)<2.4;
@@ -4427,7 +4427,7 @@ function R_extras(B){
     S.x=0;S.z=0;S.heading=0;S.vLong=0;S.vLat=0;S.steer=0;S.throttle=0;S.rearSpin=0;S.pitch=0;S.roll=0;
     combo.total=0;combo.score=0;combo.active=0;
     arena.visible=true;markMesh.visible=true;clearMarks();
-    scene.traverse(function(o){if(o.isMesh&&o.geometry&&o.geometry.type==='CircleGeometry'){o.userData._wv=o.visible;o.visible=false;}});
+    scene.traverse(function(o){if(o.isMesh&&((o.geometry&&o.geometry.type==='CircleGeometry')||o.name==='contactshadow')){o.userData._wv=o.visible;o.visible=false;}});
     if(typeof controls!=='undefined'&&controls)controls.enabled=false;
     try{muted=(localStorage.getItem('bb_drive_muted')==='1');}catch(e){muted=false;}
     cam.fov=45;cam.mode='chase';
@@ -4436,7 +4436,7 @@ function R_extras(B){
   }
   function exitDrive(){ if(!driveActive)return;driveActive=false;
     arena.visible=false;markMesh.visible=false;
-    scene.traverse(function(o){if(o.isMesh&&o.geometry&&o.geometry.type==='CircleGeometry'&&o.userData._wv!==undefined)o.visible=o.userData._wv;});
+    scene.traverse(function(o){if(o.isMesh&&((o.geometry&&o.geometry.type==='CircleGeometry')||o.name==='contactshadow')&&o.userData._wv!==undefined)o.visible=o.userData._wv;});
     for(var i=smoke.length-1;i>=0;i--){smokeGroup.remove(smoke[i]);smoke[i].material.dispose();}smoke.length=0;
     if(carGroup){carGroup.position.x=0;carGroup.position.z=0;carGroup.rotation.set(0,0,0);}
     S.x=0;S.z=0;S.heading=0;
@@ -4524,11 +4524,18 @@ function R_extras(B){
       (document.getElementById('vw')||document.body).appendChild(t); }
     t.textContent='CAM: '+txt; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){t.style.opacity='0';},1400);
   }
-  function enterCockpit(){ if(cockpitOn) return; cockpitOn=true; hiddenForCockpit=[];
-    if(typeof carGroup==='undefined'||!carGroup) return;
-    carGroup.traverse(function(o){ if(o.isMesh&&(o.name==='body'||o.name==='windshield')&&o.visible){ hiddenForCockpit.push(o); o.visible=false; } });
+  var steerWheel=null;
+  function buildSteerWheel(){ if(steerWheel||typeof carGroup==='undefined'||!carGroup) return;
+    steerWheel=new THREE.Group(); steerWheel.name='cockpitWheel';
+    var rimMat=new THREE.MeshStandardMaterial({color:0x111214,roughness:0.5,metalness:0.3});
+    var rim=new THREE.Mesh(new THREE.TorusGeometry(0.19,0.025,10,32),rimMat); steerWheel.add(rim);
+    var hub=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16),new THREE.MeshStandardMaterial({color:0x1a1a1d,roughness:0.6}));hub.rotation.x=Math.PI/2;steerWheel.add(hub);
+    [[0,-1],[-0.85,0.5],[0.85,0.5]].forEach(function(s){var sp=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.17,0.02),rimMat);sp.position.set(s[0]*0.12,s[1]*0.09,0);sp.rotation.z=Math.atan2(s[1],s[0])+Math.PI/2;steerWheel.add(sp);});
+    var badge=new THREE.Mesh(new THREE.CircleGeometry(0.035,16),new THREE.MeshBasicMaterial({color:0xE8472A}));badge.position.z=0.021;steerWheel.add(badge);
+    steerWheel.visible=false; carGroup.add(steerWheel);
   }
-  function exitCockpit(){ if(!cockpitOn) return; cockpitOn=false; for(var i=0;i<hiddenForCockpit.length;i++) hiddenForCockpit[i].visible=true; hiddenForCockpit=[]; }
+  function enterCockpit(){ if(cockpitOn) return; cockpitOn=true; buildSteerWheel(); if(steerWheel)steerWheel.visible=true; }
+  function exitCockpit(){ if(!cockpitOn) return; cockpitOn=false; if(steerWheel)steerWheel.visible=false; }
   function setMode(i){ modeIdx=(i+MODES.length)%MODES.length; var m=MODES[modeIdx];
     if(m==='cockpit') enterCockpit(); else exitCockpit();
     if(m==='trackside'){ trackAnchor=null; } if(m==='flyby'){ flyT=0; }
@@ -4537,6 +4544,7 @@ function R_extras(B){
   window.DRIVE_setCam=function(name){ var k=MODES.indexOf(name); if(k>=0) setMode(k); };
   window.DRIVE_camMode=function(){ return MODES[modeIdx]; };
 
+  function carBaseY_cp(){ return 0; }
   function smoothFov(target){ fov.cur += (target-fov.cur)*0.15; if(typeof camera!=='undefined'&&camera){ camera.fov=fov.cur; camera.updateProjectionMatrix(); } }
 
   function applyCam(){
@@ -4563,11 +4571,19 @@ function R_extras(B){
       camera.position.set(trackAnchor.x,4.2,trackAnchor.z); look(p.x,0.7,p.z); return; }
     if(m==='flyby'){ smoothFov(34); flyT+=0.016; var r=20, ang=flyT*0.7;
       camera.position.set(p.x+Math.cos(ang)*r, 3+Math.sin(flyT*0.5)*2.2, p.z+Math.sin(ang)*r); look(p.x,0.8,p.z); return; }
-    if(m==='cockpit'){ smoothFov(72);
-      var ex=p.x + s*(-0.15) + c*(-0.33), ez=p.z + c*(-0.15) - s*(-0.33);
-      camera.position.set(ex,1.18,ez);
-      var fh=p.h+head.yaw, fc=Math.cos(fh), fsn=Math.sin(fh), ty=1.12+head.pitch;
-      look(ex+fsn*8, ty, ez+fc*8); return; }
+    if(m==='cockpit'){ smoothFov(70);
+      // driver eyepoint: slightly left of centre, seat height, behind the dash plane. Shell stays visible; we look out through the windshield.
+      var ex=p.x + c*(-0.38) + s*(0.0), ez=p.z - s*(-0.38) + c*(0.0);
+      var eyeY=1.28;
+      camera.position.set(ex,eyeY,ez);
+      var fh=p.h+head.yaw, fc=Math.cos(fh), fsn=Math.sin(fh), ty=eyeY-0.18+head.pitch;
+      look(ex+fsn*12, ty, ez+fc*12);
+      // place + turn the steering wheel in front of the eyepoint
+      if(steerWheel){ var wx=p.x + s*0.42 + c*(-0.30), wz=p.z + c*0.42 - s*(-0.30);
+        steerWheel.position.set(s*0.42 + c*(-0.30), 0.92-carBaseY_cp(), c*0.42 - s*(-0.30));
+        steerWheel.rotation.set(-1.08, 0, (typeof window.__driveSteer==='number'?window.__driveSteer:0)*1.4);
+        steerWheel.rotation.y = p.h; }
+      return; }
   }
   var baseUpdate=window.DRIVE_update;
   window.DRIVE_update=function(){ baseUpdate(); try{ applyCam(); }catch(e){} };
@@ -4627,8 +4643,8 @@ function R_extras(B){
     strip=new THREE.Group();strip.name='dragStrip';
     var gmat=new THREE.MeshStandardMaterial({map:stripTex(),roughness:0.9,metalness:0});
     var ground=new THREE.Mesh(new THREE.PlaneGeometry(16,STRIP_LEN+60),gmat);ground.rotation.x=-Math.PI/2;ground.position.z=STRIP_LEN/2-20;ground.receiveShadow=true;strip.add(ground);
-    var grass=new THREE.Mesh(new THREE.PlaneGeometry(220,STRIP_LEN+120),new THREE.MeshStandardMaterial({color:0x1d2a18,roughness:1}));grass.rotation.x=-Math.PI/2;grass.position.y=-0.02;grass.position.z=STRIP_LEN/2-20;strip.add(grass);
-    var sl=new THREE.Mesh(new THREE.PlaneGeometry(16,1.2),new THREE.MeshBasicMaterial({color:0xffffff}));sl.rotation.x=-Math.PI/2;sl.position.set(0,0.01,0);strip.add(sl);
+    var grass=new THREE.Mesh(new THREE.PlaneGeometry(220,STRIP_LEN+120),new THREE.MeshStandardMaterial({color:0x1d2a18,roughness:1}));grass.rotation.x=-Math.PI/2;grass.position.y=-0.08;grass.position.z=STRIP_LEN/2-20;strip.add(grass);
+    var sl=new THREE.Mesh(new THREE.PlaneGeometry(16,1.2),new THREE.MeshBasicMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));sl.rotation.x=-Math.PI/2;sl.position.set(0,0.03,0);strip.add(sl);
     [[18.3,'60'],[201,'1/8'],[402,'1/4']].forEach(function(m){
       var post=new THREE.Mesh(new THREE.BoxGeometry(0.2,3,0.2),new THREE.MeshStandardMaterial({color:0x222222}));post.position.set(9,1.5,m[0]);strip.add(post);
       var bc=document.createElement('canvas');bc.width=128;bc.height=64;var bg=bc.getContext('2d');bg.fillStyle='#0a0a0c';bg.fillRect(0,0,128,64);bg.fillStyle='#F2A900';bg.font='bold 34px monospace';bg.textAlign='center';bg.fillText(m[1],64,44);
@@ -4636,7 +4652,7 @@ function R_extras(B){
     var gm=new THREE.MeshStandardMaterial({color:0x15161a,roughness:0.6,metalness:0.3});
     [-7,7].forEach(function(x){var p=new THREE.Mesh(new THREE.BoxGeometry(0.4,7,0.4),gm);p.position.set(x,3.5,402);strip.add(p);});
     var top=new THREE.Mesh(new THREE.BoxGeometry(15,0.7,0.6),gm);top.position.set(0,7,402);strip.add(top);
-    var fin=new THREE.Mesh(new THREE.PlaneGeometry(16,1.2),new THREE.MeshBasicMaterial({color:0xffffff}));fin.rotation.x=-Math.PI/2;fin.position.set(0,0.02,402);strip.add(fin);
+    var fin=new THREE.Mesh(new THREE.PlaneGeometry(16,1.2),new THREE.MeshBasicMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));fin.rotation.x=-Math.PI/2;fin.position.set(0,0.03,402);strip.add(fin);
     var standMat=new THREE.MeshStandardMaterial({color:0x26282e,roughness:0.9});
     [-70,70].forEach(function(x){var st=new THREE.Mesh(new THREE.BoxGeometry(10,8,260),standMat);st.position.set(x,4,180);strip.add(st);});
     var sky=new THREE.Mesh(new THREE.SphereGeometry(600,24,16),new THREE.MeshBasicMaterial({color:0x0a0e1a,side:THREE.BackSide}));strip.add(sky);
@@ -4677,8 +4693,9 @@ function R_extras(B){
     strip.visible=true; allTreeOff();
     if(typeof controls!=='undefined'&&controls)controls.enabled=false;
     var ar=scene.getObjectByName('driveArena'); if(ar)ar.visible=false;
+    scene.traverse(function(o){if(o.isMesh&&((o.geometry&&o.geometry.type==='CircleGeometry')||o.name==='contactshadow')){o.userData._dwv=o.visible;o.visible=false;}});
     if(hud)hud.style.display='block';
-    if(window.DRIVE_setCam)window.DRIVE_setCam('trackside');
+    if(window.DRIVE_setCam)window.DRIVE_setCam('far');
     showUI(true);
     litTree('prestage',true); setTimeout(function(){litTree('stage',true);},700);
     phase='tree'; setTimeout(runTree,1600);
@@ -4692,6 +4709,13 @@ function R_extras(B){
   window.DRIVE_dragLaunch=launch;
 
   function step(dt){
+    // staging camera: sit back and offset so BOTH lanes (player + opponent) are framed before launch
+    if((phase==='staging'||phase==='tree')&&typeof camera!=='undefined'&&camera){
+      camera.fov=55; camera.updateProjectionMatrix();
+      camera.position.set(0, 5.2, -16);
+      camera.lookAt(0, 0.6, 30);
+      if(typeof controls!=='undefined'&&controls)controls.target.set(0,0.6,30);
+    }
     if(phase==='launched'){
       var tGreen=(performance.now()-greenAt)/1000;
       if(P.launched&&!P.done){
@@ -4757,7 +4781,7 @@ function R_extras(B){
     P={z:0,v:0,gear:1,rpm:0,launched:false,t60:0,t18:0,t14:0,trap:0,done:false,wheelspin:0};
     var opp=oppPick(); O={z:0,v:0,et:opp.qtm,trap:opp.trap,done:false,react:0.15+Math.random()*0.25};
     reaction=0; placePlayer(); if(oppCar)oppCar.position.set(LANE,0,0); allTreeOff();
-    if(window.DRIVE_setCam)window.DRIVE_setCam('trackside');
+    if(window.DRIVE_setCam)window.DRIVE_setCam('far');
     litTree('prestage',true); setTimeout(function(){litTree('stage',true);},500); phase='tree'; setTimeout(runTree,1200); };
   window.DRIVE_dragReplay=function(){ clearSlip(); if(replaying)return; replaying=true;
     if(window.DRIVE_setCam)window.DRIVE_setCam('flyby'); var fz=P.z||402; var t0=performance.now();
@@ -4769,6 +4793,7 @@ function R_extras(B){
   window.DRIVE_dragExit=function(){ exit(); };
   function exit(){ if(!active)return; active=false; phase='idle'; clearSlip();
     strip.visible=false; if(hud)hud.style.display='none'; showUI(false);
+    scene.traverse(function(o){if(o.isMesh&&o.geometry&&o.geometry.type==='CircleGeometry'&&o.userData._dwv!==undefined)o.visible=o.userData._dwv;});
     if(typeof carGroup!=='undefined'&&carGroup){ carGroup.position.set(0,carBaseY,0); carGroup.rotation.set(0,0,0); }
     if(typeof controls!=='undefined'&&controls){controls.enabled=true;controls.target.set(0,0.6,0);}
     if(window.DRIVE_setCam)window.DRIVE_setCam('chase');
