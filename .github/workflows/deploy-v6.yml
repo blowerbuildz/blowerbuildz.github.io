@@ -16,7 +16,7 @@ jobs:
 
       - name: Download updated HTML
         run: |
-          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_7765c4df541e44b9aa0d94cbc43436bf.txt"
+          curl -L -o index.html "https://d08bcfa2-88b9-4967-9ea4-43335e3750eb.usrfiles.com/ugd/345002_a6da76cb5b0d47ef85995399a52ca886.txt"
           echo "Downloaded $(wc -c < index.html) bytes of index.html"
 
       - name: Download car models
@@ -37,5 +37,5 @@ jobs:
           git config user.name "BlowerBuildz Deploy"
           git add index.html models/challenger_opt.glb models/charger_opt.glb models/c300_opt.glb models/trackhawk_opt.glb
           git diff --staged --stat
-          git commit -m "BlowerBuildz v15: glossy clearcoat paint reflections + lit head and tail lights (brighter at night, dark in X-Ray)" || echo "Nothing to commit"
+          git commit -m "BlowerBuildz v16: visible red tail halo on the Charger (combined-mesh case), on top of v15 glossy paint + lit lights" || echo "Nothing to commit"
           git push
