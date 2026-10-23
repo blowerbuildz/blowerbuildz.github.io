@@ -4879,6 +4879,213 @@ function R_extras(B){
   window.addEventListener('keydown',function(e){ if(active){ var k=e.key.toLowerCase(); if(k===' '||k==='w'||k==='arrowup')launch(); if(k==='c'&&window.DRIVE_cam)window.DRIVE_cam(); if(k==='r'&&typeof DRIVE_dragAgain==='function')DRIVE_dragAgain(); } });
 })();
 
+
+/* mod15 paint+lights polish */
+/* ================= mod15: glossy paint + lit head/tail lights ================= */
+/* Narrow polish pass. Two things only:
+   1) PAINT: stronger studio reflections so the existing clearcoat shows sharp
+      highlights (brighter softboxes in the PMREM env). Colour/finish/X-Ray/
+      widebody/height all keep flowing through shared R_PAINT, untouched.
+   2) LIGHTS: GLB head + tail light meshes lit emissively with a subtle glow,
+      brighter at Night, no stray glow when the lights are off in X-Ray.
+   Guard on typeof THREE only (carGroup/scene are lets assigned in init). */
+(function(){
+  if(typeof THREE==='undefined') return;
+
+  /* ---------------- 1. PAINT: brighter studio environment ---------------- */
+  /* Rebuild the reflection probe with stronger softboxes so the clearcoat has
+     something crisp to mirror. Wraps R_makeEnv; re-asserts scene.environment. */
+  if(typeof R_makeEnv==='function' && !window.__BB_ENV_PATCHED){
+    window.__BB_ENV_PATCHED=true;
+    var _origMakeEnv=R_makeEnv;
+    R_makeEnv=function(rend){
+      try{
+        var pm=new THREE.PMREMGenerator(rend);
+        var es=new THREE.Scene();
+        var gc=document.createElement('canvas');gc.width=16;gc.height=256;
+        var g=gc.getContext('2d');
+        var gr=g.createLinearGradient(0,0,0,256);
+        // brighter sky band -> stronger top-down sheen
+        gr.addColorStop(0,'#cdd7e6');gr.addColorStop(0.38,'#828d9d');gr.addColorStop(0.5,'#434951');
+        gr.addColorStop(0.52,'#1d1f24');gr.addColorStop(1,'#070809');
+        g.fillStyle=gr;g.fillRect(0,0,16,256);
+        var gt=new THREE.CanvasTexture(gc);gt.encoding=THREE.sRGBEncoding;
+        es.add(new THREE.Mesh(new THREE.SphereGeometry(60,32,24),new THREE.MeshBasicMaterial({map:gt,side:THREE.BackSide})));
+        function box(w,h,x,y,z,I,tint){
+          var m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));
+          m.material.color.setRGB(I*(tint?tint[0]:1),I*(tint?tint[1]:1),I*(tint?tint[2]:1));
+          m.position.set(x,y,z);m.lookAt(0,1,0);es.add(m);return m;}
+        // brighter + a couple more highlight sources than the original 7
+        box(14,20,0,22,0,22.0);              // tighter brighter overhead softbox -> crisp highlight edge
+        box(7,30,-20,9,0,11.0);              // side strip L -> long flank highlight (was 6.5)
+        box(7,30,20,9,0,11.0);               // side strip R
+        box(22,6,0,5,-26,7.0,[1,0.93,0.84]); // warm rear strip
+        box(18,5,0,3,28,5.5);                // front low fill
+        box(5,14,-12,14,16,6.2,[0.86,0.93,1]);
+        box(5,14,12,14,-16,6.2);
+        box(8,2.2,0,15,0,9.0);               // crisp high cross highlight for roof/hood sweep
+        var rt=pm.fromScene(es,0.02);pm.dispose();
+        return rt.texture;
+      }catch(e){ return _origMakeEnv(rend); }
+    };
+    // re-assert the environment on the live scenes if lighting already ran
+    try{
+      if(typeof scene!=='undefined' && scene && typeof renderer!=='undefined' && renderer){
+        var env=R_makeEnv(renderer); window.R_ENV=env; scene.environment=env;
+        renderer.toneMappingExposure=1.12;
+      }
+    }catch(e){}
+    // crisper gloss: tighten clearcoat + lift reflection strength on the shared paint
+    if(typeof R_applyFinish==='function'){
+      var _origFinish=R_applyFinish;
+      R_applyFinish=function(){
+        _origFinish();
+        if(typeof R_PAINT!=='undefined' && R_PAINT && R_FINISH==='gloss'){
+          R_PAINT.clearcoat=1;R_PAINT.clearcoatRoughness=0.015;
+          R_PAINT.roughness=0.22;R_PAINT.envMapIntensity=2.4;
+          R_PAINT.needsUpdate=true;
+        }
+      };
+      try{ if(typeof R_PAINT!=='undefined' && R_PAINT) R_applyFinish(); }catch(e){}
+    }
+  }
+
+  /* ---------------- 2. LIGHTS: emissive head + tail on the GLBs ---------------- */
+  // Per-model light material-name fragments. Head vs tail split by name where the
+  // model separates them; combined-light models are split by mesh world-Z at build.
+  var LIGHT_MATS={
+    coupe:{ any:['dMAT_Lights'] },                         // combined -> split by Z
+    sedan:{ any:['_Lights'] },                             // combined -> split by Z
+    c300:{ head:['Drl1Mtl','HeadlightsCovers1Mtl','ReverseLights1Mtl'],
+           tail:['TaillightsCover1Mtl','TaillightsPart1Mtl'] },
+    suv:{  head:['Phare','Feux_blanc'],                    // Phare* = headlamp, Feux_blanc = white
+           tail:['Feux_rouge','Feux_stop','Feux_red_reflect'] }
+  };
+  function nameHit(name,frags){ name=name||''; for(var i=0;i<frags.length;i++){ if(name.indexOf(frags[i])>=0) return true; } return false; }
+
+  // Build the lit materials once and reuse (so BB_setLights can drive them together).
+  var HEAD_MAT=null, TAIL_MAT=null;
+  function headMat(){
+    if(HEAD_MAT) return HEAD_MAT;
+    HEAD_MAT=new THREE.MeshStandardMaterial({color:0xf2f0ea,emissive:0xfff2dc,emissiveIntensity:1.0,roughness:0.14,metalness:0.0});
+    HEAD_MAT.userData.bbLightMat='head'; return HEAD_MAT;
+  }
+  var COMBO_MAT=null;
+  function comboMat(){
+    if(COMBO_MAT) return COMBO_MAT;
+    COMBO_MAT=new THREE.MeshStandardMaterial({color:0xd8d2c6,emissive:0xffe9cf,emissiveIntensity:0.7,roughness:0.2,metalness:0.0});
+    COMBO_MAT.userData.bbLightMat='combo'; return COMBO_MAT;
+  }
+  function tailMat(){
+    if(TAIL_MAT) return TAIL_MAT;
+    TAIL_MAT=new THREE.MeshStandardMaterial({color:0x5a0804,emissive:0xff1408,emissiveIntensity:1.25,roughness:0.22,metalness:0.0});
+    TAIL_MAT.userData.bbLightMat='tail'; return TAIL_MAT;
+  }
+
+  // Centroid Z of a mesh in carGroup-local space (nose = +Z per configurator convention).
+  function meshZ(o){
+    try{
+      if(!o.geometry) return 0;
+      if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      var c=o.geometry.boundingBox.getCenter(new THREE.Vector3());
+      o.updateWorldMatrix(true,false);
+      c.applyMatrix4(o.matrixWorld);
+      // convert to carGroup local if possible
+      if(typeof carGroup!=='undefined' && carGroup){
+        carGroup.updateWorldMatrix(true,false);
+        c.applyMatrix4(new THREE.Matrix4().copy(carGroup.matrixWorld).invert());
+      }
+      return c.z;
+    }catch(e){ return 0; }
+  }
+
+  function meshSpanZ(o){
+    // world-space span along the car's longest axis (robust to the GLB being rotated at load)
+    try{ var bb=new THREE.Box3().setFromObject(o), sz=bb.getSize(new THREE.Vector3()); return Math.max(sz.z,sz.x); }catch(e){ return 0; }
+  }
+  function bodyLenZ(B){
+    try{ var bb=new THREE.Box3().setFromObject(B), sz=bb.getSize(new THREE.Vector3()); return Math.max(sz.z,sz.x); }catch(e){ return 0; }
+  }
+  window.__BB_LIGHTS=[]; // {mesh, kind}
+  // Light every light-mesh in the freshly placed GLB body group.
+  function litifyBody(key,bodyG){
+    if(!bodyG) return;
+    var spec=LIGHT_MATS[key]; if(!spec) return;
+    window.__BB_LIGHTS=[];
+    bodyG.traverse(function(o){
+      if(!o.isMesh||!o.material) return;
+      var mArr=Array.isArray(o.material)?o.material:[o.material];
+      var mname=mArr.map(function(m){return m&&m.name||'';}).join(',');
+      var kind=null;
+      if(spec.head&&nameHit(mname,spec.head)) kind='head';
+      else if(spec.tail&&nameHit(mname,spec.tail)) kind='tail';
+      else if(spec.any&&nameHit(mname,spec.any)){
+        // single light mesh that spans most of the car = combined head+tail -> warm white glow
+        var span=meshSpanZ(o), blen=bodyLenZ(bodyG);
+        if(blen>0 && span> blen*0.55) kind='combo';
+        else kind=(meshZ(o)>=0?'head':'tail');
+      }
+      if(!kind) return;
+      o.material = (kind==='head')?headMat():(kind==='combo')?comboMat():tailMat();
+      o.userData.bbLight=kind;
+      o.castShadow=false;
+      window.__BB_LIGHTS.push({mesh:o,kind:kind});
+    });
+  }
+  window.BB_litifyBody=litifyBody;
+
+  // Brightness controller: day/night + X-Ray kill.
+  window.BB_setLights=function(){
+    var night = (typeof isNight!=='undefined' && isNight);
+    var xray  = (typeof isXray!=='undefined' && isXray);
+    var hI = xray?0.0:(night?2.0:1.0);
+    var tI = xray?0.0:(night?2.6:1.25);
+    var cI = xray?0.0:(night?1.9:0.7);
+    if(HEAD_MAT){ HEAD_MAT.emissiveIntensity=hI; HEAD_MAT.needsUpdate=true; }
+    if(TAIL_MAT){ TAIL_MAT.emissiveIntensity=tI; TAIL_MAT.needsUpdate=true; }
+    if(COMBO_MAT){ COMBO_MAT.emissiveIntensity=cI; COMBO_MAT.needsUpdate=true; }
+  };
+
+  // ---- robust placement watcher ----
+  // The GLB can be placed by several code paths (sync buildGLB, the async
+  // withFallback swap, widebody/height rebuilds). Rather than wrap one of them,
+  // watch carGroup every frame: whenever a body group with a glbKey appears or
+  // changes, (re)light it once. Cheap: only a key+ref compare each frame.
+  var _lastBodyG=null, _lastKey=null;
+  function litWatch(){
+    try{
+      if(typeof carGroup!=='undefined' && carGroup && carGroup.userData){
+        var B=carGroup.userData.bodyG, key=carGroup.userData.glbKey;
+        if(B && key && (B!==_lastBodyG || key!==_lastKey)){
+          _lastBodyG=B; _lastKey=key;
+          litifyBody(key,B);
+          window.BB_setLights();
+        }
+      }
+    }catch(e){}
+    requestAnimationFrame(litWatch);
+  }
+  requestAnimationFrame(litWatch);
+
+  // Night + X-Ray toggles: respond immediately (the watcher also covers X-Ray
+  // rebuilds, but toggleNight does not rebuild, so hook it directly).
+  if(typeof window.toggleNight==='function' && !window.__BB_NIGHT_WRAPPED){
+    window.__BB_NIGHT_WRAPPED=true;
+    var _origNight=window.toggleNight;
+    window.toggleNight=function(){ _origNight.apply(this,arguments); try{window.BB_setLights();}catch(e){} };
+  }
+  if(typeof window.toggleXray==='function' && !window.__BB_XRAY_WRAPPED){
+    window.__BB_XRAY_WRAPPED=true;
+    var _origXray=window.toggleXray;
+    window.toggleXray=function(){ _origXray.apply(this,arguments); try{window.BB_setLights();}catch(e){} };
+  }
+  if(typeof window.applyXray==='function' && !window.__BB_APPLYXRAY_WRAPPED){
+    window.__BB_APPLYXRAY_WRAPPED=true;
+    var _origAX=window.applyXray;
+    window.applyXray=function(on){ var r=_origAX.apply(this,arguments); try{window.BB_setLights();}catch(e){} return r; };
+  }
+})();
+
 </script>
 </body>
 
