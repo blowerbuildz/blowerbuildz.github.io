@@ -4976,6 +4976,32 @@ function R_extras(B){
     COMBO_MAT=new THREE.MeshStandardMaterial({color:0xd8d2c6,emissive:0xffe9cf,emissiveIntensity:0.7,roughness:0.2,metalness:0.0});
     COMBO_MAT.userData.bbLightMat='combo'; return COMBO_MAT;
   }
+  // Additive red tail halo for the combined-mesh case (Charger): the warm-white combo
+  // mesh sits behind a dark lens and barely shows at the rear, so add a real red glow.
+  var HALO_MAT=null;
+  function haloMat(){
+    if(HALO_MAT) return HALO_MAT;
+    // radial red gradient sprite texture
+    var c=document.createElement('canvas');c.width=256;c.height=128;
+    var g=c.getContext('2d');
+    var gr=g.createRadialGradient(128,64,4,128,64,120);
+    gr.addColorStop(0,'rgba(255,40,24,0.95)');gr.addColorStop(0.5,'rgba(220,16,8,0.45)');gr.addColorStop(1,'rgba(180,0,0,0)');
+    g.fillStyle=gr;g.fillRect(0,0,256,128);
+    var t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;
+    HALO_MAT=new THREE.MeshBasicMaterial({map:t,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0.0,side:THREE.DoubleSide,toneMapped:false});
+    HALO_MAT.userData.bbHalo=true; return HALO_MAT;
+  }
+  function addRearHalo(bodyG){
+    if(!bodyG) return;
+    var old=bodyG.getObjectByName('bb_rear_halo'); if(old){ old.parent.remove(old); }
+    // rear tail plane: wide, at the back of the car, facing -Z
+    var geo=new THREE.PlaneGeometry(1.9,0.34);
+    var m=new THREE.Mesh(geo,haloMat()); m.name='bb_rear_halo';
+    m.position.set(0,0.74,-2.56); m.rotation.y=Math.PI; // face rearward (-Z)
+    m.renderOrder=20; m.userData.bbHalo=true;
+    bodyG.add(m);
+    window.__BB_HALO=m;
+  }
   function tailMat(){
     if(TAIL_MAT) return TAIL_MAT;
     TAIL_MAT=new THREE.MeshStandardMaterial({color:0x5a0804,emissive:0xff1408,emissiveIntensity:1.25,roughness:0.22,metalness:0.0});
@@ -5031,6 +5057,8 @@ function R_extras(B){
       o.castShadow=false;
       window.__BB_LIGHTS.push({mesh:o,kind:kind});
     });
+    // Charger combined mesh reads dark at the rear; add a visible red tail halo.
+    if(key==='sedan') addRearHalo(bodyG);
   }
   window.BB_litifyBody=litifyBody;
 
@@ -5044,6 +5072,7 @@ function R_extras(B){
     if(HEAD_MAT){ HEAD_MAT.emissiveIntensity=hI; HEAD_MAT.needsUpdate=true; }
     if(TAIL_MAT){ TAIL_MAT.emissiveIntensity=tI; TAIL_MAT.needsUpdate=true; }
     if(COMBO_MAT){ COMBO_MAT.emissiveIntensity=cI; COMBO_MAT.needsUpdate=true; }
+    if(HALO_MAT){ HALO_MAT.opacity = xray?0.0:(night?0.95:0.6); HALO_MAT.needsUpdate=true; }
   };
 
   // ---- robust placement watcher ----
